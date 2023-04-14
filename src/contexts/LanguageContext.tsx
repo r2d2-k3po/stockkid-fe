@@ -1,4 +1,4 @@
-import React, {createContext, FC, useState} from 'react';
+import React, {createContext, FC, useContext, useState} from 'react';
 
 export type LanguageContextType = {
   language: string;
@@ -20,4 +20,10 @@ export const LanguageProvider: FC<LanguageProviderProps> = ({children}) => {
       {children}
     </LanguageContext.Provider>
   );
+};
+
+export const useLanguage = () => {
+  const {language} = useContext(LanguageContext) as LanguageContextType;
+
+  return language;
 };
