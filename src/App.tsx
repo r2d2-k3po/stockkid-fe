@@ -5,18 +5,17 @@ import SymbolTest from './tests/SymbolTest';
 import ReactDaisyuiTest from './tests/ReactDaisyuiTest';
 import LightDarkSwap from './components/LightDarkSwap';
 import LanguageSelect from './components/LanguageSelect';
-import {LanguageProvider} from './contexts/LanguageContext';
-import LanguageContextTest from './tests/LanguageContextTest';
+import LanguageI18nTest from './tests/LanguageI18nTest';
 
 function App() {
   return (
-    <LanguageProvider>
+    <div>
       <LanguageSelect />
-      <LanguageContextTest />
+      <LanguageI18nTest />
       <LightDarkSwap />
       <SymbolTest />
       {/*<ReactDaisyuiTest />*/}
-    </LanguageProvider>
+    </div>
   );
 }
 

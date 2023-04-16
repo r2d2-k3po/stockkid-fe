@@ -1,0 +1,7 @@
+{
+  "title": "환영 to react using react-i18next",
+  "description": {
+    "part1": "시작하려면, 편집 <1>src/App.js</1> and 저장 to reload.",
+    "part2": "버튼을 이용하여 영어와 한국어 변경"
+  }
+}

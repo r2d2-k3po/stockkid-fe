@@ -1,25 +1,20 @@
-import React, {ChangeEvent, useContext} from 'react';
-import {
-  LanguageContext,
-  LanguageContextType
-} from '../contexts/LanguageContext';
+import React, {ChangeEvent} from 'react';
+import {useTranslation} from 'react-i18next';
 
 export default function LanguageSelect() {
-  const {language, setLanguage} = useContext(
-    LanguageContext
-  ) as LanguageContextType;
+  const {i18n} = useTranslation();
 
   const handleChangeLanguage = (e: ChangeEvent<HTMLSelectElement>) => {
     e.stopPropagation();
-    setLanguage(e.target.value);
-    localStorage.setItem('language', e.target.value);
+    localStorage.setItem('i18nLanguage', e.target.value);
+    i18n.changeLanguage(e.target.value);
   };
 
   return (
     <select
       className="select select-info w-full max-w-xs"
       onChange={handleChangeLanguage}
-      value={language}
+      value={i18n.language}
     >
       <option value="ko">한국어</option>
       <option value="en">English</option>
