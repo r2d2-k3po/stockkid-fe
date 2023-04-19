@@ -12,7 +12,7 @@ export default function LanguageSelect() {
 
   return (
     <select
-      className="select select-info w-28"
+      className="select select-ghost w-25 select-sm"
       onChange={handleChangeLanguage}
       value={i18n.language}
     >

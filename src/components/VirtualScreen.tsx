@@ -8,6 +8,8 @@ export default function VirtualScreen() {
       <Panel />
       <Panel />
       <Panel />
+      <Panel />
+      <Panel />
     </div>
   );
 }
