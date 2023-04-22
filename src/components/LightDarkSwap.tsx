@@ -5,16 +5,20 @@ export default function LightDarkSwap() {
     (localStorage.getItem('colorTheme') || 'dark') === 'light'
   );
 
+  useEffect(
+    () =>
+      document.documentElement.setAttribute(
+        'data-theme',
+        lightModeChecked ? 'light' : 'dark'
+      ),
+    [lightModeChecked]
+  );
+
   const handleChangeChecked = (e: ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
     setLightModeChecked(e.target.checked);
+    localStorage.setItem('colorTheme', e.target.checked ? 'light' : 'dark');
   };
-
-  useEffect(() => {
-    const colorTheme = lightModeChecked ? 'light' : 'dark';
-    localStorage.setItem('colorTheme', colorTheme);
-    document.documentElement.setAttribute('data-theme', colorTheme);
-  }, [lightModeChecked]);
 
   return (
     <label className="swap swap-rotate mx-2">
@@ -24,7 +28,7 @@ export default function LightDarkSwap() {
         onChange={handleChangeChecked}
       />
       <svg
-        className="swap-on fill-yellow-400 w-6 h-6"
+        className="swap-on fill-yellow-500 w-6 h-6"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
       >
