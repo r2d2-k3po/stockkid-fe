@@ -1,5 +1,5 @@
 import React, {useRef} from 'react';
-import StickyPin from './StickyPin';
+import StickyPin from '../common/StickyPin';
 
 export default function Footer() {
   const footerRef = useRef<HTMLDivElement>(null);

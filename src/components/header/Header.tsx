@@ -4,7 +4,7 @@ import LightDarkSwap from './LightDarkSwap';
 import Indicator from './Indicator';
 import Search from './Search';
 import DropDownMenu from './DropDownMenu';
-import StickyPin from './StickyPin';
+import StickyPin from '../common/StickyPin';
 
 export default function Header() {
   const headerRef = useRef<HTMLDivElement>(null);
@@ -13,7 +13,7 @@ export default function Header() {
 
   return (
     <div ref={headerRef}>
-      <div className="navbar bg-base-100">
+      <div className="navbar bg-neutral text-neutral-content">
         <div className="navbar-start">
           <DropDownMenu />
         </div>
