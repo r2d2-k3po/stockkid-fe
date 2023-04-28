@@ -1,7 +1,12 @@
 import {configureStore} from '@reduxjs/toolkit';
+import virtualScreenIdReducer from '../components/main/virtualScreenIdSlice';
+import logger from 'redux-logger';
 
 const store = configureStore({
-  reducer: {}
+  reducer: {
+    virtualScreenId: virtualScreenIdReducer
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
