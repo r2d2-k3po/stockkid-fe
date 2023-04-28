@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useEffect, useState} from 'react';
+import React, {ChangeEvent, useCallback, useEffect, useState} from 'react';
 
 export default function LightDarkSwap() {
   const [lightModeChecked, setLightModeChecked] = useState<boolean>(
@@ -14,11 +14,14 @@ export default function LightDarkSwap() {
     [lightModeChecked]
   );
 
-  const handleChangeChecked = (e: ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation();
-    setLightModeChecked(e.target.checked);
-    localStorage.setItem('colorTheme', e.target.checked ? 'light' : 'dark');
-  };
+  const handleChangeChecked = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      e.stopPropagation();
+      setLightModeChecked(e.target.checked);
+      localStorage.setItem('colorTheme', e.target.checked ? 'light' : 'dark');
+    },
+    []
+  );
 
   return (
     <label className="swap swap-rotate mx-2">

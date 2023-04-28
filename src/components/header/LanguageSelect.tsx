@@ -1,14 +1,17 @@
-import React, {ChangeEvent} from 'react';
+import React, {ChangeEvent, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
 
 export default function LanguageSelect() {
   const {i18n} = useTranslation();
 
-  const handleChangeLanguage = (e: ChangeEvent<HTMLSelectElement>) => {
-    e.stopPropagation();
-    localStorage.setItem('i18nLanguage', e.target.value);
-    i18n.changeLanguage(e.target.value);
-  };
+  const handleChangeLanguage = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      e.stopPropagation();
+      localStorage.setItem('i18nLanguage', e.target.value);
+      i18n.changeLanguage(e.target.value);
+    },
+    [i18n]
+  );
 
   return (
     <select

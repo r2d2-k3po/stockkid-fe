@@ -1,5 +1,5 @@
 import {MaterialSymbol} from 'react-material-symbols';
-import React, {ChangeEvent, FC, useEffect, useState} from 'react';
+import React, {ChangeEvent, FC, useCallback, useEffect, useState} from 'react';
 
 export type StickyPinProps = {
   targetRef: React.RefObject<HTMLDivElement>;
@@ -22,14 +22,17 @@ const StickyPin: FC<StickyPinProps> = ({targetRef, stickyPosition}) => {
     }
   }, [stickyPinChecked, targetRef, stickyPosition]);
 
-  const handleChangeChecked = (e: ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation();
-    setStickyPinChecked(e.target.checked);
-    localStorage.setItem(
-      stickyPosition,
-      e.target.checked ? 'sticky' : 'notSticky'
-    );
-  };
+  const handleChangeChecked = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      e.stopPropagation();
+      setStickyPinChecked(e.target.checked);
+      localStorage.setItem(
+        stickyPosition,
+        e.target.checked ? 'sticky' : 'notSticky'
+      );
+    },
+    [stickyPosition]
+  );
 
   return (
     <label className="swap">

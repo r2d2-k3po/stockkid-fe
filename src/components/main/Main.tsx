@@ -1,35 +1,48 @@
-import React, {MouseEvent} from 'react';
+import React, {MouseEvent, useCallback, useMemo} from 'react';
 import VirtualScreen from './VirtualScreen';
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {set, add, remove} from './virtualScreenIdSlice';
+import {v4 as uuidv4} from 'uuid';
 
 export default function Main() {
   const uuidList = useAppSelector((state) => state.virtualScreenId.uuidList);
   const dispatch = useAppDispatch();
 
-  const addVirtualScreen = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-  };
+  const addVirtualScreen = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      dispatch(add(uuidv4()));
+    },
+    [dispatch]
+  );
 
-  const screenButtons = uuidList.map((uuid, index) => (
-    <a
-      key={uuid}
-      href={'#Screen' + index.toString()}
-      className="btn btn-xs btn-outline btn-info"
-    >
-      {index + 1}
-    </a>
-  ));
+  const screenButtons = useMemo(
+    () =>
+      uuidList.map((uuid, index) => (
+        <a
+          key={uuid}
+          href={'#Screen' + (index + 1).toString()}
+          className="btn btn-xs btn-outline btn-info"
+        >
+          {index + 1}
+        </a>
+      )),
+    [uuidList]
+  );
 
-  const virtualScreens = uuidList.map((uuid, index) => (
-    <div
-      key={uuid}
-      id={'Screen' + index.toString()}
-      className="carousel-item w-full"
-    >
-      <VirtualScreen uuid={uuid} />
-    </div>
-  ));
+  const virtualScreens = useMemo(
+    () =>
+      uuidList.map((uuid, index) => (
+        <div
+          key={uuid}
+          id={'Screen' + (index + 1).toString()}
+          className="carousel-item w-full"
+        >
+          <VirtualScreen uuid={uuid} />
+        </div>
+      )),
+    [uuidList]
+  );
 
   return (
     <div>
