@@ -18,6 +18,8 @@ export default function Main() {
 
   const addVirtualScreenButtonRef = useRef<HTMLButtonElement>(null);
   const removeCurrentScreenButtonRef = useRef<HTMLButtonElement>(null);
+  const visibleScreenButtonsRef = useRef<HTMLDivElement>(null);
+  const visibleAlertRemoveScreenRef = useRef<HTMLDivElement>(null);
 
   const uuidList = useAppSelector((state) => state.virtualScreenId.uuidList);
   const dispatch = useAppDispatch();
@@ -35,12 +37,31 @@ export default function Main() {
   const removeCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
+      visibleScreenButtonsRef.current?.setAttribute('class', 'invisible');
+      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'visible');
+    },
+    []
+  );
+
+  const reallyRemoveCurrentScreen = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
       const index = parseInt(currentScreen.substring(6)) - 1;
-      alert('removing uuid : ' + index);
       dispatch(remove(uuidList[index]));
       if (index >= uuidList.length - 1) setCurrentScreen('Screen' + index);
+      visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
+      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'invisible');
     },
     [currentScreen, uuidList, dispatch]
+  );
+
+  const cancelRemoveCurrentScreen = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
+      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'invisible');
+    },
+    []
   );
 
   const handleScreenButtonClick = useCallback(
@@ -97,29 +118,30 @@ export default function Main() {
   return (
     <div>
       <div className="flex justify-start mx-5 py-2 gap-2">
-        {screenButtons}
-        <button
-          ref={addVirtualScreenButtonRef}
-          className="btn btn-xs btn-outline btn-info"
-          onClick={addVirtualScreen}
-        >
-          +
-        </button>
-        <div className="dropdown">
-          <label>
-            <button
-              ref={removeCurrentScreenButtonRef}
-              className="btn btn-xs btn-outline btn-warning"
-              onClick={removeCurrentScreen}
-            >
-              {currentScreen} -
-            </button>
-          </label>
-          <ul className="menu menu-compact dropdown-content mt-1 p-1 bg-base-100 rounded-box">
-            <li>
-              <AlertRemoveScreen />
-            </li>
-          </ul>
+        <div ref={visibleScreenButtonsRef} className="visible">
+          {screenButtons}
+          <button
+            ref={addVirtualScreenButtonRef}
+            className="btn btn-xs btn-outline btn-info"
+            onClick={addVirtualScreen}
+          >
+            +
+          </button>
+
+          <button
+            ref={removeCurrentScreenButtonRef}
+            className="btn btn-xs btn-outline btn-warning"
+            onClick={removeCurrentScreen}
+          >
+            {currentScreen} -
+          </button>
+        </div>
+        <div ref={visibleAlertRemoveScreenRef} className="invisible">
+          <AlertRemoveScreen
+            currentScreen={currentScreen}
+            onClickCancel={cancelRemoveCurrentScreen}
+            onClickRemove={reallyRemoveCurrentScreen}
+          />
         </div>
       </div>
 
