@@ -24,8 +24,10 @@ const virtualScreenIdSlice = createSlice({
       state.uuidList.push(action.payload);
     },
     remove: (state: virtualScreenIdState, action: PayloadAction<string>) => {
-      state.uuidList.filter((uuid) => uuid !== action.payload);
-      return state;
+      const newUuidList = state.uuidList.filter(
+        (uuid) => uuid !== action.payload
+      );
+      state.uuidList = newUuidList;
     }
   }
 });
