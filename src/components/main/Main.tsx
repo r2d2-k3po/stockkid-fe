@@ -1,11 +1,4 @@
-import React, {
-  MouseEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import React, {MouseEvent, useCallback, useMemo, useRef, useState} from 'react';
 import VirtualScreen from './VirtualScreen';
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {set, add, remove} from './virtualScreenIdSlice';
@@ -16,8 +9,6 @@ export default function Main() {
   const minVirtualScreenNumber = 1;
   const maxVirtualScreenNumber = 10;
 
-  const addVirtualScreenButtonRef = useRef<HTMLButtonElement>(null);
-  const removeCurrentScreenButtonRef = useRef<HTMLButtonElement>(null);
   const visibleScreenButtonsRef = useRef<HTMLDivElement>(null);
   const visibleAlertRemoveScreenRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +29,7 @@ export default function Main() {
     (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       visibleScreenButtonsRef.current?.setAttribute('class', 'invisible');
-      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'visible');
+      visibleAlertRemoveScreenRef.current?.removeAttribute('class');
     },
     []
   );
@@ -50,7 +41,7 @@ export default function Main() {
       dispatch(remove(uuidList[index]));
       if (index >= uuidList.length - 1) setCurrentScreen('Screen' + index);
       visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'invisible');
+      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'hidden');
     },
     [currentScreen, uuidList, dispatch]
   );
@@ -59,7 +50,7 @@ export default function Main() {
     (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'invisible');
+      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'hidden');
     },
     []
   );
@@ -102,41 +93,32 @@ export default function Main() {
     [uuidList]
   );
 
-  useEffect(() => {
-    if (uuidList.length >= maxVirtualScreenNumber) {
-      addVirtualScreenButtonRef.current?.setAttribute('disabled', '');
-    } else {
-      addVirtualScreenButtonRef.current?.removeAttribute('disabled');
-    }
-    if (uuidList.length <= minVirtualScreenNumber) {
-      removeCurrentScreenButtonRef.current?.setAttribute('disabled', '');
-    } else {
-      removeCurrentScreenButtonRef.current?.removeAttribute('disabled');
-    }
-  }, [uuidList.length]);
-
   return (
     <div>
-      <div className="flex justify-start mx-5 py-2 gap-2">
+      <div className="flex justify-start">
         <div ref={visibleScreenButtonsRef} className="visible">
-          {screenButtons}
-          <button
-            ref={addVirtualScreenButtonRef}
-            className="btn btn-xs btn-outline btn-info"
-            onClick={addVirtualScreen}
-          >
-            +
-          </button>
+          <div className="flex justify-start mx-5 py-2 gap-1 w-fit">
+            {screenButtons}
 
-          <button
-            ref={removeCurrentScreenButtonRef}
-            className="btn btn-xs btn-outline btn-warning"
-            onClick={removeCurrentScreen}
-          >
-            {currentScreen} -
-          </button>
+            <button
+              disabled={uuidList.length >= maxVirtualScreenNumber}
+              className="btn btn-xs btn-outline btn-info"
+              onClick={addVirtualScreen}
+            >
+              +
+            </button>
+
+            <button
+              disabled={uuidList.length <= minVirtualScreenNumber}
+              className="btn btn-xs btn-outline btn-warning"
+              onClick={removeCurrentScreen}
+            >
+              {currentScreen} -
+            </button>
+          </div>
         </div>
-        <div ref={visibleAlertRemoveScreenRef} className="invisible">
+
+        <div ref={visibleAlertRemoveScreenRef} className="hidden">
           <AlertRemoveScreen
             currentScreen={currentScreen}
             onClickCancel={cancelRemoveCurrentScreen}

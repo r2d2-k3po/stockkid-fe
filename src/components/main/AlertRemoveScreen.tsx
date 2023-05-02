@@ -12,7 +12,7 @@ const AlertRemoveScreen: FC<AlertRemoveScreenProps> = ({
   onClickCancel
 }) => {
   return (
-    <div className="alert alert-warning fixed top-16 w-auto">
+    <div className="alert alert-warning fixed top-16 w-fit">
       <div>
         <svg
           xmlns="http://www.w3.org/2000/svg"
