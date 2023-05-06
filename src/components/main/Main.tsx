@@ -1,4 +1,11 @@
-import React, {MouseEvent, useCallback, useMemo, useRef, useState} from 'react';
+import React, {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import VirtualScreen from './VirtualScreen';
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {set, add, remove} from './virtualScreenIdSlice';
@@ -45,6 +52,10 @@ export default function Main() {
     },
     [currentScreen, uuidList, dispatch]
   );
+
+  useEffect(() => {
+    localStorage.setItem('virtualScreenUuidList', JSON.stringify(uuidList));
+  }, [uuidList]);
 
   const cancelRemoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {

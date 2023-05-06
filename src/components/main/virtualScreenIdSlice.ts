@@ -7,7 +7,9 @@ interface virtualScreenIdState {
 }
 
 const initialState: virtualScreenIdState = {
-  uuidList: [uuidv4()]
+  uuidList: localStorage.getItem('virtualScreenUuidList')
+    ? JSON.parse(localStorage.getItem('virtualScreenUuidList') as string)
+    : [uuidv4()]
 };
 
 const virtualScreenIdSlice = createSlice({
