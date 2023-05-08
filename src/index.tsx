@@ -1,20 +1,48 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
+import App, {loader as appLoader} from './App';
 import reportWebVitals from './reportWebVitals';
 import 'react-material-symbols/dist/outlined.css';
 import {Provider as ReduxProvider} from 'react-redux';
 import store from './app/store';
 import './i18n';
+import {createBrowserRouter, RouterProvider} from 'react-router-dom';
+import AppError from './components/common/AppError';
+import VirtualScreen, {
+  loader as virtualScreenLoader
+} from './components/main/VirtualScreen';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    loader: appLoader,
+    element: <App />,
+
+    errorElement: <AppError />,
+    children: [
+      {
+        errorElement: <AppError />,
+        children: [
+          {
+            path: 'screen/:currentScreen',
+            loader: virtualScreenLoader,
+            element: <VirtualScreen />
+          }
+        ]
+      }
+    ]
+  }
+]);
+
 root.render(
   <React.StrictMode>
     <ReduxProvider store={store}>
-      <App />
+      <RouterProvider router={router} />
     </ReduxProvider>
   </React.StrictMode>
 );
