@@ -16,16 +16,19 @@ const virtualScreenIdSlice = createSlice({
   name: 'virtualScreenId',
   initialState,
   reducers: {
-    set: (
+    moveScreen: (
       state: virtualScreenIdState,
       action: PayloadAction<virtualScreenIdState>
     ) => {
       return action.payload;
     },
-    add: (state: virtualScreenIdState, action: PayloadAction<string>) => {
+    addScreen: (state: virtualScreenIdState, action: PayloadAction<string>) => {
       state.uuidList.push(action.payload);
     },
-    remove: (state: virtualScreenIdState, action: PayloadAction<string>) => {
+    removeScreen: (
+      state: virtualScreenIdState,
+      action: PayloadAction<string>
+    ) => {
       const newUuidList = state.uuidList.filter(
         (uuid) => uuid !== action.payload
       );
@@ -34,6 +37,7 @@ const virtualScreenIdSlice = createSlice({
   }
 });
 
-export const {set, add, remove} = virtualScreenIdSlice.actions;
+export const {moveScreen, addScreen, removeScreen} =
+  virtualScreenIdSlice.actions;
 
 export default virtualScreenIdSlice.reducer;

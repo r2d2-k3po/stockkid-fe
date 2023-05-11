@@ -4,7 +4,7 @@ import Panel0001 from './panels/Panel0001';
 import Panel0002 from './panels/Panel0002';
 import Panel0003 from './panels/Panel0003';
 
-const panels = {
+export const panels = {
   panel0000: Panel0000,
   panel0001: Panel0001,
   panel0002: Panel0002,
