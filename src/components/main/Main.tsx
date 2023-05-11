@@ -82,16 +82,17 @@ export default function Main() {
   const reallyMoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      const index = parseInt(currentScreen) - 1;
-      dispatch(removeScreen(uuidList[index]));
-      if (index >= uuidList.length - 1) {
-        setCurrentScreen(index.toString());
-        navigate(`/screen/${index.toString()}`);
-      }
+      const payload = {
+        currentIndex: parseInt(currentScreen) - 1,
+        targetIndex: parseInt(targetScreen) - 1
+      };
+      dispatch(moveScreen(payload));
+      setCurrentScreen(targetScreen);
+      navigate(`/screen/${targetScreen}`);
       visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
       visibleAlertMoveScreenRef.current?.setAttribute('class', 'hidden');
     },
-    [currentScreen, uuidList, dispatch, navigate]
+    [currentScreen, targetScreen, dispatch, navigate]
   );
 
   const cancelMoveCurrentScreen = useCallback(

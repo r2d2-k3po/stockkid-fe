@@ -6,6 +6,11 @@ interface virtualScreenIdState {
   uuidList: string[];
 }
 
+type moveScreenPayload = {
+  currentIndex: number;
+  targetIndex: number;
+};
+
 const initialState: virtualScreenIdState = {
   uuidList: localStorage.getItem('virtualScreenUuidList')
     ? JSON.parse(localStorage.getItem('virtualScreenUuidList') as string)
@@ -18,9 +23,10 @@ const virtualScreenIdSlice = createSlice({
   reducers: {
     moveScreen: (
       state: virtualScreenIdState,
-      action: PayloadAction<virtualScreenIdState>
+      action: PayloadAction<moveScreenPayload>
     ) => {
-      return action.payload;
+      const uuid = state.uuidList.splice(action.payload.currentIndex, 1);
+      state.uuidList.splice(action.payload.targetIndex, 0, ...uuid);
     },
     addScreen: (state: virtualScreenIdState, action: PayloadAction<string>) => {
       state.uuidList.push(action.payload);
@@ -29,10 +35,7 @@ const virtualScreenIdSlice = createSlice({
       state: virtualScreenIdState,
       action: PayloadAction<string>
     ) => {
-      const newUuidList = state.uuidList.filter(
-        (uuid) => uuid !== action.payload
-      );
-      state.uuidList = newUuidList;
+      state.uuidList = state.uuidList.filter((uuid) => uuid !== action.payload);
     }
   }
 });
