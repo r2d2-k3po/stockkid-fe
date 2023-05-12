@@ -19,6 +19,10 @@ export default function VirtualScreen() {
       <Panel panelCode="panel0001" />
       <Panel panelCode="panel0002" />
       <Panel panelCode="panel0003" />
+      <Panel panelCode="panel0004" />
+      <Panel panelCode="panel0005" />
+      <Panel panelCode="panel0006" />
+      <Panel panelCode="panel0007" />
     </div>
   );
 }

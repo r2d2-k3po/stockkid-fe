@@ -12,6 +12,7 @@ import {v4 as uuidv4} from 'uuid';
 import AlertRemoveScreen from './AlertRemoveScreen';
 import {NavLink, Outlet, useNavigate} from 'react-router-dom';
 import AlertMoveScreen from './AlertMoveScreen';
+import {panels} from './Panel';
 
 export default function Main() {
   const minVirtualScreenNumber = 1;
@@ -30,7 +31,7 @@ export default function Main() {
     localStorage.getItem('currentScreen') || '1'
   );
 
-  const [targetScreen, setTargetScreen] = useState<string>('1');
+  const [targetScreen, setTargetScreen] = useState<string>('0');
 
   const addVirtualScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
@@ -104,6 +105,12 @@ export default function Main() {
     []
   );
 
+  const copyCurrentScreen = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    visibleScreenButtonsRef.current?.setAttribute('class', 'invisible');
+    visibleAlertMoveScreenRef.current?.removeAttribute('class');
+  }, []);
+
   const handleScreenButtonClick = useCallback(
     (e: MouseEvent<HTMLAnchorElement>) => {
       setCurrentScreen(
@@ -121,7 +128,7 @@ export default function Main() {
           to={`/screen/${(index + 1).toString()}`}
           className={({isActive, isPending}) =>
             [
-              'btn btn-xs btn-outline btn-info',
+              'btn btn-xs btn-outline btn-primary',
               isPending ? 'loading' : isActive ? 'btn-active' : ''
             ].join(' ')
           }
@@ -131,6 +138,14 @@ export default function Main() {
         </NavLink>
       )),
     [uuidList, handleScreenButtonClick]
+  );
+
+  const optionsPanel = useMemo(
+    () =>
+      Object.keys(panels).map((panel, index) => (
+        <option key={index}>{panel}</option>
+      )),
+    []
   );
 
   useEffect(() => {
@@ -151,7 +166,7 @@ export default function Main() {
 
               <button
                 disabled={uuidList.length >= maxVirtualScreenNumber}
-                className="btn btn-xs btn-outline btn-info"
+                className="btn btn-xs btn-outline btn-secondary"
                 onClick={addVirtualScreen}
               >
                 +
@@ -172,6 +187,14 @@ export default function Main() {
               >
                 M
               </button>
+
+              <button
+                disabled={uuidList.length >= maxVirtualScreenNumber}
+                className="btn btn-xs btn-outline btn-warning"
+                onClick={copyCurrentScreen}
+              >
+                C
+              </button>
             </div>
           </div>
 
@@ -188,22 +211,22 @@ export default function Main() {
               currentScreen={currentScreen}
               onClickCancel={cancelMoveCurrentScreen}
               onClickMove={reallyMoveCurrentScreen}
-              uuidLength={uuidList.length}
+              uuidListLength={uuidList.length}
+              targetScreen={targetScreen}
               setTargetScreen={setTargetScreen}
             />
           </div>
         </div>
 
         <div className="flex justify-end mx-5 py-2 gap-1 w-fit">
-          <select className="select select-info select-xs w-full max-w-xs">
+          <select className="select select-info select-xs max-w-xs">
             <option disabled selected>
               Select panel
             </option>
-            <option>panel0000</option>
-            <option>panel0001</option>
-            <option>panel0002</option>
-            <option>panel0003</option>
+            {optionsPanel}
           </select>
+
+          <button className="btn btn-xs btn-outline btn-accent">+</button>
         </div>
       </div>
 

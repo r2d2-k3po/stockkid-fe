@@ -10,7 +10,8 @@ export type AlertMoveScreenProps = {
   currentScreen: string;
   onClickCancel: MouseEventHandler<HTMLButtonElement>;
   onClickMove: MouseEventHandler<HTMLButtonElement>;
-  uuidLength: number;
+  uuidListLength: number;
+  targetScreen: string;
   setTargetScreen: React.Dispatch<React.SetStateAction<string>>;
 };
 
@@ -18,18 +19,21 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
   currentScreen,
   onClickMove,
   onClickCancel,
-  uuidLength,
+  uuidListLength,
+  targetScreen,
   setTargetScreen
 }) => {
   const options = useMemo(
     () =>
-      [...Array(uuidLength)].map(
+      [...Array(uuidListLength)].map(
         (unused, index) =>
           index !== parseInt(currentScreen) - 1 && (
-            <option key={index}>{index + 1}</option>
+            <option value={(index + 1).toString()} key={index}>
+              {index + 1}
+            </option>
           )
       ),
-    [currentScreen, uuidLength]
+    [currentScreen, uuidListLength]
   );
 
   const handleChangeSelect = useCallback(
@@ -60,8 +64,9 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
         <select
           onChange={handleChangeSelect}
           className="select select-ghost select-xs max-w-xs"
+          value={targetScreen === currentScreen ? '0' : targetScreen}
         >
-          <option disabled selected>
+          <option disabled value="0">
             Select
           </option>
           {options}
@@ -72,7 +77,13 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
         <button onClick={onClickCancel} className="btn btn-xs btn-ghost">
           Cancel
         </button>
-        <button onClick={onClickMove} className="btn btn-xs btn-primary">
+        <button
+          disabled={
+            parseInt(targetScreen) == 0 || targetScreen === currentScreen
+          }
+          onClick={onClickMove}
+          className="btn btn-xs btn-primary"
+        >
           Move
         </button>
       </div>
