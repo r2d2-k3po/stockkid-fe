@@ -2,6 +2,7 @@ import React from 'react';
 import Panel from './Panel';
 import {Params, useLoaderData} from 'react-router-dom';
 import {useAppSelector} from '../../app/hooks';
+import MapJSONTest from '../../tests/MapJSONTest';
 
 export const loader = ({params}: {params: Params}) => {
   return params.currentScreen as string;

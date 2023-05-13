@@ -7,12 +7,18 @@ import React, {
   useState
 } from 'react';
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
-import {moveScreen, addScreen, removeScreen} from './virtualScreenIdSlice';
+import {
+  moveScreen,
+  addScreen,
+  removeScreen
+} from '../../app/virtualScreenIdSlice';
 import {v4 as uuidv4} from 'uuid';
 import AlertRemoveScreen from './AlertRemoveScreen';
 import {NavLink, Outlet, useNavigate} from 'react-router-dom';
 import AlertMoveScreen from './AlertMoveScreen';
 import {panels} from './Panel';
+import {addScreenPanel, removeScreenPanel} from '../../app/screenPanelMapSlice';
+import {mapReplacer} from '../../utils/mapReplacer';
 
 export default function Main() {
   const minVirtualScreenNumber = 1;
@@ -25,6 +31,9 @@ export default function Main() {
   const visibleAlertMoveScreenRef = useRef<HTMLDivElement>(null);
 
   const uuidList = useAppSelector((state) => state.virtualScreenId.uuidList);
+  const uuidPanelMap = useAppSelector(
+    (state) => state.screenPanelMap.uuidPanelMap
+  );
   const dispatch = useAppDispatch();
 
   const [currentScreen, setCurrentScreen] = useState<string>(
@@ -33,10 +42,23 @@ export default function Main() {
 
   const [targetScreen, setTargetScreen] = useState<string>('0');
 
+  // initialize screen 1
+  useEffect(() => {
+    if (!localStorage.getItem('virtualScreenUuidList')) {
+      const uuid = uuidv4();
+      dispatch(addScreen(uuid));
+      dispatch(addScreenPanel(uuid));
+      setCurrentScreen('1');
+      navigate('screen/1');
+    }
+  }, [dispatch, navigate]);
+
   const addVirtualScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      dispatch(addScreen(uuidv4()));
+      const uuid = uuidv4();
+      dispatch(addScreen(uuid));
+      dispatch(addScreenPanel(uuid));
     },
     [dispatch]
   );
@@ -55,6 +77,7 @@ export default function Main() {
       e.preventDefault();
       const index = parseInt(currentScreen) - 1;
       dispatch(removeScreen(uuidList[index]));
+      dispatch(removeScreenPanel(uuidList[index]));
       if (index >= uuidList.length - 1) {
         setCurrentScreen(index.toString());
         navigate(`/screen/${index.toString()}`);
@@ -151,6 +174,13 @@ export default function Main() {
   useEffect(() => {
     localStorage.setItem('virtualScreenUuidList', JSON.stringify(uuidList));
   }, [uuidList]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      'screenUuidPanelMap',
+      JSON.stringify(uuidPanelMap, mapReplacer)
+    );
+  }, [uuidPanelMap]);
 
   useEffect(() => {
     localStorage.setItem('currentScreen', currentScreen);
