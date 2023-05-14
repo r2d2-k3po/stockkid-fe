@@ -21,6 +21,7 @@ import {panels} from './Panel';
 import {
   addPanel,
   addScreenPanel,
+  PanelMap,
   removeScreenPanel
 } from '../../app/screenPanelMapSlice';
 import {mapReplacer} from '../../utils/mapReplacer';
@@ -137,11 +138,31 @@ export default function Main() {
     []
   );
 
-  const copyCurrentScreen = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    visibleScreenButtonsRef.current?.setAttribute('class', 'invisible');
-    visibleAlertMoveScreenRef.current?.removeAttribute('class');
-  }, []);
+  const copyCurrentScreenPanel = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      const currentUuid = uuidList[parseInt(currentScreen) - 1];
+      const newUuid = uuidv4();
+      dispatch(addScreen(newUuid));
+      dispatch(addScreenPanel(newUuid));
+      if (uuidPanelMap.get(currentUuid)) {
+        for (const value of (
+          uuidPanelMap.get(currentUuid) as PanelMap
+        ).values()) {
+          const payload = {
+            uuid: newUuid,
+            uuidP: uuidv4(),
+            panelCode: value.panelCode
+          };
+          dispatch(addPanel(payload));
+        }
+      }
+      const copiedScreen = (uuidList.length + 1).toString();
+      setCurrentScreen(copiedScreen);
+      navigate('screen/' + copiedScreen);
+    },
+    [currentScreen, uuidList, uuidPanelMap, dispatch, navigate]
+  );
 
   const handleChangeSelectedPanel = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
@@ -254,7 +275,7 @@ export default function Main() {
                 <button
                   disabled={uuidList.length >= maxVirtualScreenNumber}
                   className="btn btn-xs btn-outline btn-warning"
-                  onClick={copyCurrentScreen}
+                  onClick={copyCurrentScreenPanel}
                 >
                   C
                 </button>

@@ -16,11 +16,6 @@ interface ScreenPanelMapState {
   uuidPanelMap: Map<string, PanelMap>;
 }
 
-type copyScreenPanelPayload = {
-  uuid: string;
-  panelMap: PanelMap;
-};
-
 type addPanelPayload = {
   uuid: string;
   uuidP: string;
@@ -57,12 +52,6 @@ const screenPanelMapSlice = createSlice({
     ) => {
       state.uuidPanelMap.delete(action.payload);
     },
-    copyScreenPanel: (
-      state: ScreenPanelMapState,
-      action: PayloadAction<copyScreenPanelPayload>
-    ) => {
-      state.uuidPanelMap.set(action.payload.uuid, action.payload.panelMap);
-    },
     addPanel: (
       state: ScreenPanelMapState,
       action: PayloadAction<addPanelPayload>
@@ -83,12 +72,7 @@ const screenPanelMapSlice = createSlice({
   }
 });
 
-export const {
-  addScreenPanel,
-  removeScreenPanel,
-  copyScreenPanel,
-  addPanel,
-  removePanel
-} = screenPanelMapSlice.actions;
+export const {addScreenPanel, removeScreenPanel, addPanel, removePanel} =
+  screenPanelMapSlice.actions;
 
 export default screenPanelMapSlice.reducer;
