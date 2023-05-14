@@ -1,9 +1,13 @@
-import React from 'react';
+import React, {FC} from 'react';
+import {PanelProps} from '../Panel';
 
-export default function Panel0004() {
+const Panel0004: FC<PanelProps> = ({uuidP, panelType}) => {
   return (
-    <div className="overflow-auto resize w-52 h-60 border-2 border-info rounded-md m-0.5 hover:border-accent">
-      <p>Panel0004</p>
+    <div className="w-52 h-60">
+      <p>{panelType.panelCode}</p>
+      <p> uuidP : {uuidP} </p>
     </div>
   );
-}
+};
+
+export default Panel0004;

@@ -1,7 +1,8 @@
 import React from 'react';
-import type {PanelType, PanelMap} from '../app/screenPanelMapSlice';
+import type {PanelMap} from '../app/screenPanelMapSlice';
 import {mapReviver} from '../utils/mapReviver';
 import {mapReplacer} from '../utils/mapReplacer';
+import type {PanelType} from '../components/main/Panel';
 
 export default function MapJSONTest() {
   const panelValue1: PanelType = {

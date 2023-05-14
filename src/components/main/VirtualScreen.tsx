@@ -10,32 +10,37 @@ export const loader = ({params}: {params: Params}) => {
 
 export default function VirtualScreen() {
   const currentScreen = useLoaderData() as string;
-  const uuid = parseInt(currentScreen) - 1;
+
   const uuidList = useAppSelector((state) => state.virtualScreenId.uuidList);
   const uuidPanelMap = useAppSelector(
     (state) => state.screenPanelMap.uuidPanelMap
   );
 
+  const uuid = uuidList[parseInt(currentScreen) - 1];
+
   const screenPanels = useMemo(() => {
     const panelArray: JSX.Element[] = [];
-    if (uuidPanelMap.get(uuidList[uuid])) {
-      for (const entry of (
-        uuidPanelMap.get(uuidList[uuid]) as PanelMap
-      ).entries()) {
+    if (uuidPanelMap.get(uuid)) {
+      for (const entry of (uuidPanelMap.get(uuid) as PanelMap).entries()) {
         panelArray.push(
-          <Panel key={entry[0]} panelCode={entry[1].panelCode} />
+          <Panel
+            key={entry[0]}
+            uuid={uuid}
+            uuidP={entry[0]}
+            panelType={entry[1]}
+          />
         );
       }
       return panelArray;
     }
     return false;
-  }, [uuidPanelMap, uuidList, uuid]);
+  }, [uuidPanelMap, uuid]);
 
   return (
     <div className="flex flex-wrap w-full">
       <div>
         <p>screen: {currentScreen}</p>
-        <p>uuid: {uuidList[parseInt(currentScreen) - 1]}</p>
+        <p>uuid: {uuid}</p>
       </div>
       {!!screenPanels && screenPanels}
     </div>
