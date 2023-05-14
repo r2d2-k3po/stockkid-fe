@@ -1,4 +1,5 @@
 import React, {
+  ChangeEvent,
   MouseEvent,
   useCallback,
   useEffect,
@@ -17,7 +18,11 @@ import AlertRemoveScreen from './AlertRemoveScreen';
 import {NavLink, Outlet, useNavigate} from 'react-router-dom';
 import AlertMoveScreen from './AlertMoveScreen';
 import {panels} from './Panel';
-import {addScreenPanel, removeScreenPanel} from '../../app/screenPanelMapSlice';
+import {
+  addPanel,
+  addScreenPanel,
+  removeScreenPanel
+} from '../../app/screenPanelMapSlice';
 import {mapReplacer} from '../../utils/mapReplacer';
 
 export default function Main() {
@@ -41,6 +46,10 @@ export default function Main() {
   );
 
   const [targetScreen, setTargetScreen] = useState<string>('0');
+
+  const [selectedPanel, setSelectedPanel] = useState<keyof typeof panels | '0'>(
+    '0'
+  );
 
   // initialize screen 1
   useEffect(() => {
@@ -134,6 +143,27 @@ export default function Main() {
     visibleAlertMoveScreenRef.current?.removeAttribute('class');
   }, []);
 
+  const handleChangeSelectedPanel = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      e.stopPropagation();
+      setSelectedPanel(e.target.value as keyof typeof panels | '0');
+    },
+    []
+  );
+
+  const addNewPanel = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      const payload = {
+        uuid: uuidList[parseInt(currentScreen) - 1],
+        uuidP: uuidv4(),
+        panelCode: selectedPanel as keyof typeof panels
+      };
+      dispatch(addPanel(payload));
+    },
+    [currentScreen, uuidList, selectedPanel, dispatch]
+  );
+
   const handleScreenButtonClick = useCallback(
     (e: MouseEvent<HTMLAnchorElement>) => {
       setCurrentScreen(
@@ -165,8 +195,10 @@ export default function Main() {
 
   const optionsPanel = useMemo(
     () =>
-      Object.keys(panels).map((panel, index) => (
-        <option key={index}>{panel}</option>
+      Object.keys(panels).map((panel) => (
+        <option key={panel} value={panel}>
+          {panel}
+        </option>
       )),
     []
   );
@@ -191,7 +223,7 @@ export default function Main() {
       <div className="flex flex-wrap justify-between">
         <div className="flex flex-wrap justify-start w-1/3">
           <div ref={visibleScreenButtonsRef} className="visible">
-            <div className="flex flex-wrap justify-start mx-5 pt-2 gap-1">
+            <div className="flex flex-wrap justify-start mx-5 py-2 gap-1">
               {screenButtons}
 
               <button
@@ -250,11 +282,21 @@ export default function Main() {
           </div>
         </div>
 
-        <div className="flex justify-end mx-5 pt-2 gap-1 w-1/3">
-          <button className="btn btn-xs btn-outline btn-accent">+</button>
+        <div className="flex justify-end mx-5 py-2 gap-1 w-1/3">
+          <button
+            disabled={selectedPanel === '0'}
+            className="btn btn-xs btn-outline btn-accent"
+            onClick={addNewPanel}
+          >
+            +
+          </button>
 
-          <select className="select select-info select-xs max-w-xs">
-            <option disabled selected>
+          <select
+            onChange={handleChangeSelectedPanel}
+            className="select select-info select-xs max-w-xs"
+            value={selectedPanel}
+          >
+            <option disabled value="0">
               Select panel
             </option>
             {optionsPanel}
