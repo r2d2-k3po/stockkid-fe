@@ -189,9 +189,9 @@ export default function Main() {
   return (
     <div>
       <div className="flex flex-wrap justify-between">
-        <div className="flex justify-start">
+        <div className="flex flex-wrap justify-start w-1/3">
           <div ref={visibleScreenButtonsRef} className="visible">
-            <div className="flex justify-start mx-5 py-2 gap-1 w-fit">
+            <div className="flex flex-wrap justify-start mx-5 pt-2 gap-1">
               {screenButtons}
 
               <button
@@ -202,29 +202,31 @@ export default function Main() {
                 +
               </button>
 
-              <button
-                disabled={uuidList.length <= minVirtualScreenNumber}
-                className="btn btn-xs btn-outline btn-warning"
-                onClick={removeCurrentScreen}
-              >
-                {currentScreen} -
-              </button>
+              <div className="flex justify-start gap-1">
+                <button
+                  disabled={uuidList.length <= minVirtualScreenNumber}
+                  className="btn btn-xs btn-outline btn-warning"
+                  onClick={removeCurrentScreen}
+                >
+                  {currentScreen} -
+                </button>
 
-              <button
-                disabled={uuidList.length <= minVirtualScreenNumber}
-                className="btn btn-xs btn-outline btn-warning"
-                onClick={moveCurrentScreen}
-              >
-                M
-              </button>
+                <button
+                  disabled={uuidList.length <= minVirtualScreenNumber}
+                  className="btn btn-xs btn-outline btn-warning"
+                  onClick={moveCurrentScreen}
+                >
+                  M
+                </button>
 
-              <button
-                disabled={uuidList.length >= maxVirtualScreenNumber}
-                className="btn btn-xs btn-outline btn-warning"
-                onClick={copyCurrentScreen}
-              >
-                C
-              </button>
+                <button
+                  disabled={uuidList.length >= maxVirtualScreenNumber}
+                  className="btn btn-xs btn-outline btn-warning"
+                  onClick={copyCurrentScreen}
+                >
+                  C
+                </button>
+              </div>
             </div>
           </div>
 
@@ -248,15 +250,15 @@ export default function Main() {
           </div>
         </div>
 
-        <div className="flex justify-end mx-5 py-2 gap-1 w-fit">
+        <div className="flex justify-end mx-5 pt-2 gap-1 w-1/3">
+          <button className="btn btn-xs btn-outline btn-accent">+</button>
+
           <select className="select select-info select-xs max-w-xs">
             <option disabled selected>
               Select panel
             </option>
             {optionsPanel}
           </select>
-
-          <button className="btn btn-xs btn-outline btn-accent">+</button>
         </div>
       </div>
 
