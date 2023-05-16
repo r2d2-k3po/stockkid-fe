@@ -3,7 +3,7 @@ import {PanelProps} from '../Panel';
 
 const Panel0006: FC<PanelProps> = ({uuidP, panelType}) => {
   return (
-    <div className="w-80 h-80">
+    <div>
       <p>{panelType.panelCode}</p>
       <p> uuidP : {uuidP} </p>
     </div>
