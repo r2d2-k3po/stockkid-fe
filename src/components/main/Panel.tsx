@@ -31,6 +31,17 @@ export const panels = {
   panel0007: Panel0007
 };
 
+export const panelGrids = {
+  panel0000: {i: '', x: 0, y: 0, w: 1, h: 1},
+  panel0001: {i: '', x: 0, y: 0, w: 1, h: 2},
+  panel0002: {i: '', x: 0, y: 0, w: 1, h: 3},
+  panel0003: {i: '', x: 0, y: 0, w: 2, h: 1},
+  panel0004: {i: '', x: 0, y: 0, w: 2, h: 2},
+  panel0005: {i: '', x: 0, y: 0, w: 2, h: 3},
+  panel0006: {i: '', x: 0, y: 0, w: 3, h: 1},
+  panel0007: {i: '', x: 0, y: 0, w: 3, h: 2}
+};
+
 export type PanelType = {
   panelCode: keyof typeof panels;
 };

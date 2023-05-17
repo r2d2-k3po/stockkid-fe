@@ -1,12 +1,14 @@
 import {configureStore} from '@reduxjs/toolkit';
 import virtualScreenIdReducer from './virtualScreenIdSlice';
 import screenPanelMapReducer from './screenPanelMapSlice';
+import screenLayoutsMapReducer from './screenLayoutsMapSlice';
 import logger from 'redux-logger';
 
 const store = configureStore({
   reducer: {
     virtualScreenId: virtualScreenIdReducer,
-    screenPanelMap: screenPanelMapReducer
+    screenPanelMap: screenPanelMapReducer,
+    screenLayoutsMap: screenLayoutsMapReducer
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
 });

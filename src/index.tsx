@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import '/node_modules/react-grid-layout/css/styles.css';
-import '/node_modules/react-resizable/css/styles.css';
+import './css/react-grid-layout-styles.css';
+import './css/react-resizable-styles.css';
 import App, {loader as appLoader} from './App';
 import reportWebVitals from './reportWebVitals';
 import 'react-material-symbols/dist/outlined.css';

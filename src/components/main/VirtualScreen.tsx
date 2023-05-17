@@ -1,10 +1,11 @@
-import React, {useMemo} from 'react';
-import Panel from './Panel';
+import React, {useCallback, useMemo, useState} from 'react';
+import Panel, {panelGrids} from './Panel';
 import {Params, useLoaderData} from 'react-router-dom';
 import {useAppSelector} from '../../app/hooks';
 import type {PanelMap} from '../../app/screenPanelMapSlice';
-import GridLayout, {Responsive, WidthProvider} from 'react-grid-layout';
+import {Responsive, WidthProvider} from 'react-grid-layout';
 import {MaterialSymbol} from 'react-material-symbols';
+import {breakpoints, cols} from '../../app/screenLayoutsMapSlice';
 
 export const loader = ({params}: {params: Params}) => {
   return params.currentScreen as string;
@@ -25,6 +26,16 @@ export default function VirtualScreen() {
 
   const uuid = uuidList[parseInt(currentScreen) - 1];
 
+  const [currentBreakpoint, setCurrentBreakpoint] =
+    useState<keyof typeof breakpoints>('lg');
+
+  const handleBreakpointChange = useCallback(
+    (newBreakpoint: string, newCols: number) => {
+      setCurrentBreakpoint(newBreakpoint as keyof typeof breakpoints);
+    },
+    []
+  );
+
   const screenPanels = useMemo(() => {
     const panelArray: JSX.Element[] = [];
     if (uuidPanelMap.get(uuid)) {
@@ -32,7 +43,7 @@ export default function VirtualScreen() {
         panelArray.push(
           <Panel
             key={entry[0]}
-            data-grid={{x: 2, y: 2, w: 3, h: 2}}
+            data-grid={panelGrids[entry[1].panelCode]}
             uuid={uuid}
             uuidP={entry[0]}
             panelType={entry[1]}
@@ -45,15 +56,18 @@ export default function VirtualScreen() {
   }, [uuidPanelMap, uuid]);
 
   return (
-    <GridLayout
+    <ResponsiveReactGridLayout
       className="layout"
-      cols={12}
+      // layouts={layouts}
+      breakpoints={breakpoints}
+      cols={cols}
       rowHeight={80}
-      width={1536}
       autoSize={true}
       draggableHandle=".drag_pan"
       margin={[2, 2]}
+      compactType={null}
       // onLayoutChange={}
+      onBreakpointChange={handleBreakpointChange}
     >
       <div
         key={uuid}
@@ -71,6 +85,6 @@ export default function VirtualScreen() {
         <p>uuid: {uuid}</p>
       </div>
       {!!screenPanels && screenPanels}
-    </GridLayout>
+    </ResponsiveReactGridLayout>
   );
 }
