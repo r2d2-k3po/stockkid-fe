@@ -1,11 +1,17 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo} from 'react';
 import Panel, {panelGrids} from './Panel';
 import {Params, useLoaderData} from 'react-router-dom';
-import {useAppSelector} from '../../app/hooks';
+import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import type {PanelMap} from '../../app/screenPanelMapSlice';
-import {Responsive, WidthProvider} from 'react-grid-layout';
+import {Layout, Layouts, Responsive, WidthProvider} from 'react-grid-layout';
 import {MaterialSymbol} from 'react-material-symbols';
-import {breakpoints, cols} from '../../app/screenLayoutsMapSlice';
+import {
+  breakpoints,
+  cols,
+  updateLayouts
+} from '../../app/screenLayoutsMapSlice';
+import {mapReplacer} from '../../utils/mapReplacer';
+import {useSetCurrentBreakpoint} from './Main';
 
 export const loader = ({params}: {params: Params}) => {
   return params.currentScreen as string;
@@ -18,23 +24,44 @@ export default function VirtualScreen() {
   );
 
   const currentScreen = useLoaderData() as string;
+  const {setCurrentBreakpoint} = useSetCurrentBreakpoint();
 
   const uuidList = useAppSelector((state) => state.virtualScreenId.uuidList);
   const uuidPanelMap = useAppSelector(
     (state) => state.screenPanelMap.uuidPanelMap
   );
+  const uuidLayoutsMap = useAppSelector(
+    (state) => state.screenLayoutsMap.uuidLayoutsMap
+  );
+  const dispatch = useAppDispatch();
 
   const uuid = uuidList[parseInt(currentScreen) - 1];
-
-  const [currentBreakpoint, setCurrentBreakpoint] =
-    useState<keyof typeof breakpoints>('lg');
+  const layouts = uuidLayoutsMap.get(uuid);
 
   const handleBreakpointChange = useCallback(
     (newBreakpoint: string, newCols: number) => {
       setCurrentBreakpoint(newBreakpoint as keyof typeof breakpoints);
     },
-    []
+    [setCurrentBreakpoint]
   );
+
+  const handleLayoutChange = useCallback(
+    (currentLayout: Layout[], allLayouts: Layouts) => {
+      const payload = {
+        uuid: uuid,
+        layouts: allLayouts
+      };
+      dispatch(updateLayouts(payload));
+    },
+    [uuid, dispatch]
+  );
+
+  useEffect(() => {
+    localStorage.setItem(
+      'screenUuidLayoutsMap',
+      JSON.stringify(uuidLayoutsMap, mapReplacer)
+    );
+  }, [uuidLayoutsMap]);
 
   const screenPanels = useMemo(() => {
     const panelArray: JSX.Element[] = [];
@@ -58,15 +85,15 @@ export default function VirtualScreen() {
   return (
     <ResponsiveReactGridLayout
       className="layout"
-      // layouts={layouts}
+      layouts={layouts}
       breakpoints={breakpoints}
       cols={cols}
       rowHeight={80}
       autoSize={true}
       draggableHandle=".drag_pan"
       margin={[2, 2]}
-      compactType={null}
-      // onLayoutChange={}
+      compactType="vertical"
+      onLayoutChange={handleLayoutChange}
       onBreakpointChange={handleBreakpointChange}
     >
       <div

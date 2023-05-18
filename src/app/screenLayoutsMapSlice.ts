@@ -14,6 +14,11 @@ interface ScreenLayoutsMapState {
   uuidLayoutsMap: Map<string, Layouts>;
 }
 
+type updateLayoutsPayload = {
+  uuid: string;
+  layouts: Layouts;
+};
+
 type addPanelLayoutsPayload = {
   uuid: string;
   uuidP: string;
@@ -24,11 +29,6 @@ type removePanelLayoutsPayload = {
   uuid: string;
   uuidP: string;
 };
-
-const emptyLayouts: Layouts = {};
-for (const breakpoint of Object.keys(breakpoints)) {
-  emptyLayouts[breakpoint] = [];
-}
 
 const initialState: ScreenLayoutsMapState = {
   uuidLayoutsMap: localStorage.getItem('screenUuidLayoutsMap')
@@ -43,11 +43,17 @@ const screenLayoutsMapSlice = createSlice({
   name: 'screenLayoutsMap',
   initialState,
   reducers: {
+    updateLayouts: (
+      state: ScreenLayoutsMapState,
+      action: PayloadAction<updateLayoutsPayload>
+    ) => {
+      state.uuidLayoutsMap.set(action.payload.uuid, action.payload.layouts);
+    },
     addScreenLayouts: (
       state: ScreenLayoutsMapState,
       action: PayloadAction<string>
     ) => {
-      state.uuidLayoutsMap.set(action.payload, emptyLayouts);
+      state.uuidLayoutsMap.set(action.payload, {});
     },
     removeScreenLayouts: (
       state: ScreenLayoutsMapState,
@@ -60,7 +66,7 @@ const screenLayoutsMapSlice = createSlice({
       action: PayloadAction<addPanelLayoutsPayload>
     ) => {
       const layoutItem: Layout = panelGrids[action.payload.panelCode];
-      layoutItem.i = action.payload.uuidP;
+      layoutItem['i'] = action.payload.uuidP;
       const layouts = state.uuidLayoutsMap.get(action.payload.uuid) as Layouts;
       for (const breakpoint of Object.keys(breakpoints)) {
         layouts[breakpoint].push(layoutItem);
@@ -74,7 +80,7 @@ const screenLayoutsMapSlice = createSlice({
       const layouts = state.uuidLayoutsMap.get(action.payload.uuid) as Layouts;
       for (const breakpoint of Object.keys(breakpoints)) {
         layouts[breakpoint] = layouts[breakpoint].filter(
-          (layoutItem) => layoutItem.i !== action.payload.uuidP
+          (layoutItem) => layoutItem['i'] !== action.payload.uuidP
         );
       }
       state.uuidLayoutsMap.set(action.payload.uuid, layouts);
@@ -83,6 +89,7 @@ const screenLayoutsMapSlice = createSlice({
 });
 
 export const {
+  updateLayouts,
   addScreenLayouts,
   removeScreenLayouts,
   addPanelLayouts,

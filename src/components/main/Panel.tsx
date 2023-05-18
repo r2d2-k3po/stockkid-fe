@@ -72,8 +72,7 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
     onMouseDown,
     onMouseUp,
     onTouchEnd,
-    children,
-    ...props
+    children
   },
   ref
 ) {

@@ -15,7 +15,7 @@ import {
 } from '../../app/virtualScreenIdSlice';
 import {v4 as uuidv4} from 'uuid';
 import AlertRemoveScreen from './AlertRemoveScreen';
-import {NavLink, Outlet, useNavigate} from 'react-router-dom';
+import {NavLink, Outlet, useNavigate, useOutletContext} from 'react-router-dom';
 import AlertMoveScreen from './AlertMoveScreen';
 import {panels} from './Panel';
 import {
@@ -25,6 +25,18 @@ import {
   removeScreenPanel
 } from '../../app/screenPanelMapSlice';
 import {mapReplacer} from '../../utils/mapReplacer';
+import {
+  addPanelLayouts,
+  addScreenLayouts,
+  breakpoints,
+  removeScreenLayouts
+} from '../../app/screenLayoutsMapSlice';
+
+type ContextType = {
+  setCurrentBreakpoint: React.Dispatch<
+    React.SetStateAction<keyof typeof breakpoints>
+  >;
+};
 
 export default function Main() {
   const minVirtualScreenNumber = 1;
@@ -40,6 +52,9 @@ export default function Main() {
   const uuidPanelMap = useAppSelector(
     (state) => state.screenPanelMap.uuidPanelMap
   );
+  const uuidLayoutsMap = useAppSelector(
+    (state) => state.screenLayoutsMap.uuidLayoutsMap
+  );
   const dispatch = useAppDispatch();
 
   const [currentScreen, setCurrentScreen] = useState<string>(
@@ -52,12 +67,16 @@ export default function Main() {
     '0'
   );
 
+  const [currentBreakpoint, setCurrentBreakpoint] =
+    useState<keyof typeof breakpoints>('lg');
+
   // initialize screen 1
   useEffect(() => {
     if (!localStorage.getItem('virtualScreenUuidList')) {
       const uuid = uuidv4();
       dispatch(addScreen(uuid));
       dispatch(addScreenPanel(uuid));
+      dispatch(addScreenLayouts(uuid));
       setCurrentScreen('1');
       navigate('screen/1');
     }
@@ -69,6 +88,7 @@ export default function Main() {
       const uuid = uuidv4();
       dispatch(addScreen(uuid));
       dispatch(addScreenPanel(uuid));
+      dispatch(addScreenLayouts(uuid));
     },
     [dispatch]
   );
@@ -88,6 +108,7 @@ export default function Main() {
       const index = parseInt(currentScreen) - 1;
       dispatch(removeScreen(uuidList[index]));
       dispatch(removeScreenPanel(uuidList[index]));
+      dispatch(removeScreenLayouts(uuidList[index]));
       if (index >= uuidList.length - 1) {
         setCurrentScreen(index.toString());
         navigate(`/screen/${index.toString()}`);
@@ -145,6 +166,7 @@ export default function Main() {
       const newUuid = uuidv4();
       dispatch(addScreen(newUuid));
       dispatch(addScreenPanel(newUuid));
+      dispatch(addScreenLayouts(newUuid));
       if (uuidPanelMap.get(currentUuid)) {
         for (const value of (
           uuidPanelMap.get(currentUuid) as PanelMap
@@ -155,6 +177,7 @@ export default function Main() {
             panelCode: value.panelCode
           };
           dispatch(addPanel(payload));
+          dispatch(addPanelLayouts(payload));
         }
       }
       const copiedScreen = (uuidList.length + 1).toString();
@@ -181,6 +204,7 @@ export default function Main() {
         panelCode: selectedPanel as keyof typeof panels
       };
       dispatch(addPanel(payload));
+      dispatch(addPanelLayouts(payload));
     },
     [currentScreen, uuidList, selectedPanel, dispatch]
   );
@@ -325,7 +349,11 @@ export default function Main() {
         </div>
       </div>
 
-      <Outlet />
+      <Outlet context={{setCurrentBreakpoint}} />
     </div>
   );
+}
+
+export function useSetCurrentBreakpoint() {
+  return useOutletContext<ContextType>();
 }

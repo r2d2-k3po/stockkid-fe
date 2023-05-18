@@ -1,10 +1,14 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
-import {panels, PanelType} from '../components/main/Panel';
+import {panels} from '../components/main/Panel';
 import {mapReviver} from '../utils/mapReviver';
 import {enableMapSet} from 'immer';
 
 enableMapSet();
+
+export type PanelType = {
+  panelCode: keyof typeof panels;
+};
 
 export type PanelMap = Map<string, PanelType>;
 
