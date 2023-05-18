@@ -4,11 +4,9 @@ import {mapReviver} from '../utils/mapReviver';
 import {enableMapSet} from 'immer';
 import {Layout, Layouts} from 'react-grid-layout';
 import {panels, panelGrids} from '../components/main/Panel';
+import {breakpoints} from './reactGridLayoutParemeters';
 
 enableMapSet();
-
-export const breakpoints = {lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0};
-export const cols = {lg: 12, md: 10, sm: 6, xs: 4, xxs: 2};
 
 interface ScreenLayoutsMapState {
   uuidLayoutsMap: Map<string, Layouts>;
@@ -22,12 +20,14 @@ type updateLayoutsPayload = {
 type addPanelLayoutsPayload = {
   uuid: string;
   uuidP: string;
+  currentBreakpoint: keyof typeof breakpoints;
   panelCode: keyof typeof panels;
 };
 
 type removePanelLayoutsPayload = {
   uuid: string;
   uuidP: string;
+  currentBreakpoint: keyof typeof breakpoints;
 };
 
 const initialState: ScreenLayoutsMapState = {

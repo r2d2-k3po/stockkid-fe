@@ -5,13 +5,16 @@ import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import type {PanelMap} from '../../app/screenPanelMapSlice';
 import {Layout, Layouts, Responsive, WidthProvider} from 'react-grid-layout';
 import {MaterialSymbol} from 'react-material-symbols';
-import {
-  breakpoints,
-  cols,
-  updateLayouts
-} from '../../app/screenLayoutsMapSlice';
+import {updateLayouts} from '../../app/screenLayoutsMapSlice';
 import {mapReplacer} from '../../utils/mapReplacer';
 import {useSetCurrentBreakpoint} from './Main';
+import {
+  autoSize,
+  breakpoints,
+  cols,
+  margin,
+  rowHeight
+} from '../../app/reactGridLayoutParemeters';
 
 export const loader = ({params}: {params: Params}) => {
   return params.currentScreen as string;
@@ -88,10 +91,10 @@ export default function VirtualScreen() {
       layouts={layouts}
       breakpoints={breakpoints}
       cols={cols}
-      rowHeight={80}
-      autoSize={true}
+      rowHeight={rowHeight}
+      autoSize={autoSize}
       draggableHandle=".drag_pan"
-      margin={[2, 2]}
+      margin={margin}
       compactType="vertical"
       onLayoutChange={handleLayoutChange}
       onBreakpointChange={handleBreakpointChange}
