@@ -8,6 +8,8 @@ import {breakpoints} from './reactGridLayoutParemeters';
 
 enableMapSet();
 
+export type LayoutItemType = Layout;
+
 interface ScreenLayoutsMapState {
   uuidLayoutsMap: Map<string, Layouts>;
 }
@@ -22,12 +24,7 @@ type addPanelLayoutsPayload = {
   uuidP: string;
   currentBreakpoint: keyof typeof breakpoints;
   panelCode: keyof typeof panels;
-};
-
-type removePanelLayoutsPayload = {
-  uuid: string;
-  uuidP: string;
-  currentBreakpoint: keyof typeof breakpoints;
+  layoutItem?: LayoutItemType;
 };
 
 const initialState: ScreenLayoutsMapState = {
@@ -65,24 +62,15 @@ const screenLayoutsMapSlice = createSlice({
       state: ScreenLayoutsMapState,
       action: PayloadAction<addPanelLayoutsPayload>
     ) => {
-      const layoutItem: Layout = panelGrids[action.payload.panelCode];
-      layoutItem['i'] = action.payload.uuidP;
+      let layoutItem: LayoutItemType = action.payload.layoutItem
+        ? action.payload.layoutItem
+        : panelGrids[action.payload.panelCode];
+      layoutItem = {...layoutItem, i: action.payload.uuidP};
       const layouts = state.uuidLayoutsMap.get(action.payload.uuid) as Layouts;
-      for (const breakpoint of Object.keys(breakpoints)) {
-        layouts[breakpoint].push(layoutItem);
+      if (!layouts[action.payload.currentBreakpoint]) {
+        layouts[action.payload.currentBreakpoint] = [];
       }
-      state.uuidLayoutsMap.set(action.payload.uuid, layouts);
-    },
-    removePanelLayouts: (
-      state: ScreenLayoutsMapState,
-      action: PayloadAction<removePanelLayoutsPayload>
-    ) => {
-      const layouts = state.uuidLayoutsMap.get(action.payload.uuid) as Layouts;
-      for (const breakpoint of Object.keys(breakpoints)) {
-        layouts[breakpoint] = layouts[breakpoint].filter(
-          (layoutItem) => layoutItem['i'] !== action.payload.uuidP
-        );
-      }
+      layouts[action.payload.currentBreakpoint].push(layoutItem);
       state.uuidLayoutsMap.set(action.payload.uuid, layouts);
     }
   }
@@ -92,8 +80,7 @@ export const {
   updateLayouts,
   addScreenLayouts,
   removeScreenLayouts,
-  addPanelLayouts,
-  removePanelLayouts
+  addPanelLayouts
 } = screenLayoutsMapSlice.actions;
 
 export default screenLayoutsMapSlice.reducer;

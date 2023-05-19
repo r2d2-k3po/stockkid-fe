@@ -10,7 +10,7 @@ const AlertRemovePanel: FC<AlertRemovePanelProps> = ({
   onClickCancel
 }) => {
   return (
-    <div className="alert alert-warning absolute w-fit">
+    <div className="alert alert-warning absolute -top-16 w-fit">
       <div>
         <svg
           xmlns="http://www.w3.org/2000/svg"

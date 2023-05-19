@@ -28,11 +28,14 @@ import {mapReplacer} from '../../utils/mapReplacer';
 import {
   addPanelLayouts,
   addScreenLayouts,
-  breakpoints,
+  LayoutItemType,
   removeScreenLayouts
 } from '../../app/screenLayoutsMapSlice';
+import {breakpoints} from '../../app/reactGridLayoutParemeters';
+import {Layouts} from 'react-grid-layout';
+import type {PanelType} from './Panel';
 
-type ContextType = {
+type SetCurrentBreakpointContextType = {
   setCurrentBreakpoint: React.Dispatch<
     React.SetStateAction<keyof typeof breakpoints>
   >;
@@ -168,23 +171,43 @@ export default function Main() {
       dispatch(addScreenPanel(newUuid));
       dispatch(addScreenLayouts(newUuid));
       if (uuidPanelMap.get(currentUuid)) {
-        for (const value of (
-          uuidPanelMap.get(currentUuid) as PanelMap
-        ).values()) {
+        const currentPanelMap = uuidPanelMap.get(currentUuid) as PanelMap;
+        const currentLayouts = uuidLayoutsMap.get(currentUuid) as Layouts;
+        for (const key of currentPanelMap.keys()) {
+          const uuidP = uuidv4();
+          const panelCode = (currentPanelMap.get(key) as PanelType).panelCode;
           const payload = {
             uuid: newUuid,
-            uuidP: uuidv4(),
-            panelCode: value.panelCode
+            uuidP: uuidP,
+            panelCode: panelCode
           };
           dispatch(addPanel(payload));
-          dispatch(addPanelLayouts(payload));
+          const layoutItem = currentLayouts[currentBreakpoint].find(
+            (item) => item.i === key
+          ) as LayoutItemType;
+          const layoutsPayload = {
+            uuid: newUuid,
+            uuidP: uuidP,
+            currentBreakpoint: currentBreakpoint,
+            panelCode: panelCode,
+            layoutItem: layoutItem
+          };
+          dispatch(addPanelLayouts(layoutsPayload));
         }
       }
       const copiedScreen = (uuidList.length + 1).toString();
       setCurrentScreen(copiedScreen);
       navigate('screen/' + copiedScreen);
     },
-    [currentScreen, uuidList, uuidPanelMap, dispatch, navigate]
+    [
+      currentScreen,
+      uuidList,
+      uuidPanelMap,
+      uuidLayoutsMap,
+      currentBreakpoint,
+      dispatch,
+      navigate
+    ]
   );
 
   const handleChangeSelectedPanel = useCallback(
@@ -198,15 +221,23 @@ export default function Main() {
   const addNewPanel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
+      const uuid = uuidList[parseInt(currentScreen) - 1];
+      const uuidP = uuidv4();
       const payload = {
-        uuid: uuidList[parseInt(currentScreen) - 1],
-        uuidP: uuidv4(),
+        uuid: uuid,
+        uuidP: uuidP,
         panelCode: selectedPanel as keyof typeof panels
       };
       dispatch(addPanel(payload));
-      dispatch(addPanelLayouts(payload));
+      const layoutsPayload = {
+        uuid: uuid,
+        uuidP: uuidP,
+        currentBreakpoint: currentBreakpoint,
+        panelCode: selectedPanel as keyof typeof panels
+      };
+      dispatch(addPanelLayouts(layoutsPayload));
     },
-    [currentScreen, uuidList, selectedPanel, dispatch]
+    [currentScreen, uuidList, selectedPanel, currentBreakpoint, dispatch]
   );
 
   const handleScreenButtonClick = useCallback(
@@ -258,6 +289,13 @@ export default function Main() {
       JSON.stringify(uuidPanelMap, mapReplacer)
     );
   }, [uuidPanelMap]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      'screenUuidLayoutsMap',
+      JSON.stringify(uuidLayoutsMap, mapReplacer)
+    );
+  }, [uuidLayoutsMap]);
 
   useEffect(() => {
     localStorage.setItem('currentScreen', currentScreen);
@@ -355,5 +393,5 @@ export default function Main() {
 }
 
 export function useSetCurrentBreakpoint() {
-  return useOutletContext<ContextType>();
+  return useOutletContext<SetCurrentBreakpointContextType>();
 }
