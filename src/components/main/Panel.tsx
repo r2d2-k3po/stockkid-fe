@@ -113,7 +113,7 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
 
   const className = [
     _className,
-    'overflow-visible border-2 border-info rounded-md hover:border-accent'
+    'border-2 border-info rounded-md hover:border-accent'
   ].join(' ');
 
   return (
@@ -142,13 +142,11 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
           />
         </div>
       </div>
-      <div className="relative">
-        <div ref={visibleAlertRemovePanelRef} className="hidden">
-          <AlertRemovePanel
-            onClickCancel={cancelRemoveCurrentPanel}
-            onClickRemove={reallyRemoveCurrentPanel}
-          />
-        </div>
+      <div ref={visibleAlertRemovePanelRef} className="hidden">
+        <AlertRemovePanel
+          onClickCancel={cancelRemoveCurrentPanel}
+          onClickRemove={reallyRemoveCurrentPanel}
+        />
       </div>
       <SpecificPanel uuidP={uuidP} panelType={panelType} />
       {children}

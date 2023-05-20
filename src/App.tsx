@@ -14,7 +14,7 @@ export const loader = ({request}: {request: Request}) => {
 
 export default function App() {
   return (
-    <div>
+    <div className="relative h-auto min-h-full">
       <Header />
       <Main />
       <Footer />

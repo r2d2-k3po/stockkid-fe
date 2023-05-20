@@ -302,7 +302,7 @@ export default function Main() {
   }, [currentScreen]);
 
   return (
-    <div>
+    <div className="overflow-hidden">
       <div className="flex flex-wrap justify-between">
         <div className="flex flex-wrap justify-start w-1/3">
           <div ref={visibleScreenButtonsRef} className="visible">
@@ -386,7 +386,6 @@ export default function Main() {
           </select>
         </div>
       </div>
-
       <Outlet context={{setCurrentBreakpoint}} />
     </div>
   );

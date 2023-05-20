@@ -78,7 +78,7 @@ export default function VirtualScreen() {
 
   return (
     <ResponsiveReactGridLayout
-      className="layout"
+      className="layout min-h-screen overflow-auto"
       layouts={layouts}
       breakpoints={breakpoints}
       cols={cols}
