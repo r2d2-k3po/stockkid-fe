@@ -6,7 +6,7 @@ import type {PanelMap} from '../../app/screenPanelMapSlice';
 import {Layout, Layouts, Responsive, WidthProvider} from 'react-grid-layout';
 import {MaterialSymbol} from 'react-material-symbols';
 import {updateLayouts} from '../../app/screenLayoutsMapSlice';
-import {useSetCurrentBreakpoint} from './Main';
+import {useMainOutletContext} from './Main';
 import {
   autoSize,
   breakpoints,
@@ -26,7 +26,7 @@ export default function VirtualScreen() {
   );
 
   const currentScreen = useLoaderData() as string;
-  const {setCurrentBreakpoint} = useSetCurrentBreakpoint();
+  const {setCurrentBreakpoint, compactType} = useMainOutletContext();
 
   const uuidList = useAppSelector((state) => state.virtualScreenId.uuidList);
   const uuidPanelMap = useAppSelector(
@@ -41,7 +41,7 @@ export default function VirtualScreen() {
   const layouts = uuidLayoutsMap.get(uuid) as Layouts;
 
   const handleBreakpointChange = useCallback(
-    (newBreakpoint: string, newCols: number) => {
+    (newBreakpoint: string) => {
       setCurrentBreakpoint(newBreakpoint as keyof typeof breakpoints);
     },
     [setCurrentBreakpoint]
@@ -86,7 +86,7 @@ export default function VirtualScreen() {
       autoSize={autoSize}
       draggableHandle=".drag_pan"
       margin={margin}
-      compactType="vertical"
+      compactType={compactType}
       onLayoutChange={handleLayoutChange}
       onBreakpointChange={handleBreakpointChange}
     >

@@ -22,7 +22,7 @@ export default function Header() {
           <a className="btn btn-ghost normal-case text-xl">StockKid</a>
         </div>
 
-        <div className="navbar-end">
+        <div className="navbar-end mr-3">
           <Search />
           <Indicator />
           <LightDarkSwap />

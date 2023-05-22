@@ -35,10 +35,11 @@ import {breakpoints} from '../../app/reactGridLayoutParemeters';
 import {Layouts} from 'react-grid-layout';
 import type {PanelType} from './Panel';
 
-type SetCurrentBreakpointContextType = {
+type ContextType = {
   setCurrentBreakpoint: React.Dispatch<
     React.SetStateAction<keyof typeof breakpoints>
   >;
+  compactType: 'vertical' | 'horizontal' | null;
 };
 
 export default function Main() {
@@ -72,6 +73,10 @@ export default function Main() {
 
   const [currentBreakpoint, setCurrentBreakpoint] =
     useState<keyof typeof breakpoints>('lg');
+
+  const [compactType, setCompactType] = useState<
+    'vertical' | 'horizontal' | 'null'
+  >('vertical');
 
   // initialize screen 1
   useEffect(() => {
@@ -279,6 +284,14 @@ export default function Main() {
     []
   );
 
+  const handleChangeCompactType = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      e.stopPropagation();
+      setCompactType(e.target.value as 'vertical' | 'horizontal' | 'null');
+    },
+    []
+  );
+
   useEffect(() => {
     localStorage.setItem('virtualScreenUuidList', JSON.stringify(uuidList));
   }, [uuidList]);
@@ -365,7 +378,7 @@ export default function Main() {
           </div>
         </div>
 
-        <div className="flex justify-end mx-5 py-2 gap-1 w-1/3">
+        <div className="flex justify-end mx-5 py-2 gap-2 w-1/3">
           <button
             disabled={selectedPanel === '0'}
             className="btn btn-xs btn-outline btn-accent"
@@ -384,13 +397,23 @@ export default function Main() {
             </option>
             {optionsPanel}
           </select>
+
+          <select
+            onChange={handleChangeCompactType}
+            className="select select-info select-xs max-w-xs"
+            value={compactType}
+          >
+            <option value="vertical">vertical</option>
+            <option value="horizontal">horizontal</option>
+            <option value="null">none</option>
+          </select>
         </div>
       </div>
-      <Outlet context={{setCurrentBreakpoint}} />
+      <Outlet context={{setCurrentBreakpoint, compactType}} />
     </div>
   );
 }
 
-export function useSetCurrentBreakpoint() {
-  return useOutletContext<SetCurrentBreakpointContextType>();
+export function useMainOutletContext() {
+  return useOutletContext<ContextType>();
 }
