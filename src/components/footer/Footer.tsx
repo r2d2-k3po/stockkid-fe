@@ -8,7 +8,7 @@ export default function Footer() {
 
   return (
     <div ref={footerRef}>
-      <footer className="footer items-center p-4 bg-neutral text-neutral-content">
+      <footer className="footer items-center p-4 bg-neutral text-neutral-content border-2">
         <div className="items-center grid-flow-col">
           <svg
             width="36"

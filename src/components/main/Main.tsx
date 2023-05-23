@@ -34,6 +34,7 @@ import {
 import {breakpoints} from '../../app/reactGridLayoutParemeters';
 import {Layouts} from 'react-grid-layout';
 import type {PanelType} from './Panel';
+import {useTranslation} from 'react-i18next';
 
 type ContextType = {
   setCurrentBreakpoint: React.Dispatch<
@@ -45,6 +46,8 @@ type ContextType = {
 export default function Main() {
   const minVirtualScreenNumber = 1;
   const maxVirtualScreenNumber = 10;
+
+  const {t} = useTranslation();
 
   const navigate = useNavigate();
 
@@ -315,7 +318,7 @@ export default function Main() {
   }, [currentScreen]);
 
   return (
-    <div className="overflow-hidden">
+    <div className="border-2 min-h-[calc(100vh-136px)]">
       <div className="flex flex-wrap justify-between">
         <div className="flex flex-wrap justify-start w-1/3">
           <div ref={visibleScreenButtonsRef} className="visible">
@@ -393,7 +396,7 @@ export default function Main() {
             value={selectedPanel}
           >
             <option disabled value="0">
-              Select panel
+              {t('Main.SelectPanel')}
             </option>
             {optionsPanel}
           </select>
@@ -403,9 +406,11 @@ export default function Main() {
             className="select select-info select-xs max-w-xs"
             value={compactType}
           >
-            <option value="vertical">vertical</option>
-            <option value="horizontal">horizontal</option>
-            <option value="null">none</option>
+            <option value="vertical">{t('Main.CompactTypeVertical')}</option>
+            <option value="horizontal">
+              {t('Main.CompactTypeHorizontal')}
+            </option>
+            <option value="null">{t('Main.CompactTypeNone')}</option>
           </select>
         </div>
       </div>

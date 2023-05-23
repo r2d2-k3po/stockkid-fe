@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useMemo
 } from 'react';
+import {useTranslation} from 'react-i18next';
 
 export type AlertMoveScreenProps = {
   currentScreen: string;
@@ -23,6 +24,8 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
   targetScreen,
   setTargetScreen
 }) => {
+  const {t} = useTranslation();
+
   const options = useMemo(
     () =>
       [...Array(uuidListLength)].map(
@@ -60,14 +63,14 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
           />
         </svg>
-        <span>Warning: {currentScreen} will be moved to</span>
+        <span>{t('AlertMoveScreen.Message', {currentScreen})}</span>
         <select
           onChange={handleChangeSelect}
           className="select select-ghost select-xs max-w-xs"
           value={targetScreen === currentScreen ? '0' : targetScreen}
         >
           <option disabled value="0">
-            Select
+            {t('AlertMoveScreen.Select')}
           </option>
           {options}
         </select>
@@ -75,7 +78,7 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
 
       <div className="flex-none">
         <button onClick={onClickCancel} className="btn btn-xs btn-ghost">
-          Cancel
+          {t('AlertMoveScreen.Cancel')}
         </button>
         <button
           disabled={
@@ -84,7 +87,7 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
           onClick={onClickMove}
           className="btn btn-xs btn-primary"
         >
-          Move
+          {t('AlertMoveScreen.Move')}
         </button>
       </div>
     </div>

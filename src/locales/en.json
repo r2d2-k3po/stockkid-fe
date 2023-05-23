@@ -1,7 +1,19 @@
 {
-  "title": "Welcome to react using react-i18next",
-  "description": {
-    "part1": "To get started, edit <1>src/App.js</1> and save to reload.",
-    "part2": "Switch language between english and german using buttons above."
+  "AlertMoveScreen": {
+    "Cancel": "Cancel",
+    "Message": "Screen {{currentScreen}} will be moved to",
+    "Move": "Move",
+    "Select": "Select"
+  },
+  "AlertRemoveScreen": {
+    "Cancel": "Cancel",
+    "Message": "Screen {{currentScreen}} will be removed!",
+    "Remove": "Remove"
+  },
+  "Main": {
+    "CompactTypeHorizontal": "horizontal",
+    "CompactTypeNone": "none",
+    "CompactTypeVertical": "vertical",
+    "SelectPanel": "Select panel"
   }
 }

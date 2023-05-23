@@ -15,7 +15,7 @@ const StickyPin: FC<StickyPinProps> = ({targetRef, stickyPosition}) => {
     if (stickyPinChecked) {
       targetRef.current?.setAttribute(
         'class',
-        ['sticky', stickyPosition].join(' ')
+        ['fixed left-0 right-0', stickyPosition].join(' ')
       );
     } else {
       targetRef.current?.removeAttribute('class');

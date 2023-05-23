@@ -1,4 +1,5 @@
 import React, {FC, MouseEventHandler} from 'react';
+import {useTranslation} from 'react-i18next';
 
 export type AlertRemoveScreenProps = {
   currentScreen: string;
@@ -11,6 +12,8 @@ const AlertRemoveScreen: FC<AlertRemoveScreenProps> = ({
   onClickRemove,
   onClickCancel
 }) => {
+  const {t} = useTranslation();
+
   return (
     <div className="alert alert-warning fixed top-16 w-fit">
       <div>
@@ -27,14 +30,14 @@ const AlertRemoveScreen: FC<AlertRemoveScreenProps> = ({
             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
           />
         </svg>
-        <span>Warning: {currentScreen} will be removed!</span>
+        <span>{t('AlertRemoveScreen.Message', {currentScreen})}</span>
       </div>
       <div className="flex-none">
         <button onClick={onClickCancel} className="btn btn-xs btn-ghost">
-          Cancel
+          {t('AlertRemoveScreen.Cancel')}
         </button>
         <button onClick={onClickRemove} className="btn btn-xs btn-primary">
-          Remove
+          {t('AlertRemoveScreen.Remove')}
         </button>
       </div>
     </div>
