@@ -1,14 +1,29 @@
-import React, {useRef} from 'react';
-import StickyPin from '../common/StickyPin';
+import React, {FC, useEffect} from 'react';
+import FixedPin from '../common/FixedPin';
+import {useMeasure} from 'react-use';
 
-export default function Footer() {
-  const footerRef = useRef<HTMLDivElement>(null);
+export type FooterProps = {
+  fixedFooter: boolean;
+  setFixedFooter: React.Dispatch<React.SetStateAction<boolean>>;
+  setFooterHeight: React.Dispatch<React.SetStateAction<number>>;
+};
 
-  const stickyPosition = 'bottom-0';
+const Footer: FC<FooterProps> = ({
+  fixedFooter,
+  setFixedFooter,
+  setFooterHeight
+}) => {
+  const [measureRef, {height}] = useMeasure<HTMLDivElement>();
+
+  useEffect(() => {
+    setFooterHeight(height);
+  }, [height, setFooterHeight]);
+
+  const footerClassName = fixedFooter ? 'fixed left-0 right-0 bottom-0' : '';
 
   return (
-    <div ref={footerRef}>
-      <footer className="footer items-center p-4 bg-neutral text-neutral-content border-2">
+    <div ref={measureRef} className={footerClassName}>
+      <footer className="footer items-center p-4 bg-neutral text-neutral-content">
         <div className="items-center grid-flow-col">
           <svg
             width="36"
@@ -58,8 +73,10 @@ export default function Footer() {
             </svg>
           </a>
         </div>
-        <StickyPin targetRef={footerRef} stickyPosition={stickyPosition} />
+        <FixedPin fixed={fixedFooter} setFixed={setFixedFooter} />
       </footer>
     </div>
   );
-}
+};
+
+export default Footer;

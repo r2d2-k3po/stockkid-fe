@@ -4,7 +4,6 @@ import {Params, useLoaderData} from 'react-router-dom';
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import type {PanelMap} from '../../app/screenPanelMapSlice';
 import {Layout, Layouts, Responsive, WidthProvider} from 'react-grid-layout';
-import {MaterialSymbol} from 'react-material-symbols';
 import {updateLayouts} from '../../app/screenLayoutsMapSlice';
 import {useMainOutletContext} from './Main';
 import {
@@ -77,37 +76,20 @@ export default function VirtualScreen() {
   }, [uuidPanelMap, uuid]);
 
   return (
-    <div className="border-2 min-h-[calc(100vh-176px)]">
-      <ResponsiveReactGridLayout
-        className="layout"
-        layouts={layouts}
-        breakpoints={breakpoints}
-        cols={cols}
-        rowHeight={rowHeight}
-        autoSize={autoSize}
-        draggableHandle=".drag_pan"
-        margin={margin}
-        compactType={compactType}
-        onLayoutChange={handleLayoutChange}
-        onBreakpointChange={handleBreakpointChange}
-      >
-        {/*<div*/}
-        {/*  key={uuid}*/}
-        {/*  data-grid={{x: 0, y: 0, w: 3, h: 1}}*/}
-        {/*  className="border-2 border-info rounded-md hover:border-accent"*/}
-        {/*>*/}
-        {/*  <MaterialSymbol*/}
-        {/*    icon="drag_pan"*/}
-        {/*    className="drag_pan btn btn-xs btn-outline btn-warning"*/}
-        {/*    size={22}*/}
-        {/*    grade={-25}*/}
-        {/*    weight={200}*/}
-        {/*  />*/}
-        {/*  <p>screen: {currentScreen}</p>*/}
-        {/*  <p>uuid: {uuid}</p>*/}
-        {/*</div>*/}
-        {!!screenPanels && screenPanels}
-      </ResponsiveReactGridLayout>
-    </div>
+    <ResponsiveReactGridLayout
+      className="layout"
+      layouts={layouts}
+      breakpoints={breakpoints}
+      cols={cols}
+      rowHeight={rowHeight}
+      autoSize={autoSize}
+      draggableHandle=".drag_pan"
+      margin={margin}
+      compactType={compactType}
+      onLayoutChange={handleLayoutChange}
+      onBreakpointChange={handleBreakpointChange}
+    >
+      {!!screenPanels && screenPanels}
+    </ResponsiveReactGridLayout>
   );
 }
