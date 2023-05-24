@@ -5,6 +5,11 @@
     "Move": "이동",
     "Select": "선택"
   },
+  "AlertRemovePanel": {
+    "Cancel": "취소",
+    "Message": "현재 패널을 삭제합니다!",
+    "Remove": "삭제"
+  },
   "AlertRemoveScreen": {
     "Cancel": "취소",
     "Message": "스크린 {{currentScreen}} 번을 삭제합니다!",

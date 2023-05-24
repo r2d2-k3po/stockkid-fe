@@ -113,7 +113,7 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
 
   const className = [
     _className,
-    'border-2 border-info rounded-md hover:border-accent'
+    'border-2 border-info rounded-md hover:border-accent relative'
   ].join(' ');
 
   return (

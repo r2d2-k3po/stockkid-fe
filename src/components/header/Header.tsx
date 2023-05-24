@@ -1,18 +1,33 @@
-import React, {useRef} from 'react';
+import React, {FC, useEffect} from 'react';
 import LanguageSelect from './LanguageSelect';
 import LightDarkSwap from './LightDarkSwap';
 import Indicator from './Indicator';
 import Search from './Search';
 import DropDownMenu from './DropDownMenu';
-import StickyPin from '../common/StickyPin';
+import FixedPin from '../common/FixedPin';
+import {useMeasure} from 'react-use';
 
-export default function Header() {
-  const headerRef = useRef<HTMLDivElement>(null);
+export type HeaderProps = {
+  fixedHeader: boolean;
+  setFixedHeader: React.Dispatch<React.SetStateAction<boolean>>;
+  setHeaderHeight: React.Dispatch<React.SetStateAction<number>>;
+};
 
-  const stickyPosition = 'top-0';
+const Header: FC<HeaderProps> = ({
+  fixedHeader,
+  setFixedHeader,
+  setHeaderHeight
+}) => {
+  const [measureRef, {height}] = useMeasure<HTMLDivElement>();
+
+  useEffect(() => {
+    setHeaderHeight(height);
+  }, [height, setHeaderHeight]);
+
+  const headerClassName = fixedHeader ? 'fixed top-0 left-0 right-0' : '';
 
   return (
-    <div ref={headerRef}>
+    <div ref={measureRef} className={headerClassName}>
       <div className="navbar bg-neutral text-neutral-content">
         <div className="navbar-start">
           <DropDownMenu />
@@ -27,9 +42,11 @@ export default function Header() {
           <Indicator />
           <LightDarkSwap />
           <LanguageSelect />
-          <StickyPin targetRef={headerRef} stickyPosition={stickyPosition} />
+          <FixedPin fixed={fixedHeader} setFixed={setFixedHeader} />
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Header;

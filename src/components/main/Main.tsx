@@ -1,5 +1,6 @@
 import React, {
   ChangeEvent,
+  FC,
   MouseEvent,
   useCallback,
   useEffect,
@@ -43,7 +44,11 @@ type ContextType = {
   compactType: 'vertical' | 'horizontal' | null;
 };
 
-export default function Main() {
+export type MainProps = {
+  mainClassName: string;
+};
+
+const Main: FC<MainProps> = ({mainClassName}) => {
   const minVirtualScreenNumber = 1;
   const maxVirtualScreenNumber = 10;
 
@@ -318,7 +323,7 @@ export default function Main() {
   }, [currentScreen]);
 
   return (
-    <div className="border-2 min-h-[calc(100vh-136px)]">
+    <div className={mainClassName}>
       <div className="flex flex-wrap justify-between">
         <div className="flex flex-wrap justify-start w-1/3">
           <div ref={visibleScreenButtonsRef} className="visible">
@@ -417,8 +422,10 @@ export default function Main() {
       <Outlet context={{setCurrentBreakpoint, compactType}} />
     </div>
   );
-}
+};
 
 export function useMainOutletContext() {
   return useOutletContext<ContextType>();
 }
+
+export default Main;

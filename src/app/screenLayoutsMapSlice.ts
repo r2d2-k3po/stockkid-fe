@@ -62,9 +62,8 @@ const screenLayoutsMapSlice = createSlice({
       state: ScreenLayoutsMapState,
       action: PayloadAction<addPanelLayoutsPayload>
     ) => {
-      let layoutItem: LayoutItemType = action.payload.layoutItem
-        ? action.payload.layoutItem
-        : panelGrids[action.payload.panelCode];
+      let layoutItem: LayoutItemType =
+        action.payload.layoutItem ?? panelGrids[action.payload.panelCode];
       layoutItem = {...layoutItem, i: action.payload.uuidP};
       const layouts = state.uuidLayoutsMap.get(action.payload.uuid) as Layouts;
       if (!layouts[action.payload.currentBreakpoint]) {
