@@ -44,4 +44,4 @@ const AlertRemoveScreen: FC<AlertRemoveScreenProps> = ({
   );
 };
 
-export default AlertRemoveScreen;
+export default React.memo(AlertRemoveScreen);

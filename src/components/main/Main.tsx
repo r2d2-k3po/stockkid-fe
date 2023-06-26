@@ -428,4 +428,4 @@ export function useMainOutletContext() {
   return useOutletContext<ContextType>();
 }
 
-export default Main;
+export default React.memo(Main);

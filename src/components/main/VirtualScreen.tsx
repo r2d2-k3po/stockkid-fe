@@ -18,7 +18,7 @@ export const loader = ({params}: {params: Params}) => {
   return params.currentScreen as string;
 };
 
-export default function VirtualScreen() {
+function VirtualScreen() {
   const ResponsiveReactGridLayout = useMemo(
     () => WidthProvider(Responsive),
     []
@@ -93,3 +93,5 @@ export default function VirtualScreen() {
     </ResponsiveReactGridLayout>
   );
 }
+
+export default React.memo(VirtualScreen);

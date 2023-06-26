@@ -154,4 +154,4 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
   );
 });
 
-export default Panel;
+export default React.memo(Panel);

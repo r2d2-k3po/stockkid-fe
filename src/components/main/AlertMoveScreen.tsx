@@ -94,4 +94,4 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
   );
 };
 
-export default AlertMoveScreen;
+export default React.memo(AlertMoveScreen);

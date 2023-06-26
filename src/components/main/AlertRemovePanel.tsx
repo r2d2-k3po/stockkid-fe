@@ -42,4 +42,4 @@ const AlertRemovePanel: FC<AlertRemovePanelProps> = ({
   );
 };
 
-export default AlertRemovePanel;
+export default React.memo(AlertRemovePanel);
