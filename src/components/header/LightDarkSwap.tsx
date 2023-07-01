@@ -24,7 +24,7 @@ export default function LightDarkSwap() {
   );
 
   return (
-    <label className="swap swap-rotate mx-2">
+    <label className="btn btn-ghost btn-circle swap swap-rotate mx-2">
       <input
         type="checkbox"
         checked={lightModeChecked}

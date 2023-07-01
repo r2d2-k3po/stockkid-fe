@@ -42,7 +42,7 @@ export default function App() {
           setHeaderHeight={setHeaderHeight}
         />
         <div
-          className={`absolute top-[${headerHeight}px] left-0 right-0 bottom-0 overflow-auto`}
+          className={`fixed top-[${headerHeight}px] left-0 right-0 bottom-0 overflow-auto`}
         >
           <Main mainClassName="" />
           <Footer
@@ -57,7 +57,7 @@ export default function App() {
     return (
       <div className="relative h-full min-h-screen">
         <div
-          className={`absolute top-0 left-0 right-0 bottom-[${footerHeight}px] overflow-auto`}
+          className={`fixed top-0 left-0 right-0 bottom-[${footerHeight}px] overflow-auto`}
         >
           <Header
             fixedHeader={fixedHeader}
@@ -79,7 +79,7 @@ export default function App() {
       : 'relative h-auto min-h-screen overflow-auto';
 
     const mainClassName = fixedHeader
-      ? `absolute top-[${headerHeight}px] left-0 right-0 bottom-[${footerHeight}px] overflow-auto`
+      ? `fixed top-[${headerHeight}px] left-0 right-0 bottom-[${footerHeight}px] overflow-auto`
       : '';
 
     return (

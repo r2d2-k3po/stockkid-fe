@@ -16,7 +16,7 @@ const FixedPin: FC<FixedPinProps> = ({fixed, setFixed}) => {
   );
 
   return (
-    <label className="swap">
+    <label className="btn btn-ghost btn-circle swap">
       <input type="checkbox" checked={fixed} onChange={handleChangeChecked} />
       <MaterialSymbol
         icon="push_pin"
