@@ -1,16 +1,21 @@
 import {configureStore} from '@reduxjs/toolkit';
-import virtualScreenIdReducer from './virtualScreenIdSlice';
-import screenPanelMapReducer from './screenPanelMapSlice';
-import screenLayoutsMapReducer from './screenLayoutsMapSlice';
+import virtualScreenIdReducer from './slices/virtualScreenIdSlice';
+import screenPanelMapReducer from './slices/screenPanelMapSlice';
+import screenLayoutsMapReducer from './slices/screenLayoutsMapSlice';
 import logger from 'redux-logger';
+import {api} from './api';
+import authReducer from './slices/authSlice';
 
 const store = configureStore({
   reducer: {
     virtualScreenId: virtualScreenIdReducer,
     screenPanelMap: screenPanelMapReducer,
-    screenLayoutsMap: screenLayoutsMapReducer
+    screenLayoutsMap: screenLayoutsMapReducer,
+    [api.reducerPath]: api.reducer,
+    auth: authReducer
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat([logger, api.middleware])
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

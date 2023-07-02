@@ -15,7 +15,7 @@ import Panel0004 from './panels/Panel0004';
 import Panel0005 from './panels/Panel0005';
 import Panel0006 from './panels/Panel0006';
 import Panel0007 from './panels/Panel0007';
-import {removePanel} from '../../app/screenPanelMapSlice';
+import {removePanel} from '../../app/slices/screenPanelMapSlice';
 import AlertRemovePanel from './AlertRemovePanel';
 import {useAppDispatch} from '../../app/hooks';
 import {MaterialSymbol} from 'react-material-symbols';

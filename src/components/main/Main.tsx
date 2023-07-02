@@ -13,7 +13,7 @@ import {
   moveScreen,
   addScreen,
   removeScreen
-} from '../../app/virtualScreenIdSlice';
+} from '../../app/slices/virtualScreenIdSlice';
 import {v4 as uuidv4} from 'uuid';
 import AlertRemoveScreen from './AlertRemoveScreen';
 import {NavLink, Outlet, useNavigate, useOutletContext} from 'react-router-dom';
@@ -24,15 +24,15 @@ import {
   addScreenPanel,
   PanelMap,
   removeScreenPanel
-} from '../../app/screenPanelMapSlice';
+} from '../../app/slices/screenPanelMapSlice';
 import {mapReplacer} from '../../utils/mapReplacer';
 import {
   addPanelLayouts,
   addScreenLayouts,
   LayoutItemType,
   removeScreenLayouts
-} from '../../app/screenLayoutsMapSlice';
-import {breakpoints} from '../../app/reactGridLayoutParemeters';
+} from '../../app/slices/screenLayoutsMapSlice';
+import {breakpoints} from '../../app/constants/reactGridLayoutParemeters';
 import {Layouts} from 'react-grid-layout';
 import type {PanelType} from './Panel';
 import {useTranslation} from 'react-i18next';

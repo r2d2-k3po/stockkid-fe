@@ -15,7 +15,7 @@ const AlertRemoveScreen: FC<AlertRemoveScreenProps> = ({
   const {t} = useTranslation();
 
   return (
-    <div className="alert alert-warning fixed top-16 w-fit">
+    <div className="alert alert-warning fixed top-16 w-fit z-50">
       <div>
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -1,10 +1,10 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
-import {mapReviver} from '../utils/mapReviver';
+import {mapReviver} from '../../utils/mapReviver';
 import {enableMapSet} from 'immer';
 import {Layout, Layouts} from 'react-grid-layout';
-import {panels, panelGrids} from '../components/main/Panel';
-import {breakpoints} from './reactGridLayoutParemeters';
+import {panels, panelGrids} from '../../components/main/Panel';
+import {breakpoints} from '../constants/reactGridLayoutParemeters';
 
 enableMapSet();
 

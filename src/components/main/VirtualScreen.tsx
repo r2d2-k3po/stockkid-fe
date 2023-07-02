@@ -2,9 +2,9 @@ import React, {useCallback, useMemo} from 'react';
 import Panel from './Panel';
 import {Params, useLoaderData} from 'react-router-dom';
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
-import type {PanelMap} from '../../app/screenPanelMapSlice';
+import type {PanelMap} from '../../app/slices/screenPanelMapSlice';
 import {Layout, Layouts, Responsive, WidthProvider} from 'react-grid-layout';
-import {updateLayouts} from '../../app/screenLayoutsMapSlice';
+import {updateLayouts} from '../../app/slices/screenLayoutsMapSlice';
 import {useMainOutletContext} from './Main';
 import {
   autoSize,
@@ -12,7 +12,7 @@ import {
   cols,
   margin,
   rowHeight
-} from '../../app/reactGridLayoutParemeters';
+} from '../../app/constants/reactGridLayoutParemeters';
 
 export const loader = ({params}: {params: Params}) => {
   return params.currentScreen as string;

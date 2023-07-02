@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
-import {panels, PanelType} from '../components/main/Panel';
-import {mapReviver} from '../utils/mapReviver';
+import {panels, PanelType} from '../../components/main/Panel';
+import {mapReviver} from '../../utils/mapReviver';
 import {enableMapSet} from 'immer';
 
 enableMapSet();
