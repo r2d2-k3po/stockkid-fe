@@ -1,30 +1,35 @@
 import React from 'react';
-import {MaterialSymbol} from 'react-material-symbols';
+import {useAppSelector} from '../../app/hooks';
+import MaterialSymbolButton from '../common/MaterialSymbolButton';
 
 const AuthMenu = () => {
+  const token = useAppSelector((state) => state.auth.token);
+  const loggedIn = !(token == null);
+
   return (
     <div className="dropdown dropdown-right">
-      <label tabIndex={0} className="btn btn-ghost btn-circle">
-        <MaterialSymbol icon="account_circle" size={36} grade={-25} />
+      <label tabIndex={0}>
+        {loggedIn ? (
+          <MaterialSymbolButton icon="account_circle" />
+        ) : (
+          <MaterialSymbolButton icon="no_accounts" />
+        )}
       </label>
       <div
         tabIndex={0}
         className="dropdown-content z-50 card card-compact shadow bg-primary text-primary-content"
       >
-        <div className="flex">
-          <div className="btn btn-ghost btn-circle">
-            <MaterialSymbol icon="account_circle" size={36} grade={-25} />
+        {loggedIn ? (
+          <div className="flex">
+            <MaterialSymbolButton icon="no_accounts" />
+            <MaterialSymbolButton icon="manage_accounts" />
           </div>
-          <div className="btn btn-ghost btn-circle">
-            <MaterialSymbol icon="no_accounts" size={36} grade={-25} />
+        ) : (
+          <div className="flex">
+            <MaterialSymbolButton icon="account_circle" />
+            <MaterialSymbolButton icon="person_add" />
           </div>
-          <div className="btn btn-ghost btn-circle">
-            <MaterialSymbol icon="person_add" size={36} grade={-25} />
-          </div>
-          <div className="btn btn-ghost btn-circle">
-            <MaterialSymbol icon="manage_accounts" size={36} grade={-25} />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

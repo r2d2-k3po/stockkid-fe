@@ -36,6 +36,10 @@ import {breakpoints} from '../../app/constants/reactGridLayoutParemeters';
 import {Layouts} from 'react-grid-layout';
 import type {PanelType} from './Panel';
 import {useTranslation} from 'react-i18next';
+import {
+  maxVirtualScreenNumber,
+  minVirtualScreenNumber
+} from '../../app/constants/virtualScreenNumbers';
 
 type ContextType = {
   setCurrentBreakpoint: React.Dispatch<
@@ -49,9 +53,6 @@ export type MainProps = {
 };
 
 const Main: FC<MainProps> = ({mainClassName}) => {
-  const minVirtualScreenNumber = 1;
-  const maxVirtualScreenNumber = 10;
-
   const {t} = useTranslation();
 
   const navigate = useNavigate();

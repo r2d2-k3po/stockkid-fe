@@ -7,10 +7,12 @@ interface AuthState {
   token: string | null;
 }
 
-const initialState: AuthState = {
-  user: null,
-  token: null
-};
+const initialState: AuthState = localStorage.getItem('authState')
+  ? JSON.parse(localStorage.getItem('authState') as string)
+  : {
+      user: null,
+      token: null
+    };
 
 const authSlice = createSlice({
   name: 'auth',
