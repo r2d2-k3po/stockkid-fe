@@ -19,6 +19,8 @@ import {removePanel} from '../../app/slices/screenPanelMapSlice';
 import AlertRemovePanel from './AlertRemovePanel';
 import {useAppDispatch} from '../../app/hooks';
 import {MaterialSymbol} from 'react-material-symbols';
+import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
+import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
 
 export const panels = {
   panel0000: Panel0000,
@@ -81,30 +83,27 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
   const visibleAlertRemovePanelRef = useRef<HTMLDivElement>(null);
 
   const removeCurrentPanel = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    visiblePanelButtonsRef.current?.setAttribute('class', 'invisible');
-    visibleAlertRemovePanelRef.current?.removeAttribute('class');
+    e.stopPropagation();
+    invisibleRefVisibleRef(visiblePanelButtonsRef, visibleAlertRemovePanelRef);
   }, []);
 
   const reallyRemoveCurrentPanel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const payload = {
         uuid: uuid,
         uuidP: uuidP
       };
       dispatch(removePanel(payload));
-      visiblePanelButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertRemovePanelRef.current?.setAttribute('class', 'hidden');
+      visibleRefHiddenRef(visiblePanelButtonsRef, visibleAlertRemovePanelRef);
     },
     [uuid, uuidP, dispatch]
   );
 
   const cancelRemoveCurrentPanel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      visiblePanelButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertRemovePanelRef.current?.setAttribute('class', 'hidden');
+      e.stopPropagation();
+      visibleRefHiddenRef(visiblePanelButtonsRef, visibleAlertRemovePanelRef);
     },
     []
   );

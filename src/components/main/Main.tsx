@@ -40,6 +40,8 @@ import {
   maxVirtualScreenNumber,
   minVirtualScreenNumber
 } from '../../app/constants/virtualScreenNumbers';
+import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
+import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
 
 type ContextType = {
   setCurrentBreakpoint: React.Dispatch<
@@ -101,7 +103,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
   const addVirtualScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const uuid = uuidv4();
       dispatch(addScreen(uuid));
       dispatch(addScreenPanel(uuid));
@@ -112,16 +114,18 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
   const removeCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      visibleScreenButtonsRef.current?.setAttribute('class', 'invisible');
-      visibleAlertRemoveScreenRef.current?.removeAttribute('class');
+      e.stopPropagation();
+      invisibleRefVisibleRef(
+        visibleScreenButtonsRef,
+        visibleAlertRemoveScreenRef
+      );
     },
     []
   );
 
   const reallyRemoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const index = parseInt(currentScreen) - 1;
       dispatch(removeScreen(uuidList[index]));
       dispatch(removeScreenPanel(uuidList[index]));
@@ -130,30 +134,27 @@ const Main: FC<MainProps> = ({mainClassName}) => {
         setCurrentScreen(index.toString());
         navigate(`/screen/${index.toString()}`);
       }
-      visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'hidden');
+      visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertRemoveScreenRef);
     },
     [currentScreen, uuidList, dispatch, navigate]
   );
 
   const cancelRemoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'hidden');
+      e.stopPropagation();
+      visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertRemoveScreenRef);
     },
     []
   );
 
   const moveCurrentScreen = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    visibleScreenButtonsRef.current?.setAttribute('class', 'invisible');
-    visibleAlertMoveScreenRef.current?.removeAttribute('class');
+    e.stopPropagation();
+    invisibleRefVisibleRef(visibleScreenButtonsRef, visibleAlertMoveScreenRef);
   }, []);
 
   const reallyMoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const payload = {
         currentIndex: parseInt(currentScreen) - 1,
         targetIndex: parseInt(targetScreen) - 1
@@ -161,24 +162,22 @@ const Main: FC<MainProps> = ({mainClassName}) => {
       dispatch(moveScreen(payload));
       setCurrentScreen(targetScreen);
       navigate(`/screen/${targetScreen}`);
-      visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertMoveScreenRef.current?.setAttribute('class', 'hidden');
+      visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertMoveScreenRef);
     },
     [currentScreen, targetScreen, dispatch, navigate]
   );
 
   const cancelMoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertMoveScreenRef.current?.setAttribute('class', 'hidden');
+      e.stopPropagation();
+      visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertMoveScreenRef);
     },
     []
   );
 
   const copyCurrentScreenPanel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const currentUuid = uuidList[parseInt(currentScreen) - 1];
       const newUuid = uuidv4();
       dispatch(addScreen(newUuid));
@@ -234,7 +233,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
   const addNewPanel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const uuid = uuidList[parseInt(currentScreen) - 1];
       const uuidP = uuidv4();
       const payload = {
