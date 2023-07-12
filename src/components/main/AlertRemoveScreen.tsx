@@ -1,7 +1,7 @@
 import React, {FC, MouseEventHandler} from 'react';
 import {useTranslation} from 'react-i18next';
 
-export type AlertRemoveScreenProps = {
+type AlertRemoveScreenProps = {
   currentScreen: string;
   onClickCancel: MouseEventHandler<HTMLButtonElement>;
   onClickRemove: MouseEventHandler<HTMLButtonElement>;

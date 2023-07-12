@@ -20,5 +20,14 @@
     "CompactTypeNone": "none",
     "CompactTypeVertical": "vertical",
     "SelectPanel": "Select panel"
+  },
+  "SignupForm": {
+    "Cancel": "Cancel",
+    "Signup": "Sign Up",
+    "placeholder": {
+      "confirmPassword": "Confirm Password",
+      "password": "Password",
+      "username": "Username"
+    }
   }
 }

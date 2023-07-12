@@ -1,7 +1,7 @@
 import {MaterialSymbol} from 'react-material-symbols';
 import React, {ChangeEvent, FC, useCallback} from 'react';
 
-export type FixedPinProps = {
+type FixedPinProps = {
   fixed: boolean;
   setFixed: React.Dispatch<React.SetStateAction<boolean>>;
 };

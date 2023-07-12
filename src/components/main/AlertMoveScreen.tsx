@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import {useTranslation} from 'react-i18next';
 
-export type AlertMoveScreenProps = {
+type AlertMoveScreenProps = {
   currentScreen: string;
   onClickCancel: MouseEventHandler<HTMLButtonElement>;
   onClickMove: MouseEventHandler<HTMLButtonElement>;

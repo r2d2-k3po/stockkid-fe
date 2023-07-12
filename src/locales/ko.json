@@ -20,5 +20,14 @@
     "CompactTypeNone": "미적용",
     "CompactTypeVertical": "세로",
     "SelectPanel": "패널 선택"
+  },
+  "SignupForm": {
+    "Cancel": "취소",
+    "Signup": "회원가입",
+    "placeholder": {
+      "confirmPassword": "비밀번호 확인",
+      "password": "비밀번호",
+      "username": "사용자명"
+    }
   }
 }
