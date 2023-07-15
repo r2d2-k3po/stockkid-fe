@@ -9,7 +9,7 @@ export default function VirtualScreenTest() {
     <div
       key={uuid}
       data-grid={{x: 0, y: 0, w: 3, h: 1}}
-      className="border-2 border-info rounded-md hover:border-accent"
+      className="rounded-md border-2 border-info hover:border-accent"
     >
       <MaterialSymbol
         icon="drag_pan"

@@ -125,7 +125,7 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
       onTouchEnd={onTouchEnd}
     >
       <div ref={visiblePanelButtonsRef} className="visible">
-        <div className="flex justify-between m-0.5 gap-1">
+        <div className="flex justify-between gap-1 m-0.5">
           <button
             className="btn btn-xs btn-outline btn-warning"
             onClick={removeCurrentPanel}

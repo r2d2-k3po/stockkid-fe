@@ -325,9 +325,9 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   return (
     <div className={mainClassName}>
       <div className="flex flex-wrap justify-between">
-        <div className="flex flex-wrap justify-start w-1/3">
+        <div className="flex w-1/3 flex-wrap justify-start">
           <div ref={visibleScreenButtonsRef} className="visible">
-            <div className="flex flex-wrap justify-start mx-5 py-2 gap-1">
+            <div className="mx-5 flex flex-wrap justify-start gap-1 py-2">
               {screenButtons}
 
               <button
@@ -386,7 +386,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
           </div>
         </div>
 
-        <div className="flex justify-end mx-5 py-2 gap-2 w-1/3">
+        <div className="mx-5 flex w-1/3 justify-end gap-2 py-2">
           <button
             disabled={selectedPanel === '0'}
             className="btn btn-xs btn-outline btn-accent"
@@ -397,7 +397,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
           <select
             onChange={handleChangeSelectedPanel}
-            className="select select-info select-xs max-w-xs"
+            className="max-w-xs select select-info select-xs"
             value={selectedPanel}
           >
             <option disabled value="0">
@@ -408,7 +408,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
           <select
             onChange={handleChangeCompactType}
-            className="select select-info select-xs max-w-xs"
+            className="max-w-xs select select-info select-xs"
             value={compactType}
           >
             <option value="vertical">{t('Main.CompactTypeVertical')}</option>

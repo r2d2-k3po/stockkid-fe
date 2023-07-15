@@ -44,11 +44,11 @@ const AuthMenu = () => {
       </label>
       <div
         tabIndex={0}
-        className="dropdown-content z-50 card card-compact shadow bg-primary text-primary-content mx-1"
+        className="z-50 mx-1 shadow dropdown-content card card-compact bg-primary text-primary-content"
       >
         <div ref={visibleLoggedInButtonsRef} className="visible">
           {loggedIn ? (
-            <div className="flex mx-2">
+            <div className="mx-2 flex">
               <div onClick={showRef(visibleLogoutFormRef)}>
                 <MaterialSymbolButton icon="no_accounts" />
               </div>
@@ -57,7 +57,7 @@ const AuthMenu = () => {
               </div>
             </div>
           ) : (
-            <div className="flex mx-2">
+            <div className="mx-2 flex">
               <div onClick={showRef(visibleLoginFormRef)}>
                 <MaterialSymbolButton icon="account_circle" />
               </div>

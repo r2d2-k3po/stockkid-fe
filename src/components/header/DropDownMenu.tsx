@@ -21,7 +21,7 @@ export default function DropDownMenu() {
       </label>
       <ul
         tabIndex={0}
-        className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+        className="mt-3 w-52 p-2 shadow z-[1] menu menu-sm dropdown-content bg-base-100 rounded-box"
       >
         <li>
           <a className="justify-between">

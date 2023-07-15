@@ -55,7 +55,7 @@ const SignupForm: FC<SignupFormProps> = ({hideRef}) => {
   );
 
   return (
-    <div className="flex w-[50rem] gap-1 items-center mx-2">
+    <div className="mx-2 flex items-center gap-1 w-[50rem]">
       <MaterialSymbolButton icon="person_add" />
       <input
         type="text"
@@ -63,7 +63,7 @@ const SignupForm: FC<SignupFormProps> = ({hideRef}) => {
         placeholder={t('SignupForm.placeholder.username') as string}
         value={username}
         onChange={handleChange('username')}
-        className="input input-bordered input-sm w-full max-w-xs"
+        className="w-full max-w-xs input input-bordered input-sm"
       />
       <input
         type="password"
@@ -71,7 +71,7 @@ const SignupForm: FC<SignupFormProps> = ({hideRef}) => {
         placeholder={t('SignupForm.placeholder.password') as string}
         value={password}
         onChange={handleChange('password')}
-        className="input input-bordered input-sm w-full max-w-xs"
+        className="w-full max-w-xs input input-bordered input-sm"
       />
       <input
         type="password"
@@ -79,7 +79,7 @@ const SignupForm: FC<SignupFormProps> = ({hideRef}) => {
         placeholder={t('SignupForm.placeholder.confirmPassword') as string}
         value={confirmPassword}
         onChange={handleChange('confirmPassword')}
-        className="input input-bordered input-sm w-full max-w-xs"
+        className="w-full max-w-xs input input-bordered input-sm"
       />
       <div className="flex-none">
         <button onClick={onClickCancel} className="btn btn-xs btn-ghost">

@@ -13,11 +13,11 @@ const AlertRemovePanel: FC<AlertRemovePanelProps> = ({
   const {t} = useTranslation();
 
   return (
-    <div className="alert alert-warning w-fit absolute z-50">
+    <div className="absolute z-50 w-fit alert alert-warning">
       <div>
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="stroke-current flex-shrink-0 h-6 w-6"
+          className="h-6 w-6 flex-shrink-0 stroke-current"
           fill="none"
           viewBox="0 0 24 24"
         >
