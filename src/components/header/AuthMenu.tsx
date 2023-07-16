@@ -1,4 +1,4 @@
-import React, {MouseEvent, useCallback, useRef} from 'react';
+import React, {MouseEvent, useCallback, useRef, useState} from 'react';
 import {useAppSelector} from '../../app/hooks';
 import MaterialSymbolButton from '../common/MaterialSymbolButton';
 import LogoutForm from './LogoutForm';
@@ -33,39 +33,45 @@ const AuthMenu = () => {
     []
   );
 
+  const [showLoggedInButtons, setShowLoggedInButtons] =
+    useState<boolean>(false);
+
+  const toggleShowLoggedInButtons = useCallback(
+    () => setShowLoggedInButtons((showLoggedInButtons) => !showLoggedInButtons),
+    []
+  );
+
   return (
-    <div className="dropdown dropdown-right">
-      <label tabIndex={0}>
+    <div className="flex">
+      <div onClick={toggleShowLoggedInButtons}>
         {loggedIn ? (
           <MaterialSymbolButton icon="account_circle" />
         ) : (
           <MaterialSymbolButton icon="no_accounts" />
         )}
-      </label>
-      <div
-        tabIndex={0}
-        className="z-50 mx-1 shadow dropdown-content card card-compact bg-primary text-primary-content"
-      >
+      </div>
+      <div className="z-50 mx-1 shadow card card-compact bg-primary text-primary-content">
         <div ref={visibleLoggedInButtonsRef} className="visible">
-          {loggedIn ? (
-            <div className="mx-2 flex">
-              <div onClick={showRef(visibleLogoutFormRef)}>
-                <MaterialSymbolButton icon="no_accounts" />
+          {showLoggedInButtons &&
+            (loggedIn ? (
+              <div className="mx-2 flex">
+                <div onClick={showRef(visibleLogoutFormRef)}>
+                  <MaterialSymbolButton icon="no_accounts" />
+                </div>
+                <div onClick={showRef(visibleManageAccountRef)}>
+                  <MaterialSymbolButton icon="manage_accounts" />
+                </div>
               </div>
-              <div onClick={showRef(visibleManageAccountRef)}>
-                <MaterialSymbolButton icon="manage_accounts" />
+            ) : (
+              <div className="mx-2 flex">
+                <div onClick={showRef(visibleLoginFormRef)}>
+                  <MaterialSymbolButton icon="account_circle" />
+                </div>
+                <div onClick={showRef(visibleSignupFormRef)}>
+                  <MaterialSymbolButton icon="person_add" />
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="mx-2 flex">
-              <div onClick={showRef(visibleLoginFormRef)}>
-                <MaterialSymbolButton icon="account_circle" />
-              </div>
-              <div onClick={showRef(visibleSignupFormRef)}>
-                <MaterialSymbolButton icon="person_add" />
-              </div>
-            </div>
-          )}
+            ))}
         </div>
         <div ref={visibleLogoutFormRef} className="hidden">
           <LogoutForm />
