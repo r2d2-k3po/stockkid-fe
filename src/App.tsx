@@ -17,19 +17,19 @@ export default function App() {
     (localStorage.getItem('fixedHeader') || 'true') === 'true'
   );
 
-  const [headerHeight, setHeaderHeight] = useState<number>(0);
+  const [headerHeight, setHeaderHeight] = useState<number>(64);
 
   const [fixedFooter, setFixedFooter] = useState<boolean>(
     (localStorage.getItem('fixedFooter') || 'true') === 'true'
   );
 
-  const [footerHeight, setFooterHeight] = useState<number>(0);
+  const [footerHeight, setFooterHeight] = useState<number>(64);
 
-  const classNameFixedHeader = `fixed top-[${headerHeight}px] left-0 right-0 bottom-0 overflow-auto`;
+  const classNameFixedHeader = `fixed top-[64px] left-0 right-0 bottom-0 overflow-auto`;
 
-  const classNameFixedFooter = `fixed top-0 left-0 right-0 bottom-[${footerHeight}px] overflow-auto`;
+  const classNameFixedFooter = `fixed top-0 left-0 right-0 bottom-[64px] overflow-auto`;
 
-  const classNameFixedBoth = `fixed top-[${headerHeight}px] left-0 right-0 bottom-[${footerHeight}px] overflow-auto`;
+  const classNameFixedBoth = `fixed top-[64px] left-0 right-0 bottom-[64px] overflow-auto`;
 
   useEffect(() => {
     localStorage.setItem('fixedHeader', fixedHeader.toString());
