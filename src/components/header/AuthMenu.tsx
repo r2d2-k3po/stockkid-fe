@@ -77,7 +77,7 @@ const AuthMenu = () => {
           <LoginForm />
         </div>
         <div ref={visibleSignupFormRef} className="hidden">
-          <SignupForm hideRef={hideRef(visibleSignupFormRef)} />
+          <SignupForm hideThisRef={hideRef(visibleSignupFormRef)} />
         </div>
       </div>
     </div>

@@ -11,6 +11,11 @@ export interface UserResponse {
   token: string;
 }
 
+export interface SignupRequest {
+  username: string;
+  password: string;
+}
+
 export interface LoginRequest {
   username: string;
   password: string;
@@ -22,6 +27,7 @@ export const api = createApi({
     prepareHeaders: (headers, {getState}) => {
       // By default, if we have a token in the store, let's use that for authenticated requests
       const token = (getState() as RootState).auth.token;
+      headers.set('Content-Type', 'application/json');
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
       }
@@ -30,6 +36,13 @@ export const api = createApi({
   }),
   tagTypes: [],
   endpoints: (builder) => ({
+    signup: builder.mutation<unknown, SignupRequest>({
+      query: (signupRequest) => ({
+        url: 'member/signup',
+        method: 'POST',
+        body: signupRequest
+      })
+    }),
     login: builder.mutation<UserResponse, LoginRequest>({
       query: (credentials) => ({
         url: 'login',
@@ -43,4 +56,4 @@ export const api = createApi({
   })
 });
 
-export const {useLoginMutation, useProtectedMutation} = api;
+export const {useSignupMutation, useLoginMutation, useProtectedMutation} = api;
