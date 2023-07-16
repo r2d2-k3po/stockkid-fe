@@ -26,8 +26,8 @@
     "Signup": "회원가입",
     "placeholder": {
       "confirmPassword": "비밀번호 확인",
-      "password": "비밀번호",
-      "username": "사용자명"
+      "password": "비밀번호 (6~30)",
+      "username": "사용자명 (6~30)"
     }
   }
 }

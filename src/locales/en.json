@@ -26,8 +26,8 @@
     "Signup": "Sign Up",
     "placeholder": {
       "confirmPassword": "Confirm Password",
-      "password": "Password",
-      "username": "Username"
+      "password": "Password (6~30)",
+      "username": "Username (6~30)"
     }
   }
 }

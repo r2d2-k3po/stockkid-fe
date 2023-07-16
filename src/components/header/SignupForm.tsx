@@ -12,6 +12,8 @@ type SignupFormProps = {
 };
 
 const SignupForm: FC<SignupFormProps> = ({hideRef}) => {
+  const regexFinal = /^.{6,30}$/;
+
   const {t} = useTranslation();
 
   const [{username, password, confirmPassword}, setForm] =
@@ -23,7 +25,10 @@ const SignupForm: FC<SignupFormProps> = ({hideRef}) => {
 
   const handleChange = useCallback(
     (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
-      setForm((obj) => ({...obj, [key]: e.target.value.trim()}));
+      const regex = /^.{0,30}$/;
+      if (regex.test(e.target.value)) {
+        setForm((obj) => ({...obj, [key]: e.target.value.trim()}));
+      }
     },
     []
   );
@@ -87,8 +92,8 @@ const SignupForm: FC<SignupFormProps> = ({hideRef}) => {
         </button>
         <button
           disabled={
-            username.length <= 5 ||
-            password.length <= 5 ||
+            !regexFinal.test(username) ||
+            !regexFinal.test(password) ||
             password != confirmPassword
           }
           onClick={onClickSignup}
