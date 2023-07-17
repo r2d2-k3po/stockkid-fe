@@ -37,7 +37,7 @@ const Header: FC<HeaderProps> = ({
           <a className="text-xl normal-case btn btn-ghost">StockKid.net</a>
         </div>
 
-        <div className="mr-3 navbar-end">
+        <div className="navbar-end">
           <Search />
           <Indicator />
           <LightDarkSwap />

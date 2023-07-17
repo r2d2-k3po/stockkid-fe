@@ -45,7 +45,9 @@ const AuthMenu = () => {
     <div className="flex">
       <div onClick={toggleShowLoggedInButtons}>
         {loggedIn ? (
-          <MaterialSymbolButton icon="account_circle" />
+          <div className="shadow card card-compact bg-accent text-accent-content">
+            <MaterialSymbolButton icon="account_circle" />
+          </div>
         ) : (
           <MaterialSymbolButton icon="no_accounts" />
         )}
@@ -80,7 +82,7 @@ const AuthMenu = () => {
           <ManageAccount />
         </div>
         <div ref={visibleLoginFormRef} className="hidden">
-          <LoginForm />
+          <LoginForm hideThisRef={hideRef(visibleLoginFormRef)} />
         </div>
         <div ref={visibleSignupFormRef} className="hidden">
           <SignupForm hideThisRef={hideRef(visibleSignupFormRef)} />

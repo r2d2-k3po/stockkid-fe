@@ -15,6 +15,10 @@
     "Message": "Screen {{currentScreen}} will be removed!",
     "Remove": "Remove"
   },
+  "LoginForm": {
+    "Login": "Login",
+    "RememberMe": "Remember Username"
+  },
   "Main": {
     "CompactTypeHorizontal": "horizontal",
     "CompactTypeNone": "none",
