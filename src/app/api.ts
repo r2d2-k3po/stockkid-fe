@@ -6,9 +6,10 @@ export interface User {
   username: string;
 }
 
-export interface UserResponse {
-  user: User;
-  token: string;
+export interface ResponseEntity {
+  responseStatus: string;
+  responseMessage: string;
+  responseObject: unknown;
 }
 
 export interface SignupRequest {
@@ -27,23 +28,23 @@ export const api = createApi({
     prepareHeaders: (headers, {getState}) => {
       // By default, if we have a token in the store, let's use that for authenticated requests
       const token = (getState() as RootState).auth.token;
-      headers.set('Content-Type', 'application/json');
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
       }
       return headers;
-    }
+    },
+    jsonContentType: 'application/json'
   }),
   tagTypes: [],
   endpoints: (builder) => ({
-    signup: builder.mutation<unknown, SignupRequest>({
+    signup: builder.mutation<ResponseEntity, SignupRequest>({
       query: (signupRequest) => ({
         url: 'member/signup',
         method: 'POST',
         body: signupRequest
       })
     }),
-    login: builder.mutation<UserResponse, LoginRequest>({
+    login: builder.mutation<ResponseEntity, LoginRequest>({
       query: (credentials) => ({
         url: 'login',
         method: 'POST',

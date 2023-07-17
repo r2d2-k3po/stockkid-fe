@@ -23,6 +23,7 @@
   },
   "SignupForm": {
     "Cancel": "Cancel",
+    "Reset": "Reset",
     "Signup": "Sign Up",
     "placeholder": {
       "confirmPassword": "Confirm Password",

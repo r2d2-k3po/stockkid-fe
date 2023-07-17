@@ -1,7 +1,7 @@
 import React, {ChangeEvent, FC, MouseEvent, useCallback, useState} from 'react';
 import MaterialSymbolButton from '../common/MaterialSymbolButton';
 import {useTranslation} from 'react-i18next';
-import {useSignupMutation} from '../../app/api';
+import {useSignupMutation, ResponseEntity} from '../../app/api';
 
 type SignupFormType = Record<
   'username' | 'password' | 'confirmPassword',
@@ -19,7 +19,7 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
 
   const [
     requestSignup,
-    {data, error, isUninitialized, isLoading, isSuccess, isError, reset}
+    {data, isUninitialized, isLoading, isSuccess, isError, reset}
   ] = useSignupMutation();
 
   const [{username, password, confirmPassword}, setForm] =
@@ -53,22 +53,34 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
   );
 
   const onClickSignup = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      try {
+        e.stopPropagation();
+        const signupRequest = {
+          username: username,
+          password: password
+        };
+        await requestSignup(signupRequest);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setForm({
+          username: '',
+          password: '',
+          confirmPassword: ''
+        });
+      }
+    },
+    [username, password, requestSignup]
+  );
+
+  const onClickReset = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      const signupRequest = {
-        username: username,
-        password: password
-      };
-      requestSignup(signupRequest);
-      // hideThisRef();
-      setForm({
-        username: '',
-        password: '',
-        confirmPassword: ''
-      });
       reset();
+      hideThisRef();
     },
-    [username, password, requestSignup, reset]
+    [hideThisRef, reset]
   );
 
   if (isUninitialized || isLoading) {
@@ -111,8 +123,7 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
             disabled={
               !regexFinal.test(username) ||
               !regexFinal.test(password) ||
-              password != confirmPassword ||
-              isLoading
+              password != confirmPassword
             }
             onClick={onClickSignup}
             className={
@@ -128,10 +139,18 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
     );
   } else {
     return (
-      <div className="mx-2 flex items-center gap-1 w-[50rem]">
+      <div className="mx-2 flex items-center gap-1 w-full">
         <MaterialSymbolButton icon="person_add" />
-        {isSuccess && <div>Success : {JSON.stringify(data)}</div>}
-        {isError && <div>Error : {JSON.stringify(error)} </div>}
+        {isSuccess && (
+          <div>
+            Status : {(data as ResponseEntity).responseStatus}, Message :{' '}
+            {(data as ResponseEntity).responseMessage}
+          </div>
+        )}
+        {isError && <div>Signup Error!</div>}
+        <button onClick={onClickReset} className="btn btn-xs btn-accent mx-1">
+          {t('SignupForm.Reset')}
+        </button>
       </div>
     );
   }

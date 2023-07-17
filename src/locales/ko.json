@@ -23,6 +23,7 @@
   },
   "SignupForm": {
     "Cancel": "취소",
+    "Reset": "초기화",
     "Signup": "회원가입",
     "placeholder": {
       "confirmPassword": "비밀번호 확인",
