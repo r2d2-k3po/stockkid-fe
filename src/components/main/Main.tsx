@@ -13,7 +13,7 @@ import {
   moveScreen,
   addScreen,
   removeScreen
-} from '../../app/virtualScreenIdSlice';
+} from '../../app/slices/virtualScreenIdSlice';
 import {v4 as uuidv4} from 'uuid';
 import AlertRemoveScreen from './AlertRemoveScreen';
 import {NavLink, Outlet, useNavigate, useOutletContext} from 'react-router-dom';
@@ -24,18 +24,24 @@ import {
   addScreenPanel,
   PanelMap,
   removeScreenPanel
-} from '../../app/screenPanelMapSlice';
+} from '../../app/slices/screenPanelMapSlice';
 import {mapReplacer} from '../../utils/mapReplacer';
 import {
   addPanelLayouts,
   addScreenLayouts,
   LayoutItemType,
   removeScreenLayouts
-} from '../../app/screenLayoutsMapSlice';
-import {breakpoints} from '../../app/reactGridLayoutParemeters';
+} from '../../app/slices/screenLayoutsMapSlice';
+import {breakpoints} from '../../app/constants/reactGridLayoutParemeters';
 import {Layouts} from 'react-grid-layout';
 import type {PanelType} from './Panel';
 import {useTranslation} from 'react-i18next';
+import {
+  maxVirtualScreenNumber,
+  minVirtualScreenNumber
+} from '../../app/constants/virtualScreenNumbers';
+import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
+import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
 
 type ContextType = {
   setCurrentBreakpoint: React.Dispatch<
@@ -49,9 +55,6 @@ export type MainProps = {
 };
 
 const Main: FC<MainProps> = ({mainClassName}) => {
-  const minVirtualScreenNumber = 1;
-  const maxVirtualScreenNumber = 10;
-
   const {t} = useTranslation();
 
   const navigate = useNavigate();
@@ -100,7 +103,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
   const addVirtualScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const uuid = uuidv4();
       dispatch(addScreen(uuid));
       dispatch(addScreenPanel(uuid));
@@ -111,16 +114,18 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
   const removeCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      visibleScreenButtonsRef.current?.setAttribute('class', 'invisible');
-      visibleAlertRemoveScreenRef.current?.removeAttribute('class');
+      e.stopPropagation();
+      invisibleRefVisibleRef(
+        visibleScreenButtonsRef,
+        visibleAlertRemoveScreenRef
+      );
     },
     []
   );
 
   const reallyRemoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const index = parseInt(currentScreen) - 1;
       dispatch(removeScreen(uuidList[index]));
       dispatch(removeScreenPanel(uuidList[index]));
@@ -129,30 +134,27 @@ const Main: FC<MainProps> = ({mainClassName}) => {
         setCurrentScreen(index.toString());
         navigate(`/screen/${index.toString()}`);
       }
-      visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'hidden');
+      visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertRemoveScreenRef);
     },
     [currentScreen, uuidList, dispatch, navigate]
   );
 
   const cancelRemoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertRemoveScreenRef.current?.setAttribute('class', 'hidden');
+      e.stopPropagation();
+      visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertRemoveScreenRef);
     },
     []
   );
 
   const moveCurrentScreen = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    visibleScreenButtonsRef.current?.setAttribute('class', 'invisible');
-    visibleAlertMoveScreenRef.current?.removeAttribute('class');
+    e.stopPropagation();
+    invisibleRefVisibleRef(visibleScreenButtonsRef, visibleAlertMoveScreenRef);
   }, []);
 
   const reallyMoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const payload = {
         currentIndex: parseInt(currentScreen) - 1,
         targetIndex: parseInt(targetScreen) - 1
@@ -160,24 +162,22 @@ const Main: FC<MainProps> = ({mainClassName}) => {
       dispatch(moveScreen(payload));
       setCurrentScreen(targetScreen);
       navigate(`/screen/${targetScreen}`);
-      visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertMoveScreenRef.current?.setAttribute('class', 'hidden');
+      visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertMoveScreenRef);
     },
     [currentScreen, targetScreen, dispatch, navigate]
   );
 
   const cancelMoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      visibleScreenButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertMoveScreenRef.current?.setAttribute('class', 'hidden');
+      e.stopPropagation();
+      visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertMoveScreenRef);
     },
     []
   );
 
   const copyCurrentScreenPanel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const currentUuid = uuidList[parseInt(currentScreen) - 1];
       const newUuid = uuidv4();
       dispatch(addScreen(newUuid));
@@ -233,7 +233,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
   const addNewPanel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const uuid = uuidList[parseInt(currentScreen) - 1];
       const uuidP = uuidv4();
       const payload = {
@@ -325,9 +325,9 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   return (
     <div className={mainClassName}>
       <div className="flex flex-wrap justify-between">
-        <div className="flex flex-wrap justify-start w-1/3">
+        <div className="flex w-1/3 flex-wrap justify-start">
           <div ref={visibleScreenButtonsRef} className="visible">
-            <div className="flex flex-wrap justify-start mx-5 py-2 gap-1">
+            <div className="mx-5 flex flex-wrap justify-start gap-1 py-2">
               {screenButtons}
 
               <button
@@ -386,7 +386,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
           </div>
         </div>
 
-        <div className="flex justify-end mx-5 py-2 gap-2 w-1/3">
+        <div className="mx-5 flex w-1/3 justify-end gap-2 py-2">
           <button
             disabled={selectedPanel === '0'}
             className="btn btn-xs btn-outline btn-accent"
@@ -397,7 +397,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
           <select
             onChange={handleChangeSelectedPanel}
-            className="select select-info select-xs max-w-xs"
+            className="max-w-xs select select-info select-xs"
             value={selectedPanel}
           >
             <option disabled value="0">
@@ -408,7 +408,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
           <select
             onChange={handleChangeCompactType}
-            className="select select-info select-xs max-w-xs"
+            className="max-w-xs select select-info select-xs"
             value={compactType}
           >
             <option value="vertical">{t('Main.CompactTypeVertical')}</option>
@@ -428,4 +428,4 @@ export function useMainOutletContext() {
   return useOutletContext<ContextType>();
 }
 
-export default Main;
+export default React.memo(Main);

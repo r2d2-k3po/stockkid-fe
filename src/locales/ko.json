@@ -5,6 +5,11 @@
     "Move": "이동",
     "Select": "선택"
   },
+  "AlertRemovePanel": {
+    "Cancel": "취소",
+    "Message": "현재 패널을 삭제합니다!",
+    "Remove": "삭제"
+  },
   "AlertRemoveScreen": {
     "Cancel": "취소",
     "Message": "스크린 {{currentScreen}} 번을 삭제합니다!",
@@ -15,5 +20,15 @@
     "CompactTypeNone": "미적용",
     "CompactTypeVertical": "세로",
     "SelectPanel": "패널 선택"
+  },
+  "SignupForm": {
+    "Cancel": "취소",
+    "Reset": "초기화",
+    "Signup": "회원가입",
+    "placeholder": {
+      "confirmPassword": "비밀번호 확인",
+      "password": "비밀번호 (6~30)",
+      "username": "사용자명 (6~30)"
+    }
   }
 }

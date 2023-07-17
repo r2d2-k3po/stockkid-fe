@@ -5,6 +5,11 @@
     "Move": "Move",
     "Select": "Select"
   },
+  "AlertRemovePanel": {
+    "Cancel": "Cancel",
+    "Message": "Current panel will be removed!",
+    "Remove": "Remove"
+  },
   "AlertRemoveScreen": {
     "Cancel": "Cancel",
     "Message": "Screen {{currentScreen}} will be removed!",
@@ -15,5 +20,15 @@
     "CompactTypeNone": "none",
     "CompactTypeVertical": "vertical",
     "SelectPanel": "Select panel"
+  },
+  "SignupForm": {
+    "Cancel": "Cancel",
+    "Reset": "Reset",
+    "Signup": "Sign Up",
+    "placeholder": {
+      "confirmPassword": "Confirm Password",
+      "password": "Password (6~30)",
+      "username": "Username (6~30)"
+    }
   }
 }

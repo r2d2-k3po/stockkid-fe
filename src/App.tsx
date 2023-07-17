@@ -17,13 +17,19 @@ export default function App() {
     (localStorage.getItem('fixedHeader') || 'true') === 'true'
   );
 
-  const [headerHeight, setHeaderHeight] = useState<number>(0);
+  const [headerHeight, setHeaderHeight] = useState<number>(64);
 
   const [fixedFooter, setFixedFooter] = useState<boolean>(
     (localStorage.getItem('fixedFooter') || 'true') === 'true'
   );
 
-  const [footerHeight, setFooterHeight] = useState<number>(0);
+  const [footerHeight, setFooterHeight] = useState<number>(64);
+
+  const classNameFixedHeader = `fixed top-[64px] left-0 right-0 bottom-0 overflow-auto`;
+
+  const classNameFixedFooter = `fixed top-0 left-0 right-0 bottom-[64px] overflow-auto`;
+
+  const classNameFixedBoth = `fixed top-[64px] left-0 right-0 bottom-[64px] overflow-auto`;
 
   useEffect(() => {
     localStorage.setItem('fixedHeader', fixedHeader.toString());
@@ -35,15 +41,13 @@ export default function App() {
 
   if (fixedHeader && !fixedFooter) {
     return (
-      <div className="relative h-full min-h-screen">
+      <div className="relative">
         <Header
           fixedHeader={fixedHeader}
           setFixedHeader={setFixedHeader}
           setHeaderHeight={setHeaderHeight}
         />
-        <div
-          className={`absolute top-[${headerHeight}px] left-0 right-0 bottom-0 overflow-auto`}
-        >
+        <div className={classNameFixedHeader}>
           <Main mainClassName="" />
           <Footer
             fixedFooter={fixedFooter}
@@ -55,10 +59,8 @@ export default function App() {
     );
   } else if (!fixedHeader && fixedFooter) {
     return (
-      <div className="relative h-full min-h-screen">
-        <div
-          className={`absolute top-0 left-0 right-0 bottom-[${footerHeight}px] overflow-auto`}
-        >
+      <div className="relative">
+        <div className={classNameFixedFooter}>
           <Header
             fixedHeader={fixedHeader}
             setFixedHeader={setFixedHeader}
@@ -74,13 +76,9 @@ export default function App() {
       </div>
     );
   } else {
-    const appClassName = fixedHeader
-      ? 'relative h-auto min-h-screen'
-      : 'relative h-auto min-h-screen overflow-auto';
+    const appClassName = fixedHeader ? 'relative' : 'relative overflow-auto';
 
-    const mainClassName = fixedHeader
-      ? `absolute top-[${headerHeight}px] left-0 right-0 bottom-[${footerHeight}px] overflow-auto`
-      : '';
+    const mainClassName = fixedHeader ? classNameFixedBoth : '';
 
     return (
       <div className={appClassName}>

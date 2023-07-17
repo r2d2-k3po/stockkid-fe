@@ -15,10 +15,12 @@ import Panel0004 from './panels/Panel0004';
 import Panel0005 from './panels/Panel0005';
 import Panel0006 from './panels/Panel0006';
 import Panel0007 from './panels/Panel0007';
-import {removePanel} from '../../app/screenPanelMapSlice';
+import {removePanel} from '../../app/slices/screenPanelMapSlice';
 import AlertRemovePanel from './AlertRemovePanel';
 import {useAppDispatch} from '../../app/hooks';
 import {MaterialSymbol} from 'react-material-symbols';
+import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
+import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
 
 export const panels = {
   panel0000: Panel0000,
@@ -81,30 +83,27 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
   const visibleAlertRemovePanelRef = useRef<HTMLDivElement>(null);
 
   const removeCurrentPanel = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    visiblePanelButtonsRef.current?.setAttribute('class', 'invisible');
-    visibleAlertRemovePanelRef.current?.removeAttribute('class');
+    e.stopPropagation();
+    invisibleRefVisibleRef(visiblePanelButtonsRef, visibleAlertRemovePanelRef);
   }, []);
 
   const reallyRemoveCurrentPanel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
+      e.stopPropagation();
       const payload = {
         uuid: uuid,
         uuidP: uuidP
       };
       dispatch(removePanel(payload));
-      visiblePanelButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertRemovePanelRef.current?.setAttribute('class', 'hidden');
+      visibleRefHiddenRef(visiblePanelButtonsRef, visibleAlertRemovePanelRef);
     },
     [uuid, uuidP, dispatch]
   );
 
   const cancelRemoveCurrentPanel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      visiblePanelButtonsRef.current?.setAttribute('class', 'visible');
-      visibleAlertRemovePanelRef.current?.setAttribute('class', 'hidden');
+      e.stopPropagation();
+      visibleRefHiddenRef(visiblePanelButtonsRef, visibleAlertRemovePanelRef);
     },
     []
   );
@@ -113,7 +112,7 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
 
   const className = [
     _className,
-    'border-2 border-info rounded-md hover:border-accent'
+    'border-2 border-info rounded-md hover:border-accent relative'
   ].join(' ');
 
   return (
@@ -126,7 +125,7 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
       onTouchEnd={onTouchEnd}
     >
       <div ref={visiblePanelButtonsRef} className="visible">
-        <div className="flex justify-between m-0.5 gap-1">
+        <div className="flex justify-between gap-1 m-0.5">
           <button
             className="btn btn-xs btn-outline btn-warning"
             onClick={removeCurrentPanel}
@@ -154,4 +153,4 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
   );
 });
 
-export default Panel;
+export default React.memo(Panel);

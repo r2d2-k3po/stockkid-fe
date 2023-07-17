@@ -1,10 +1,10 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
-import {mapReviver} from '../utils/mapReviver';
+import {mapReviver} from '../../utils/mapReviver';
 import {enableMapSet} from 'immer';
 import {Layout, Layouts} from 'react-grid-layout';
-import {panels, panelGrids} from '../components/main/Panel';
-import {breakpoints} from './reactGridLayoutParemeters';
+import {panels, panelGrids} from '../../components/main/Panel';
+import {breakpoints} from '../constants/reactGridLayoutParemeters';
 
 enableMapSet();
 
@@ -62,9 +62,8 @@ const screenLayoutsMapSlice = createSlice({
       state: ScreenLayoutsMapState,
       action: PayloadAction<addPanelLayoutsPayload>
     ) => {
-      let layoutItem: LayoutItemType = action.payload.layoutItem
-        ? action.payload.layoutItem
-        : panelGrids[action.payload.panelCode];
+      let layoutItem: LayoutItemType =
+        action.payload.layoutItem ?? panelGrids[action.payload.panelCode];
       layoutItem = {...layoutItem, i: action.payload.uuidP};
       const layouts = state.uuidLayoutsMap.get(action.payload.uuid) as Layouts;
       if (!layouts[action.payload.currentBreakpoint]) {

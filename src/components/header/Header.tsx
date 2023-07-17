@@ -3,9 +3,9 @@ import LanguageSelect from './LanguageSelect';
 import LightDarkSwap from './LightDarkSwap';
 import Indicator from './Indicator';
 import Search from './Search';
-import DropDownMenu from './DropDownMenu';
 import FixedPin from '../common/FixedPin';
 import {useMeasure} from 'react-use';
+import AuthMenu from './AuthMenu';
 
 export type HeaderProps = {
   fixedHeader: boolean;
@@ -30,14 +30,14 @@ const Header: FC<HeaderProps> = ({
     <div ref={measureRef} className={headerClassName}>
       <div className="navbar bg-neutral text-neutral-content">
         <div className="navbar-start">
-          <DropDownMenu />
+          <AuthMenu />
         </div>
 
         <div className="navbar-center">
-          <a className="btn btn-ghost normal-case text-xl">StockKid</a>
+          <a className="text-xl normal-case btn btn-ghost">StockKid.net</a>
         </div>
 
-        <div className="navbar-end mr-3">
+        <div className="mr-3 navbar-end">
           <Search />
           <Indicator />
           <LightDarkSwap />
@@ -49,4 +49,4 @@ const Header: FC<HeaderProps> = ({
   );
 };
 
-export default Header;
+export default React.memo(Header);

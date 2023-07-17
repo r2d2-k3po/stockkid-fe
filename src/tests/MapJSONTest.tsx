@@ -1,5 +1,5 @@
 import React from 'react';
-import type {PanelMap} from '../app/screenPanelMapSlice';
+import type {PanelMap} from '../app/slices/screenPanelMapSlice';
 import {mapReviver} from '../utils/mapReviver';
 import {mapReplacer} from '../utils/mapReplacer';
 import type {PanelType} from '../components/main/Panel';
