@@ -45,10 +45,10 @@ export const api = createApi({
       })
     }),
     login: builder.mutation<ResponseEntity, LoginRequest>({
-      query: (credentials) => ({
-        url: 'login',
+      query: (loginRequest) => ({
+        url: 'member/login',
         method: 'POST',
-        body: credentials
+        body: loginRequest
       })
     }),
     protected: builder.mutation<{message: string}, void>({
