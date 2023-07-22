@@ -143,8 +143,8 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
         <MaterialSymbolButton icon="person_add" />
         {isSuccess && (
           <div>
-            Status : {(data as ResponseEntity).responseStatus}, Message :{' '}
-            {(data as ResponseEntity).responseMessage}
+            Status : {(data as ResponseEntity).apiStatus}, Message :{' '}
+            {(data as ResponseEntity).apiMsg}
           </div>
         )}
         {isError && <div>Signup Error!</div>}

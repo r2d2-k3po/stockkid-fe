@@ -15,6 +15,9 @@
     "Message": "Screen {{currentScreen}} will be removed!",
     "Remove": "Remove"
   },
+  "AuthMenu": {
+    "username": "Username"
+  },
   "LoginForm": {
     "Login": "Login",
     "RememberMe": "Remember Username"
@@ -27,7 +30,7 @@
   },
   "SignupForm": {
     "Cancel": "Cancel",
-    "Reset": "Reset",
+    "Reset": "Close",
     "Signup": "Sign Up",
     "placeholder": {
       "confirmPassword": "Confirm Password",

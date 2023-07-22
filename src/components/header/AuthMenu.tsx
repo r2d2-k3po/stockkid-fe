@@ -12,11 +12,17 @@ import ManageAccount from './ManageAccount';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
+import {useTranslation} from 'react-i18next';
+import {tokenDecoder} from '../../utils/tokenDecoder';
 
 const AuthMenu = () => {
+  const {t} = useTranslation();
+
   const token = useAppSelector((state) => state.auth.token);
   const loggedIn = !(token == null);
   // console.log('loggedin : ' + loggedIn);
+  const decodedToken = token ? tokenDecoder(token) : null;
+  console.log('decodedToken : ' + JSON.stringify(decodedToken));
 
   const visibleLoggedInButtonsRef = useRef<HTMLDivElement>(null);
   const visibleLogoutFormRef = useRef<HTMLDivElement>(null);
@@ -72,6 +78,10 @@ const AuthMenu = () => {
           {showLoggedInButtons &&
             (loggedIn ? (
               <div className="mx-2 flex">
+                <div className="shadow card card-compact bg-accent text-accent-content">
+                  {t('AuthMenu.username')} :{' '}
+                  {/*{decodedToken && JSON.stringify(decodedToken)}*/}
+                </div>
                 <div onClick={showRef(visibleLogoutFormRef)}>
                   <MaterialSymbolButton icon="no_accounts" />
                 </div>

@@ -10,8 +10,8 @@ import {useTranslation} from 'react-i18next';
 import {ResponseEntity, useLoginMutation} from '../../app/api';
 import MaterialSymbolButton from '../common/MaterialSymbolButton';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/query';
-import {updateToken} from '../../app/slices/authSlice';
 import {useAppDispatch} from '../../app/hooks';
+import {updateToken} from '../../app/slices/authSlice';
 
 type LoginFormType = Record<'username' | 'password', string>;
 
@@ -91,7 +91,7 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
           password: password
         };
         const data = await requestLogin(loginRequest).unwrap();
-        const newToken = (data as ResponseEntity).responseObject as string;
+        const newToken = (data as ResponseEntity).apiObj as string;
         dispatch(updateToken(newToken));
         // console.log('login success, update token : ' + newToken);
       } catch (err) {
@@ -176,8 +176,8 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
         <MaterialSymbolButton icon="account_circle" />
         {isSuccess && (
           <div>
-            Status : {(data as ResponseEntity).responseStatus}, Message :{' '}
-            {(data as ResponseEntity).responseMessage}
+            Status : {(data as ResponseEntity).apiStatus}, Message :{' '}
+            {(data as ResponseEntity).apiMsg}
           </div>
         )}
         {isError && <div>Login Error!</div>}
