@@ -9,6 +9,9 @@ import React, {
 import {useTranslation} from 'react-i18next';
 import {ResponseEntity, useLoginMutation} from '../../app/api';
 import MaterialSymbolButton from '../common/MaterialSymbolButton';
+import {FetchBaseQueryError} from '@reduxjs/toolkit/query';
+import {updateToken} from '../../app/slices/authSlice';
+import {useAppDispatch} from '../../app/hooks';
 
 type LoginFormType = Record<'username' | 'password', string>;
 
@@ -20,6 +23,8 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
   const regexFinal = /^.{6,30}$/;
 
   const {t} = useTranslation();
+
+  const dispatch = useAppDispatch();
 
   const [
     requestLogin,
@@ -85,7 +90,10 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
           username: username,
           password: password
         };
-        await requestLogin(loginRequest);
+        const data = await requestLogin(loginRequest).unwrap();
+        const newToken = (data as ResponseEntity).responseObject as string;
+        dispatch(updateToken(newToken));
+        // console.log('login success, update token : ' + newToken);
       } catch (err) {
         console.log(err);
       } finally {
@@ -95,7 +103,7 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
         }));
       }
     },
-    [username, password, requestLogin, rememberMe]
+    [username, password, requestLogin, rememberMe, dispatch]
   );
 
   const onClickReset = useCallback(
@@ -172,8 +180,22 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
             {(data as ResponseEntity).responseMessage}
           </div>
         )}
-        {/*{isError && <div>Login Error!</div>}*/}
-        {isError && <div>{JSON.stringify(error)}</div>}
+        {isError && <div>Login Error!</div>}
+        {/*{isError && <div>{JSON.stringify(error)}</div>}*/}
+        {/*{isError && (*/}
+        {/*  <div>*/}
+        {/*    Status :{' '}*/}
+        {/*    {*/}
+        {/*      ((error as FetchBaseQueryError).data as ResponseEntity)*/}
+        {/*        .responseStatus*/}
+        {/*    }*/}
+        {/*    , Message :{' '}*/}
+        {/*    {*/}
+        {/*      ((error as FetchBaseQueryError).data as ResponseEntity)*/}
+        {/*        .responseMessage*/}
+        {/*    }*/}
+        {/*  </div>*/}
+        {/*)}*/}
         <button onClick={onClickReset} className="btn btn-xs btn-accent mx-1">
           {t('SignupForm.Reset')}
         </button>
