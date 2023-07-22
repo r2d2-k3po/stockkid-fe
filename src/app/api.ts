@@ -2,10 +2,6 @@ import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import {RootState} from './store';
 import {apiBaseUrl} from './constants/baseUrls';
 
-export interface User {
-  username: string;
-}
-
 export interface ResponseEntity {
   responseStatus: string;
   responseMessage: string;
@@ -45,10 +41,10 @@ export const api = createApi({
       })
     }),
     login: builder.mutation<ResponseEntity, LoginRequest>({
-      query: (credentials) => ({
-        url: 'login',
+      query: (loginRequest) => ({
+        url: 'member/login',
         method: 'POST',
-        body: credentials
+        body: loginRequest
       })
     }),
     protected: builder.mutation<{message: string}, void>({

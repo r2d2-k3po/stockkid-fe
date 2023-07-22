@@ -15,6 +15,10 @@
     "Message": "스크린 {{currentScreen}} 번을 삭제합니다!",
     "Remove": "삭제"
   },
+  "LoginForm": {
+    "Login": "로그인",
+    "RememberMe": "사용자명 저장"
+  },
   "Main": {
     "CompactTypeHorizontal": "가로",
     "CompactTypeNone": "미적용",

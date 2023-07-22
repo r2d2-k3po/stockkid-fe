@@ -25,14 +25,14 @@ const Footer: FC<FooterProps> = ({
     <div ref={measureRef} className={footerClassName}>
       <div className="navbar bg-neutral text-neutral-content">
         <div className="navbar-start">
-          <div>Copyright © 2023 - All right reserved</div>
+          <div>Copyright © 2023 - All rights reserved</div>
         </div>
 
         <div className="navbar-center">
           <a className="text-xl normal-case btn btn-ghost">StockKid.net</a>
         </div>
 
-        <div className="mr-3 navbar-end">
+        <div className="navbar-end">
           <FixedPin fixed={fixedFooter} setFixed={setFixedFooter} />
         </div>
       </div>

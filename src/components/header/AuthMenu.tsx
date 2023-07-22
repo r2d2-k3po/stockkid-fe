@@ -1,4 +1,10 @@
-import React, {MouseEvent, useCallback, useRef, useState} from 'react';
+import React, {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import {useAppSelector} from '../../app/hooks';
 import MaterialSymbolButton from '../common/MaterialSymbolButton';
 import LogoutForm from './LogoutForm';
@@ -10,6 +16,7 @@ import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
 const AuthMenu = () => {
   const token = useAppSelector((state) => state.auth.token);
   const loggedIn = !(token == null);
+  // console.log('loggedin : ' + loggedIn);
 
   const visibleLoggedInButtonsRef = useRef<HTMLDivElement>(null);
   const visibleLogoutFormRef = useRef<HTMLDivElement>(null);
@@ -41,11 +48,21 @@ const AuthMenu = () => {
     []
   );
 
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token as string);
+    } else {
+      localStorage.removeItem('token');
+    }
+  }, [token]);
+
   return (
     <div className="flex">
       <div onClick={toggleShowLoggedInButtons}>
         {loggedIn ? (
-          <MaterialSymbolButton icon="account_circle" />
+          <div className="shadow card card-compact bg-accent text-accent-content">
+            <MaterialSymbolButton icon="account_circle" />
+          </div>
         ) : (
           <MaterialSymbolButton icon="no_accounts" />
         )}
@@ -80,7 +97,7 @@ const AuthMenu = () => {
           <ManageAccount />
         </div>
         <div ref={visibleLoginFormRef} className="hidden">
-          <LoginForm />
+          <LoginForm hideThisRef={hideRef(visibleLoginFormRef)} />
         </div>
         <div ref={visibleSignupFormRef} className="hidden">
           <SignupForm hideThisRef={hideRef(visibleSignupFormRef)} />

@@ -115,7 +115,7 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
           <button
             disabled={isLoading}
             onClick={onClickCancel}
-            className="btn btn-xs btn-ghost"
+            className="btn btn-xs btn-ghost mr-1"
           >
             {t('SignupForm.Cancel')}
           </button>
