@@ -16,7 +16,7 @@
     "Remove": "Remove"
   },
   "AuthMenu": {
-    "username": "Username"
+    "expiresInMinutes": "Logout: in {{expiresInMinutes}} minutes"
   },
   "LoginForm": {
     "Login": "Login",

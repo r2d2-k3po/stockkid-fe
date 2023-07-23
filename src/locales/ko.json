@@ -16,7 +16,7 @@
     "Remove": "삭제"
   },
   "AuthMenu": {
-    "username": "사용자명"
+    "expiresInMinutes": "로그아웃: {{expiresInMinutes}}분 후"
   },
   "LoginForm": {
     "Login": "로그인",

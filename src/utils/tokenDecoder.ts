@@ -23,7 +23,7 @@ export function getRemainingTimeBeforeExpiration(exp: number): number {
       return 0; // Token already expired
     }
 
-    return remainingTimeInSeconds / 60;
+    return Math.floor(remainingTimeInSeconds / 60); // in Minutes
   } catch (error) {
     console.error('Error calculating remainingTime:', error);
     return 0; // Return 0 to indicate an error or expired token
