@@ -15,9 +15,16 @@
     "Message": "스크린 {{currentScreen}} 번을 삭제합니다!",
     "Remove": "삭제"
   },
+  "AuthMenu": {
+    "expiresInMinutes": "로그아웃: {{expiresInMinutes}}분 후"
+  },
   "LoginForm": {
     "Login": "로그인",
     "RememberMe": "사용자명 저장"
+  },
+  "LogoutForm": {
+    "Logout": "로그아웃",
+    "message": "로그아웃합니다."
   },
   "Main": {
     "CompactTypeHorizontal": "가로",
@@ -27,7 +34,7 @@
   },
   "SignupForm": {
     "Cancel": "취소",
-    "Reset": "초기화",
+    "Reset": "닫기",
     "Signup": "회원가입",
     "placeholder": {
       "confirmPassword": "비밀번호 확인",

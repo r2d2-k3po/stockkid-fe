@@ -2,6 +2,7 @@ import React, {
   MouseEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState
 } from 'react';
@@ -12,11 +13,29 @@ import ManageAccount from './ManageAccount';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
+import {useTranslation} from 'react-i18next';
+import {
+  getRemainingTimeBeforeExpiration,
+  tokenDecoder
+} from '../../utils/tokenDecoder';
 
 const AuthMenu = () => {
+  const {t} = useTranslation();
+
   const token = useAppSelector((state) => state.auth.token);
   const loggedIn = !(token == null);
   // console.log('loggedin : ' + loggedIn);
+  const decodedToken = useMemo(
+    () => (token ? tokenDecoder(token) : null),
+    [token]
+  );
+  // console.log('decodedToken : ' + JSON.stringify(decodedToken));
+
+  const [expiresInMinutes, setExpiresInMinutes] = useState<number>(
+    decodedToken
+      ? getRemainingTimeBeforeExpiration(decodedToken?.exp as number)
+      : 0
+  );
 
   const visibleLoggedInButtonsRef = useRef<HTMLDivElement>(null);
   const visibleLogoutFormRef = useRef<HTMLDivElement>(null);
@@ -56,6 +75,18 @@ const AuthMenu = () => {
     }
   }, [token]);
 
+  useEffect(() => {
+    if (decodedToken?.exp) {
+      const duration = 1000 * 60;
+      const id = setInterval(() => {
+        setExpiresInMinutes(
+          getRemainingTimeBeforeExpiration(decodedToken.exp as number)
+        );
+      }, duration);
+      return () => clearInterval(id);
+    }
+  }, [decodedToken?.exp]);
+
   return (
     <div className="flex">
       <div onClick={toggleShowLoggedInButtons}>
@@ -72,6 +103,10 @@ const AuthMenu = () => {
           {showLoggedInButtons &&
             (loggedIn ? (
               <div className="mx-2 flex">
+                <div className="m-1 mr-2 card card-compact bg-accent text-accent-content text-xs py-1 px-2">
+                  <p>{decodedToken?.sub} </p>
+                  <p>{t('AuthMenu.expiresInMinutes', {expiresInMinutes})}</p>
+                </div>
                 <div onClick={showRef(visibleLogoutFormRef)}>
                   <MaterialSymbolButton icon="no_accounts" />
                 </div>
@@ -91,7 +126,7 @@ const AuthMenu = () => {
             ))}
         </div>
         <div ref={visibleLogoutFormRef} className="hidden">
-          <LogoutForm />
+          <LogoutForm hideThisRef={hideRef(visibleLogoutFormRef)} />
         </div>
         <div ref={visibleManageAccountRef} className="hidden">
           <ManageAccount />

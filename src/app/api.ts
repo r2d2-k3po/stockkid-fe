@@ -3,9 +3,9 @@ import {RootState} from './store';
 import {apiBaseUrl} from './constants/baseUrls';
 
 export interface ResponseEntity {
-  responseStatus: string;
-  responseMessage: string;
-  responseObject: unknown;
+  apiStatus: string;
+  apiMsg: string;
+  apiObj: unknown;
 }
 
 export interface SignupRequest {
