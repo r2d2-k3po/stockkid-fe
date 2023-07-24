@@ -126,7 +126,7 @@ const AuthMenu = () => {
             ))}
         </div>
         <div ref={visibleLogoutFormRef} className="hidden">
-          <LogoutForm />
+          <LogoutForm hideThisRef={hideRef(visibleLogoutFormRef)} />
         </div>
         <div ref={visibleManageAccountRef} className="hidden">
           <ManageAccount />

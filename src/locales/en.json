@@ -22,6 +22,10 @@
     "Login": "Login",
     "RememberMe": "Remember Username"
   },
+  "LogoutForm": {
+    "Logout": "Logout",
+    "message": "Logging out."
+  },
   "Main": {
     "CompactTypeHorizontal": "horizontal",
     "CompactTypeNone": "none",

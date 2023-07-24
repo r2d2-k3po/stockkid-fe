@@ -22,6 +22,10 @@
     "Login": "로그인",
     "RememberMe": "사용자명 저장"
   },
+  "LogoutForm": {
+    "Logout": "로그아웃",
+    "message": "로그아웃합니다."
+  },
   "Main": {
     "CompactTypeHorizontal": "가로",
     "CompactTypeNone": "미적용",
