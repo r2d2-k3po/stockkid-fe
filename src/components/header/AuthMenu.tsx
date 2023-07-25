@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState
 } from 'react';
-import {useAppSelector} from '../../app/hooks';
+import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import MaterialSymbolButton from '../common/MaterialSymbolButton';
 import LogoutForm from './LogoutForm';
 import ManageAccount from './ManageAccount';
@@ -18,9 +18,12 @@ import {
   getRemainingTimeBeforeExpiration,
   tokenDecoder
 } from '../../utils/tokenDecoder';
+import {updateToken} from '../../app/slices/authSlice';
 
 const AuthMenu = () => {
   const {t} = useTranslation();
+
+  const dispatch = useAppDispatch();
 
   const token = useAppSelector((state) => state.auth.token);
   const loggedIn = !(token == null);
@@ -87,6 +90,12 @@ const AuthMenu = () => {
     }
   }, [decodedToken?.exp]);
 
+  useEffect(() => {
+    if (token && expiresInMinutes === 0) {
+      dispatch(updateToken(null));
+    }
+  }, [token, expiresInMinutes, dispatch]);
+
   return (
     <div className="flex">
       <div onClick={toggleShowLoggedInButtons}>
@@ -129,7 +138,7 @@ const AuthMenu = () => {
           <LogoutForm hideThisRef={hideRef(visibleLogoutFormRef)} />
         </div>
         <div ref={visibleManageAccountRef} className="hidden">
-          <ManageAccount />
+          <ManageAccount hideThisRef={hideRef(visibleManageAccountRef)} />
         </div>
         <div ref={visibleLoginFormRef} className="hidden">
           <LoginForm hideThisRef={hideRef(visibleLoginFormRef)} />

@@ -32,6 +32,18 @@
     "CompactTypeVertical": "세로",
     "SelectPanel": "패널 선택"
   },
+  "ManageAccount": {
+    "ChangePassword": "비밀번호 변경",
+    "placeholder": {
+      "confirmNewPassword": "새 비밀번호 확인",
+      "newPassword": "새 비밀번호 (6~30)",
+      "oldPassword": "예전 비밀번호 (6~30)"
+    },
+    "select": {
+      "addNewTask": "새 작업 추가",
+      "changePassword": "비밀번호 변경"
+    }
+  },
   "SignupForm": {
     "Cancel": "취소",
     "Reset": "닫기",

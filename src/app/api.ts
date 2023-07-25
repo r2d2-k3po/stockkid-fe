@@ -18,6 +18,11 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface PasswordChangeRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: apiBaseUrl,
@@ -47,10 +52,15 @@ export const api = createApi({
         body: loginRequest
       })
     }),
-    protected: builder.mutation<{message: string}, void>({
-      query: () => 'protected'
+    changePassword: builder.mutation<ResponseEntity, PasswordChangeRequest>({
+      query: (passwordChangeRequest) => ({
+        url: 'member/changePassword',
+        method: 'POST',
+        body: passwordChangeRequest
+      })
     })
   })
 });
 
-export const {useSignupMutation, useLoginMutation, useProtectedMutation} = api;
+export const {useSignupMutation, useLoginMutation, useChangePasswordMutation} =
+  api;
