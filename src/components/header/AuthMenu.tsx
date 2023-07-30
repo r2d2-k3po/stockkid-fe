@@ -78,6 +78,16 @@ const AuthMenu = () => {
     }
   }, [token]);
 
+  // update expiresInMinutes immediately after login
+  useEffect(() => {
+    if (decodedToken?.exp) {
+      setExpiresInMinutes(
+        getRemainingTimeBeforeExpiration(decodedToken.exp as number)
+      );
+    }
+  }, [decodedToken?.exp]);
+
+  // update expiresInMinutes in 1min after login and then every minute
   useEffect(() => {
     if (decodedToken?.exp) {
       const duration = 1000 * 60;

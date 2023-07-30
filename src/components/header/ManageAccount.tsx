@@ -1,7 +1,7 @@
 import React, {ChangeEvent, FC, MouseEvent, useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import MaterialSymbolButton from '../common/MaterialSymbolButton';
-import {useChangePasswordMutation} from '../../app/api';
+import {ResponseEntity, useChangePasswordMutation} from '../../app/api';
 
 type ChangePasswordFormType = Record<
   'oldPassword' | 'newPassword' | 'confirmNewPassword',
@@ -93,78 +93,97 @@ const ManageAccount: FC<ManageAccountProps> = ({hideThisRef}) => {
     },
     [hideThisRef, reset]
   );
-  return (
-    <div className="mx-2 flex items-center gap-1 w-[60rem]">
-      <MaterialSymbolButton icon="manage_accounts" />
-      <select
-        onChange={handleChangeTask}
-        className="max-w-xs select select-info select-xs"
-        value={currentTask}
-      >
-        <option value="changePassword">
-          {t('ManageAccount.select.changePassword')}
-        </option>
-        <option value="addNewTask">
-          {t('ManageAccount.select.addNewTask')}
-        </option>
-      </select>
-      {currentTask == 'changePassword' && (
-        <div className="ml-1 flex items-center gap-1">
-          <input
-            type="password"
-            name="oldPassword"
-            placeholder={t('ManageAccount.placeholder.oldPassword') as string}
-            value={oldPassword}
-            onChange={handleChange('oldPassword')}
-            className="w-full max-w-xs input input-bordered input-sm"
-          />
-          <input
-            type="password"
-            name="newPassword"
-            placeholder={t('ManageAccount.placeholder.newPassword') as string}
-            value={newPassword}
-            onChange={handleChange('newPassword')}
-            className="w-full max-w-xs input input-bordered input-sm"
-          />
-          <input
-            type="password"
-            name="confirmNewPassword"
-            placeholder={
-              t('ManageAccount.placeholder.confirmNewPassword') as string
-            }
-            value={confirmNewPassword}
-            onChange={handleChange('confirmNewPassword')}
-            className="w-full max-w-xs input input-bordered input-sm"
-          />
-          <div className="flex-none">
-            <button
-              disabled={isLoading}
-              onClick={onClickCancel}
-              className="btn btn-xs btn-ghost mr-1"
-            >
-              {t('SignupForm.Cancel')}
-            </button>
-            <button
-              disabled={
-                !regexFinal.test(oldPassword) ||
-                !regexFinal.test(newPassword) ||
-                newPassword != confirmNewPassword
+
+  if (isUninitialized || isLoading) {
+    return (
+      <div className="mx-2 flex items-center gap-1 w-[60rem]">
+        <MaterialSymbolButton icon="manage_accounts" />
+        <select
+          onChange={handleChangeTask}
+          className="max-w-xs select select-info select-xs"
+          value={currentTask}
+        >
+          <option value="changePassword">
+            {t('ManageAccount.select.changePassword')}
+          </option>
+          <option value="addNewTask">
+            {t('ManageAccount.select.addNewTask')}
+          </option>
+        </select>
+        {currentTask == 'changePassword' && (
+          <div className="ml-1 flex items-center gap-1">
+            <input
+              type="password"
+              name="oldPassword"
+              placeholder={t('ManageAccount.placeholder.oldPassword') as string}
+              value={oldPassword}
+              onChange={handleChange('oldPassword')}
+              className="w-full max-w-xs input input-bordered input-sm"
+            />
+            <input
+              type="password"
+              name="newPassword"
+              placeholder={t('ManageAccount.placeholder.newPassword') as string}
+              value={newPassword}
+              onChange={handleChange('newPassword')}
+              className="w-full max-w-xs input input-bordered input-sm"
+            />
+            <input
+              type="password"
+              name="confirmNewPassword"
+              placeholder={
+                t('ManageAccount.placeholder.confirmNewPassword') as string
               }
-              onClick={onClickChangePassword}
-              className={
-                isLoading
-                  ? 'btn btn-xs btn-accent loading'
-                  : 'btn btn-xs btn-accent'
-              }
-            >
-              {t('ManageAccount.ChangePassword')}
-            </button>
+              value={confirmNewPassword}
+              onChange={handleChange('confirmNewPassword')}
+              className="w-full max-w-xs input input-bordered input-sm"
+            />
+            <div className="flex-none">
+              <button
+                disabled={isLoading}
+                onClick={onClickCancel}
+                className="btn btn-xs btn-ghost mr-1"
+              >
+                {t('SignupForm.Cancel')}
+              </button>
+              <button
+                disabled={
+                  !regexFinal.test(oldPassword) ||
+                  !regexFinal.test(newPassword) ||
+                  newPassword != confirmNewPassword
+                }
+                onClick={onClickChangePassword}
+                className={
+                  isLoading
+                    ? 'btn btn-xs btn-accent loading'
+                    : 'btn btn-xs btn-accent'
+                }
+              >
+                {t('ManageAccount.ChangePassword')}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-      {currentTask == 'addNewTask' && <div>addNewTask</div>}
-    </div>
-  );
+        )}
+        {currentTask == 'addNewTask' && <div>addNewTask</div>}
+      </div>
+    );
+  } else {
+    return (
+      <div className="mx-2 flex items-center gap-1 w-full">
+        <MaterialSymbolButton icon="manage_accounts" />
+        {isSuccess && (
+          <div>
+            Status : {(data as ResponseEntity).apiStatus}, Message :{' '}
+            {(data as ResponseEntity).apiMsg}
+          </div>
+        )}
+        {isError && <div>Error : {JSON.stringify(error)}</div>}
+        <button onClick={onClickReset} className="btn btn-xs btn-accent mx-1">
+          {t('SignupForm.Reset')}
+        </button>
+      </div>
+    );
+  }
 };
 
 export default React.memo(ManageAccount);

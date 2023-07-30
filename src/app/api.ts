@@ -54,8 +54,8 @@ export const api = createApi({
     }),
     changePassword: builder.mutation<ResponseEntity, PasswordChangeRequest>({
       query: (passwordChangeRequest) => ({
-        url: 'member/changePassword',
-        method: 'POST',
+        url: 'jwt/member/changePassword',
+        method: 'PATCH',
         body: passwordChangeRequest
       })
     })
