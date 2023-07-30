@@ -1,8 +1,8 @@
 import React, {FC, MouseEvent, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
-import {useAppDispatch} from '../../app/hooks';
-import {updateToken} from '../../app/slices/authSlice';
-import MaterialSymbolButton from '../common/MaterialSymbolButton';
+import {useAppDispatch} from '../../../app/hooks';
+import {updateToken} from '../../../app/slices/authSlice';
+import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 
 type LogoutFormProps = {
   hideThisRef: () => void;

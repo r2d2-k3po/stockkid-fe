@@ -40,8 +40,8 @@
       "oldPassword": "old Password (6~30)"
     },
     "select": {
-      "addNewTask": "add New Task",
-      "changePassword": "change Password"
+      "changePassword": "change Password",
+      "deleteAccount": "delete Account"
     }
   },
   "SignupForm": {

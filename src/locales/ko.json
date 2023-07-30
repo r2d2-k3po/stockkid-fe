@@ -40,8 +40,8 @@
       "oldPassword": "예전 비밀번호 (6~30)"
     },
     "select": {
-      "addNewTask": "새 작업 추가",
-      "changePassword": "비밀번호 변경"
+      "changePassword": "비밀번호 변경",
+      "deleteAccount": "계정 삭제"
     }
   },
   "SignupForm": {

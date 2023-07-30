@@ -6,19 +6,19 @@ import React, {
   useRef,
   useState
 } from 'react';
-import {useAppDispatch, useAppSelector} from '../../app/hooks';
-import MaterialSymbolButton from '../common/MaterialSymbolButton';
+import {useAppDispatch, useAppSelector} from '../../../app/hooks';
+import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 import LogoutForm from './LogoutForm';
-import ManageAccount from './ManageAccount';
+import ManageAccount from './manageaccount/ManageAccount';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
-import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
+import {visibleRefHiddenRef} from '../../../utils/visibleRefHiddenRef';
 import {useTranslation} from 'react-i18next';
 import {
   getRemainingTimeBeforeExpiration,
   tokenDecoder
-} from '../../utils/tokenDecoder';
-import {updateToken} from '../../app/slices/authSlice';
+} from '../../../utils/tokenDecoder';
+import {updateToken} from '../../../app/slices/authSlice';
 
 const AuthMenu = () => {
   const {t} = useTranslation();

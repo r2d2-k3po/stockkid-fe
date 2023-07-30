@@ -1,7 +1,7 @@
 import React, {ChangeEvent, FC, MouseEvent, useCallback, useState} from 'react';
-import MaterialSymbolButton from '../common/MaterialSymbolButton';
+import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 import {useTranslation} from 'react-i18next';
-import {useSignupMutation, ResponseEntity} from '../../app/api';
+import {useSignupMutation, ResponseEntity} from '../../../app/api';
 
 type SignupFormType = Record<
   'username' | 'password' | 'confirmPassword',
