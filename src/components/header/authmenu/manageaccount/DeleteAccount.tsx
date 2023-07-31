@@ -8,6 +8,8 @@ import React, {
 } from 'react';
 import {useTranslation} from 'react-i18next';
 import {ResponseEntity, useDeleteAccountMutation} from '../../../../app/api';
+import {useAppDispatch} from '../../../../app/hooks';
+import {updateToken} from '../../../../app/slices/authSlice';
 
 type DeleteAccountProps = {
   hideThisRef: () => void;
@@ -22,6 +24,7 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
 }) => {
   const regexFinal = /^.{6,30}$/;
   const {t} = useTranslation();
+  const dispatch = useAppDispatch();
 
   const [
     requestAccountDelete,
@@ -66,10 +69,13 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
   const onClickReset = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      reset();
       hideThisRef();
+      if (isSuccess) {
+        dispatch(updateToken(null));
+      }
+      reset();
     },
-    [hideThisRef, reset]
+    [hideThisRef, reset, dispatch, isSuccess]
   );
 
   useEffect(() => {
