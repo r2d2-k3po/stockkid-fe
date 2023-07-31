@@ -6,21 +6,24 @@ import React, {
   useRef,
   useState
 } from 'react';
-import {useAppSelector} from '../../app/hooks';
-import MaterialSymbolButton from '../common/MaterialSymbolButton';
+import {useAppDispatch, useAppSelector} from '../../../app/hooks';
+import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 import LogoutForm from './LogoutForm';
-import ManageAccount from './ManageAccount';
+import ManageAccount from './manageaccount/ManageAccount';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
-import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
+import {visibleRefHiddenRef} from '../../../utils/visibleRefHiddenRef';
 import {useTranslation} from 'react-i18next';
 import {
   getRemainingTimeBeforeExpiration,
   tokenDecoder
-} from '../../utils/tokenDecoder';
+} from '../../../utils/tokenDecoder';
+import {updateToken} from '../../../app/slices/authSlice';
 
 const AuthMenu = () => {
   const {t} = useTranslation();
+
+  const dispatch = useAppDispatch();
 
   const token = useAppSelector((state) => state.auth.token);
   const loggedIn = !(token == null);
@@ -75,6 +78,16 @@ const AuthMenu = () => {
     }
   }, [token]);
 
+  // update expiresInMinutes immediately after login
+  useEffect(() => {
+    if (decodedToken?.exp) {
+      setExpiresInMinutes(
+        getRemainingTimeBeforeExpiration(decodedToken.exp as number)
+      );
+    }
+  }, [decodedToken?.exp]);
+
+  // update expiresInMinutes in 1min after login and then every minute
   useEffect(() => {
     if (decodedToken?.exp) {
       const duration = 1000 * 60;
@@ -86,6 +99,12 @@ const AuthMenu = () => {
       return () => clearInterval(id);
     }
   }, [decodedToken?.exp]);
+
+  useEffect(() => {
+    if (token && expiresInMinutes === 0) {
+      dispatch(updateToken(null));
+    }
+  }, [token, expiresInMinutes, dispatch]);
 
   return (
     <div className="flex">
@@ -129,7 +148,7 @@ const AuthMenu = () => {
           <LogoutForm hideThisRef={hideRef(visibleLogoutFormRef)} />
         </div>
         <div ref={visibleManageAccountRef} className="hidden">
-          <ManageAccount />
+          <ManageAccount hideThisRef={hideRef(visibleManageAccountRef)} />
         </div>
         <div ref={visibleLoginFormRef} className="hidden">
           <LoginForm hideThisRef={hideRef(visibleLoginFormRef)} />

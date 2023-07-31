@@ -32,14 +32,29 @@
     "CompactTypeVertical": "vertical",
     "SelectPanel": "Select panel"
   },
+  "ManageAccount": {
+    "ChangePassword": "Change Password",
+    "placeholder": {
+      "confirmNewPassword": "confirm new Password",
+      "newPassword": "new Password (6~30)",
+      "oldPassword": "old Password (6~30)"
+    },
+    "select": {
+      "changePassword": "change Password",
+      "deleteAccount": "delete Account"
+    }
+  },
   "SignupForm": {
     "Cancel": "Cancel",
     "Reset": "Close",
     "Signup": "Sign Up",
     "placeholder": {
-      "confirmPassword": "Confirm Password",
+      "confirmPassword": "confirm Password",
       "password": "Password (6~30)",
       "username": "Username (6~30)"
     }
+  },
+  "DeleteAccount": {
+    "DeleteAccount": "Delete Account"
   }
 }

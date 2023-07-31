@@ -7,11 +7,11 @@ import React, {
   useState
 } from 'react';
 import {useTranslation} from 'react-i18next';
-import {ResponseEntity, useLoginMutation} from '../../app/api';
-import MaterialSymbolButton from '../common/MaterialSymbolButton';
+import {ResponseEntity, useLoginMutation} from '../../../app/api';
+import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/query';
-import {useAppDispatch} from '../../app/hooks';
-import {updateToken} from '../../app/slices/authSlice';
+import {useAppDispatch} from '../../../app/hooks';
+import {updateToken} from '../../../app/slices/authSlice';
 
 type LoginFormType = Record<'username' | 'password', string>;
 

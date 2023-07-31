@@ -18,6 +18,15 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface PasswordChangeRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface AccountDeleteRequest {
+  password: string;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: apiBaseUrl,
@@ -47,10 +56,26 @@ export const api = createApi({
         body: loginRequest
       })
     }),
-    protected: builder.mutation<{message: string}, void>({
-      query: () => 'protected'
+    changePassword: builder.mutation<ResponseEntity, PasswordChangeRequest>({
+      query: (passwordChangeRequest) => ({
+        url: 'jwt/member/changePassword',
+        method: 'PATCH',
+        body: passwordChangeRequest
+      })
+    }),
+    deleteAccount: builder.mutation<ResponseEntity, AccountDeleteRequest>({
+      query: (accountDeleteRequest) => ({
+        url: 'jwt/member/deleteAccount',
+        method: 'PATCH',
+        body: accountDeleteRequest
+      })
     })
   })
 });
 
-export const {useSignupMutation, useLoginMutation, useProtectedMutation} = api;
+export const {
+  useSignupMutation,
+  useLoginMutation,
+  useChangePasswordMutation,
+  useDeleteAccountMutation
+} = api;
