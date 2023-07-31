@@ -25,7 +25,7 @@ const ManageAccount: FC<ManageAccountProps> = ({hideThisRef}) => {
   }, []);
 
   return (
-    <div className="mx-2 flex items-center gap-1 w-[58rem]">
+    <div className="mx-2 flex items-center gap-1 w-full">
       <MaterialSymbolButton icon="manage_accounts" />
       {(isUninitialized || isLoading) && (
         <select
@@ -48,7 +48,13 @@ const ManageAccount: FC<ManageAccountProps> = ({hideThisRef}) => {
           setIsLoading={setIsLoading}
         />
       )}
-      {currentTask == 'deleteAccount' && <DeleteAccount />}
+      {currentTask == 'deleteAccount' && (
+        <DeleteAccount
+          hideThisRef={hideThisRef}
+          setIsUninitialized={setIsUninitialized}
+          setIsLoading={setIsLoading}
+        />
+      )}
     </div>
   );
 };

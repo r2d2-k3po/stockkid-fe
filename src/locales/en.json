@@ -53,5 +53,8 @@
       "password": "Password (6~30)",
       "username": "Username (6~30)"
     }
+  },
+  "DeleteAccount": {
+    "DeleteAccount": "Delete Account"
   }
 }
