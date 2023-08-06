@@ -19,6 +19,9 @@ import {
   tokenDecoder
 } from '../../../utils/tokenDecoder';
 import {updateToken} from '../../../app/slices/authSlice';
+import {GoogleOAuthProvider} from '@react-oauth/google';
+import GoogleSignin from './GoogleSignin';
+import {googleClientId} from '../../../app/constants/clientIds';
 
 const AuthMenu = () => {
   const {t} = useTranslation();
@@ -141,6 +144,9 @@ const AuthMenu = () => {
                 <div onClick={showRef(visibleSignupFormRef)}>
                   <MaterialSymbolButton icon="person_add" />
                 </div>
+                <GoogleOAuthProvider clientId={googleClientId}>
+                  <GoogleSignin />
+                </GoogleOAuthProvider>
               </div>
             ))}
         </div>
