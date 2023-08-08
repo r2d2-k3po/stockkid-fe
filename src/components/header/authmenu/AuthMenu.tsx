@@ -22,6 +22,7 @@ import {updateToken} from '../../../app/slices/authSlice';
 import {GoogleOAuthProvider} from '@react-oauth/google';
 import GoogleSignin from './GoogleSignin';
 import {googleClientId} from '../../../app/constants/clientIds';
+import GoogleButton from './GoogleButton';
 
 const AuthMenu = () => {
   const {t} = useTranslation();
@@ -48,6 +49,7 @@ const AuthMenu = () => {
   const visibleManageAccountRef = useRef<HTMLDivElement>(null);
   const visibleLoginFormRef = useRef<HTMLDivElement>(null);
   const visibleSignupFormRef = useRef<HTMLDivElement>(null);
+  const visibleGoogleSigninRef = useRef<HTMLDivElement>(null);
 
   const showRef = useCallback(
     (ref: React.RefObject<HTMLDivElement>) =>
@@ -144,9 +146,9 @@ const AuthMenu = () => {
                 <div onClick={showRef(visibleSignupFormRef)}>
                   <MaterialSymbolButton icon="person_add" />
                 </div>
-                <GoogleOAuthProvider clientId={googleClientId}>
-                  <GoogleSignin />
-                </GoogleOAuthProvider>
+                <div onClick={showRef(visibleGoogleSigninRef)}>
+                  <GoogleButton />
+                </div>
               </div>
             ))}
         </div>
@@ -161,6 +163,11 @@ const AuthMenu = () => {
         </div>
         <div ref={visibleSignupFormRef} className="hidden">
           <SignupForm hideThisRef={hideRef(visibleSignupFormRef)} />
+        </div>
+        <div ref={visibleGoogleSigninRef} className="hidden">
+          <GoogleOAuthProvider clientId={googleClientId}>
+            <GoogleSignin hideThisRef={hideRef(visibleGoogleSigninRef)} />
+          </GoogleOAuthProvider>
         </div>
       </div>
     </div>

@@ -27,6 +27,10 @@ export interface AccountDeleteRequest {
   password: string;
 }
 
+export interface GoogleSigninRequest {
+  idToken: string;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: apiBaseUrl,
@@ -56,6 +60,13 @@ export const api = createApi({
         body: loginRequest
       })
     }),
+    googleSignin: builder.mutation<ResponseEntity, GoogleSigninRequest>({
+      query: (googleSigninRequest) => ({
+        url: 'member/googleSignin',
+        method: 'POST',
+        body: googleSigninRequest
+      })
+    }),
     changePassword: builder.mutation<ResponseEntity, PasswordChangeRequest>({
       query: (passwordChangeRequest) => ({
         url: 'jwt/member/changePassword',
@@ -76,6 +87,7 @@ export const api = createApi({
 export const {
   useSignupMutation,
   useLoginMutation,
+  useGoogleSigninMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation
 } = api;
