@@ -1,5 +1,4 @@
 import React, {FC, MouseEvent, useCallback} from 'react';
-import {useGoogleLogin} from '@react-oauth/google';
 import {ResponseEntity, useGoogleSigninMutation} from '../../../app/api';
 import {updateToken} from '../../../app/slices/authSlice';
 import {useAppDispatch} from '../../../app/hooks';
@@ -7,10 +6,11 @@ import GoogleButton from './GoogleButton';
 import {useTranslation} from 'react-i18next';
 
 type GoogleSigninProps = {
+  idToken: string | null;
   hideThisRef: () => void;
 };
 
-const GoogleSignin: FC<GoogleSigninProps> = ({hideThisRef}) => {
+const GoogleSignin: FC<GoogleSigninProps> = ({idToken, hideThisRef}) => {
   const dispatch = useAppDispatch();
   const {t} = useTranslation();
 
@@ -27,11 +27,13 @@ const GoogleSignin: FC<GoogleSigninProps> = ({hideThisRef}) => {
     [hideThisRef]
   );
 
-  const onClickLogin = useGoogleLogin({
-    onSuccess: async (codeResponse) => {
+  const onClickLogin = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
       try {
+        e.stopPropagation();
+        console.log('idToken : ' + idToken);
         const googleSigninRequest = {
-          idToken: codeResponse.code
+          authcode: idToken as string
         };
         const data = await requestGoogleSignin(googleSigninRequest).unwrap();
         const newToken = (data as ResponseEntity).apiObj as string;
@@ -41,9 +43,8 @@ const GoogleSignin: FC<GoogleSigninProps> = ({hideThisRef}) => {
         console.log(err);
       }
     },
-    onError: (errorResponse) => console.log(errorResponse),
-    flow: 'auth-code'
-  });
+    [idToken, requestGoogleSignin, dispatch]
+  );
 
   const onClickReset = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
@@ -67,6 +68,7 @@ const GoogleSignin: FC<GoogleSigninProps> = ({hideThisRef}) => {
             {t('SignupForm.Cancel')}
           </button>
           <button
+            disabled={idToken == null}
             onClick={onClickLogin}
             className={
               isLoading

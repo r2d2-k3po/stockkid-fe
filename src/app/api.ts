@@ -28,7 +28,7 @@ export interface AccountDeleteRequest {
 }
 
 export interface GoogleSigninRequest {
-  idToken: string;
+  authcode: string;
 }
 
 export const api = createApi({
