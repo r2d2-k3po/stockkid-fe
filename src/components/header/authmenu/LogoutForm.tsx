@@ -33,7 +33,7 @@ const LogoutForm: FC<LogoutFormProps> = ({hideThisRef}) => {
   return (
     <div className="mx-2 flex items-center gap-1">
       <MaterialSymbolButton icon="no_accounts" />
-      <div>{t('LogoutForm.message')}</div>
+      {/*<div>{t('LogoutForm.message')}</div>*/}
 
       <div className="flex-none">
         <button onClick={onClickCancel} className="btn btn-xs btn-ghost mr-1">

@@ -3,17 +3,19 @@ import {useTranslation} from 'react-i18next';
 import MaterialSymbolButton from '../../../common/MaterialSymbolButton';
 import ChangePassword from './ChangePassword';
 import DeleteAccount from './DeleteAccount';
+import DeleteGoogleAccount from './DeleteGoogleAccount';
 
 type ManageAccountProps = {
+  loginMethod: string | null;
   hideThisRef: () => void;
 };
 
-const ManageAccount: FC<ManageAccountProps> = ({hideThisRef}) => {
+const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
   const {t} = useTranslation();
 
   const [currentTask, setCurrentTask] = useState<
     'changePassword' | 'deleteAccount'
-  >('changePassword');
+  >(loginMethod == 'UP' ? 'changePassword' : 'deleteAccount');
 
   const [isUninitialized, setIsUninitialized] = useState<boolean>(true);
 
@@ -23,6 +25,8 @@ const ManageAccount: FC<ManageAccountProps> = ({hideThisRef}) => {
     e.stopPropagation();
     setCurrentTask(e.target.value as 'changePassword' | 'deleteAccount');
   }, []);
+  console.log(loginMethod);
+  console.log(currentTask);
 
   return (
     <div className="mx-2 flex items-center gap-1 w-full">
@@ -33,23 +37,32 @@ const ManageAccount: FC<ManageAccountProps> = ({hideThisRef}) => {
           className="max-w-xs select select-info select-xs"
           value={currentTask}
         >
-          <option value="changePassword">
-            {t('ManageAccount.select.changePassword')}
-          </option>
+          {loginMethod == 'UP' && (
+            <option value="changePassword">
+              {t('ManageAccount.select.changePassword')}
+            </option>
+          )}
           <option value="deleteAccount">
             {t('ManageAccount.select.deleteAccount')}
           </option>
         </select>
       )}
-      {currentTask == 'changePassword' && (
+      {loginMethod == 'UP' && currentTask == 'changePassword' && (
         <ChangePassword
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}
           setIsLoading={setIsLoading}
         />
       )}
-      {currentTask == 'deleteAccount' && (
+      {loginMethod == 'UP' && currentTask == 'deleteAccount' && (
         <DeleteAccount
+          hideThisRef={hideThisRef}
+          setIsUninitialized={setIsUninitialized}
+          setIsLoading={setIsLoading}
+        />
+      )}
+      {loginMethod == 'GGL' && currentTask == 'deleteAccount' && (
+        <DeleteGoogleAccount
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}
           setIsLoading={setIsLoading}

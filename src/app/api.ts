@@ -62,7 +62,7 @@ export const api = createApi({
     }),
     googleSignin: builder.mutation<ResponseEntity, GoogleSigninRequest>({
       query: (googleSigninRequest) => ({
-        url: 'member/googleSignin',
+        url: 'google/member/signin',
         method: 'POST',
         body: googleSigninRequest
       })
@@ -80,6 +80,13 @@ export const api = createApi({
         method: 'PATCH',
         body: accountDeleteRequest
       })
+    }),
+    deleteGoogleAccount: builder.mutation<ResponseEntity, GoogleSigninRequest>({
+      query: (accountDeleteRequest) => ({
+        url: 'google/member/deleteAccount',
+        method: 'PATCH',
+        body: accountDeleteRequest
+      })
     })
   })
 });
@@ -89,5 +96,6 @@ export const {
   useLoginMutation,
   useGoogleSigninMutation,
   useChangePasswordMutation,
-  useDeleteAccountMutation
+  useDeleteAccountMutation,
+  useDeleteGoogleAccountMutation
 } = api;

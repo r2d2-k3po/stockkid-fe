@@ -35,7 +35,12 @@ const AuthMenu = () => {
     () => (token ? tokenDecoder(token) : null),
     [token]
   );
-  // console.log('decodedToken : ' + JSON.stringify(decodedToken));
+  // console.log('decodedToken : ' + decodedToken?.soc);
+
+  const loginMethod = useMemo(
+    () => (decodedToken ? (decodedToken.soc as string) : null),
+    [decodedToken]
+  );
 
   const [expiresInMinutes, setExpiresInMinutes] = useState<number>(
     decodedToken
@@ -176,7 +181,10 @@ const AuthMenu = () => {
           <LogoutForm hideThisRef={hideRef(visibleLogoutFormRef)} />
         </div>
         <div ref={visibleManageAccountRef} className="hidden">
-          <ManageAccount hideThisRef={hideRef(visibleManageAccountRef)} />
+          <ManageAccount
+            loginMethod={loginMethod}
+            hideThisRef={hideRef(visibleManageAccountRef)}
+          />
         </div>
         <div ref={visibleLoginFormRef} className="hidden">
           <LoginForm hideThisRef={hideRef(visibleLoginFormRef)} />
@@ -184,12 +192,6 @@ const AuthMenu = () => {
         <div ref={visibleSignupFormRef} className="hidden">
           <SignupForm hideThisRef={hideRef(visibleSignupFormRef)} />
         </div>
-        {/*<div ref={visibleGoogleSigninRef} className="hidden">*/}
-        {/*  <GoogleSignin*/}
-        {/*    idToken={idToken}*/}
-        {/*    hideThisRef={hideRef(visibleGoogleSigninRef)}*/}
-        {/*  />*/}
-        {/*</div>*/}
       </div>
     </div>
   );
