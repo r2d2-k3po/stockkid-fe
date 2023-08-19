@@ -31,4 +31,4 @@ const GoogleButton = () => {
   );
 };
 
-export default GoogleButton;
+export default React.memo(GoogleButton);

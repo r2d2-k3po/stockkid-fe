@@ -1,9 +1,6 @@
 import React, {FC, MouseEvent, useCallback, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
-import {
-  ResponseEntity,
-  useDeleteGoogleAccountMutation
-} from '../../../../app/api';
+import {useDeleteGoogleAccountMutation} from '../../../../app/api';
 import {useAppDispatch} from '../../../../app/hooks';
 import {updateToken} from '../../../../app/slices/authSlice';
 import GoogleButton from '../GoogleButton';
@@ -25,7 +22,7 @@ const DeleteGoogleAccount: FC<DeleteAccountProps> = ({
 
   const [
     requestDeleteGoogleAccount,
-    {data, error, isUninitialized, isLoading, isSuccess, isError, reset}
+    {isUninitialized, isLoading, isSuccess, isError, reset}
   ] = useDeleteGoogleAccountMutation();
 
   const onClickCancel = useCallback(
@@ -52,18 +49,6 @@ const DeleteGoogleAccount: FC<DeleteAccountProps> = ({
     flow: 'auth-code'
   });
 
-  const onClickReset = useCallback(
-    (e: MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation();
-      hideThisRef();
-      if (isSuccess) {
-        dispatch(updateToken(null));
-      }
-      reset();
-    },
-    [hideThisRef, reset, dispatch, isSuccess]
-  );
-
   useEffect(() => {
     setIsUninitialized(isUninitialized);
   }, [isUninitialized, setIsUninitialized]);
@@ -71,6 +56,19 @@ const DeleteGoogleAccount: FC<DeleteAccountProps> = ({
   useEffect(() => {
     setIsLoading(isLoading);
   }, [isLoading, setIsLoading]);
+
+  useEffect(() => {
+    if (isSuccess || isError) {
+      const id = setTimeout(() => {
+        hideThisRef();
+        if (isSuccess) {
+          dispatch(updateToken(null));
+        }
+        reset();
+      }, 3000);
+      return () => clearTimeout(id);
+    }
+  }, [isSuccess, isError, reset, hideThisRef, dispatch]);
 
   if (isUninitialized || isLoading) {
     return (
@@ -92,16 +90,8 @@ const DeleteGoogleAccount: FC<DeleteAccountProps> = ({
   } else {
     return (
       <>
-        {isSuccess && (
-          <div>
-            Status : {(data as ResponseEntity).apiStatus}, Message :{' '}
-            {(data as ResponseEntity).apiMsg}
-          </div>
-        )}
-        {isError && <div>Error : {JSON.stringify(error)}</div>}
-        <button onClick={onClickReset} className="btn btn-xs btn-accent mx-1">
-          {t('SignupForm.Reset')}
-        </button>
+        {isSuccess && <div>{t('DeleteAccount.Success')}</div>}
+        {isError && <div>{t('DeleteAccount.Error')}</div>}
       </>
     );
   }

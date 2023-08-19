@@ -1,7 +1,14 @@
-import React, {ChangeEvent, FC, MouseEvent, useCallback, useState} from 'react';
+import React, {
+  ChangeEvent,
+  FC,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useState
+} from 'react';
 import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 import {useTranslation} from 'react-i18next';
-import {useSignupMutation, ResponseEntity} from '../../../app/api';
+import {useSignupMutation} from '../../../app/api';
 
 type SignupFormType = Record<
   'username' | 'password' | 'confirmPassword',
@@ -19,7 +26,7 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
 
   const [
     requestSignup,
-    {data, isUninitialized, isLoading, isSuccess, isError, reset}
+    {isUninitialized, isLoading, isSuccess, isError, reset}
   ] = useSignupMutation();
 
   const [{username, password, confirmPassword}, setForm] =
@@ -83,10 +90,22 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
     [hideThisRef, reset]
   );
 
+  useEffect(() => {
+    if (isSuccess || isError) {
+      const id = setTimeout(() => {
+        reset();
+        hideThisRef();
+      }, 3000);
+      return () => clearTimeout(id);
+    }
+  }, [isSuccess, isError, reset, hideThisRef]);
+
   if (isUninitialized || isLoading) {
     return (
       <div className="mx-2 flex items-center gap-1 w-[50rem]">
-        <MaterialSymbolButton icon="person_add" />
+        <button onClick={onClickCancel}>
+          <MaterialSymbolButton icon="person_add" />
+        </button>
         <input
           type="text"
           name="username"
@@ -140,17 +159,11 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
   } else {
     return (
       <div className="mx-2 flex items-center gap-1 w-full">
-        <MaterialSymbolButton icon="person_add" />
-        {isSuccess && (
-          <div>
-            Status : {(data as ResponseEntity).apiStatus}, Message :{' '}
-            {(data as ResponseEntity).apiMsg}
-          </div>
-        )}
-        {isError && <div>Signup Error!</div>}
-        <button onClick={onClickReset} className="btn btn-xs btn-accent mx-1">
-          {t('SignupForm.Reset')}
+        <button onClick={onClickReset}>
+          <MaterialSymbolButton icon="person_add" />
         </button>
+        {isSuccess && <div>{t('SignupForm.SignupSuccess')}</div>}
+        {isError && <div>{t('SignupForm.SignupError')}</div>}
       </div>
     );
   }

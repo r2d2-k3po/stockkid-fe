@@ -112,10 +112,7 @@ const AuthMenu = () => {
     }
   }, [decodedToken?.exp, dispatch]);
 
-  const [
-    requestGoogleSignin,
-    {data, error, isUninitialized, isLoading, isSuccess, isError, reset}
-  ] = useGoogleSigninMutation();
+  const [requestGoogleSignin, {isError, reset}] = useGoogleSigninMutation();
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (codeResponse) => {
@@ -135,6 +132,15 @@ const AuthMenu = () => {
     onError: (errorResponse) => console.log(errorResponse),
     flow: 'auth-code'
   });
+
+  useEffect(() => {
+    if (isError) {
+      const id = setTimeout(() => {
+        reset();
+      }, 3000);
+      return () => clearTimeout(id);
+    }
+  }, [isError, reset]);
 
   return (
     <div className="flex">
@@ -164,7 +170,7 @@ const AuthMenu = () => {
                 </div>
               </div>
             ) : (
-              <div className="mx-2 flex">
+              <div className="mx-2 flex items-center">
                 <div onClick={showRef(visibleLoginFormRef)}>
                   <MaterialSymbolButton icon="account_circle" />
                 </div>
@@ -174,6 +180,7 @@ const AuthMenu = () => {
                 <div onClick={() => googleLogin()}>
                   <GoogleButton />
                 </div>
+                {isError && <div>{t('AuthMenu.GoogleSigninError')}</div>}
               </div>
             ))}
         </div>

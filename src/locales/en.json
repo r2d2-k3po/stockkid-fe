@@ -16,15 +16,25 @@
     "Remove": "Remove"
   },
   "AuthMenu": {
+    "GoogleSigninError": "Google sign in error!",
     "expiresInMinutes": "Logout: in {{expiresInMinutes}} minutes"
+  },
+  "ChangePassword": {
+    "Error": "Password change error!",
+    "Success": "Password change success!"
+  },
+  "DeleteAccount": {
+    "DeleteAccount": "Delete Account",
+    "Error": "Account delete error!",
+    "Success": "Account delete success!"
   },
   "LoginForm": {
     "Login": "Login",
+    "LoginError": "Login error!",
     "RememberMe": "Remember Username"
   },
   "LogoutForm": {
-    "Logout": "Logout",
-    "message": "Logging out."
+    "Logout": "Logout"
   },
   "Main": {
     "CompactTypeHorizontal": "horizontal",
@@ -48,13 +58,12 @@
     "Cancel": "Cancel",
     "Reset": "Close",
     "Signup": "Sign Up",
+    "SignupError": "Signup error!",
+    "SignupSuccess": "Signup success!",
     "placeholder": {
       "confirmPassword": "confirm Password",
       "password": "Password (6~30)",
       "username": "Username (6~30)"
     }
-  },
-  "DeleteAccount": {
-    "DeleteAccount": "Delete Account"
   }
 }

@@ -16,15 +16,25 @@
     "Remove": "삭제"
   },
   "AuthMenu": {
+    "GoogleSigninError": "구글 로그인 에러!",
     "expiresInMinutes": "로그아웃: {{expiresInMinutes}}분 후"
+  },
+  "ChangePassword": {
+    "Error": "비밀번호 변경 에러!",
+    "Success": "비밀번호 변경 성공!"
+  },
+  "DeleteAccount": {
+    "DeleteAccount": "계정 삭제",
+    "Error": "계정 삭제 에러!",
+    "Success": "계정 삭제 성공!"
   },
   "LoginForm": {
     "Login": "로그인",
+    "LoginError": "로그인 에러!",
     "RememberMe": "사용자명 저장"
   },
   "LogoutForm": {
-    "Logout": "로그아웃",
-    "message": "로그아웃합니다."
+    "Logout": "로그아웃"
   },
   "Main": {
     "CompactTypeHorizontal": "가로",
@@ -48,13 +58,12 @@
     "Cancel": "취소",
     "Reset": "닫기",
     "Signup": "회원가입",
+    "SignupError": "회원가입 에러!",
+    "SignupSuccess": "회원가입 성공!",
     "placeholder": {
       "confirmPassword": "비밀번호 확인",
       "password": "비밀번호 (6~30)",
       "username": "사용자명 (6~30)"
     }
-  },
-  "DeleteAccount": {
-    "DeleteAccount": "계정 삭제"
   }
 }

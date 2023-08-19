@@ -7,7 +7,7 @@ import React, {
   useState
 } from 'react';
 import {useTranslation} from 'react-i18next';
-import {ResponseEntity, useChangePasswordMutation} from '../../../../app/api';
+import {useChangePasswordMutation} from '../../../../app/api';
 
 type ChangePasswordFormType = Record<
   'oldPassword' | 'newPassword' | 'confirmNewPassword',
@@ -31,7 +31,7 @@ const ChangePassword: FC<ChangePasswordProps> = ({
 
   const [
     requestPasswordChange,
-    {data, error, isUninitialized, isLoading, isSuccess, isError, reset}
+    {isUninitialized, isLoading, isSuccess, isError, reset}
   ] = useChangePasswordMutation();
 
   const [{oldPassword, newPassword, confirmNewPassword}, setForm] =
@@ -86,15 +86,6 @@ const ChangePassword: FC<ChangePasswordProps> = ({
     [requestPasswordChange, oldPassword, newPassword]
   );
 
-  const onClickReset = useCallback(
-    (e: MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation();
-      reset();
-      hideThisRef();
-    },
-    [hideThisRef, reset]
-  );
-
   useEffect(() => {
     setIsUninitialized(isUninitialized);
   }, [isUninitialized, setIsUninitialized]);
@@ -102,6 +93,16 @@ const ChangePassword: FC<ChangePasswordProps> = ({
   useEffect(() => {
     setIsLoading(isLoading);
   }, [isLoading, setIsLoading]);
+
+  useEffect(() => {
+    if (isSuccess || isError) {
+      const id = setTimeout(() => {
+        reset();
+        hideThisRef();
+      }, 3000);
+      return () => clearTimeout(id);
+    }
+  }, [isSuccess, isError, reset, hideThisRef]);
 
   if (isUninitialized || isLoading) {
     return (
@@ -161,16 +162,8 @@ const ChangePassword: FC<ChangePasswordProps> = ({
   } else {
     return (
       <>
-        {isSuccess && (
-          <div>
-            Status : {(data as ResponseEntity).apiStatus}, Message :{' '}
-            {(data as ResponseEntity).apiMsg}
-          </div>
-        )}
-        {isError && <div>Error : {JSON.stringify(error)}</div>}
-        <button onClick={onClickReset} className="btn btn-xs btn-accent mx-1">
-          {t('SignupForm.Reset')}
-        </button>
+        {isSuccess && <div>{t('ChangePassword.Success')}</div>}
+        {isError && <div>{t('ChangePassword.Error')}</div>}
       </>
     );
   }
