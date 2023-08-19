@@ -9,7 +9,6 @@ import React, {
 import {useTranslation} from 'react-i18next';
 import {ResponseEntity, useLoginMutation} from '../../../app/api';
 import MaterialSymbolButton from '../../common/MaterialSymbolButton';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/query';
 import {useAppDispatch} from '../../../app/hooks';
 import {updateToken} from '../../../app/slices/authSlice';
 
@@ -28,7 +27,7 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
 
   const [
     requestLogin,
-    {data, error, isUninitialized, isLoading, isSuccess, isError, reset}
+    {isUninitialized, isLoading, isSuccess, isError, reset}
   ] = useLoginMutation();
 
   const [{username, password}, setForm] = useState<LoginFormType>({
@@ -115,10 +114,25 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
     [hideThisRef, reset]
   );
 
+  useEffect(() => {
+    if (isSuccess) {
+      reset();
+      hideThisRef();
+    } else if (isError) {
+      const id = setTimeout(() => {
+        reset();
+        hideThisRef();
+      }, 3000);
+      return () => clearTimeout(id);
+    }
+  }, [isSuccess, isError, reset, hideThisRef]);
+
   if (isUninitialized || isLoading) {
     return (
       <div className="mx-2 flex items-center gap-1 w-[50rem]">
-        <MaterialSymbolButton icon="account_circle" />
+        <button onClick={onClickCancel}>
+          <MaterialSymbolButton icon="account_circle" />
+        </button>
         <input
           type="text"
           name="username"
@@ -173,32 +187,14 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
   } else {
     return (
       <div className="mx-2 flex items-center gap-1 w-full">
-        <MaterialSymbolButton icon="account_circle" />
-        {isSuccess && (
-          <div>
-            Status : {(data as ResponseEntity).apiStatus}, Message :{' '}
-            {(data as ResponseEntity).apiMsg}
-          </div>
+        {isError && (
+          <>
+            <button onClick={onClickReset}>
+              <MaterialSymbolButton icon="account_circle" />
+            </button>
+            <div>{t('LoginForm.LoginError')}</div>
+          </>
         )}
-        {isError && <div>Login Error!</div>}
-        {/*{isError && <div>{JSON.stringify(error)}</div>}*/}
-        {/*{isError && (*/}
-        {/*  <div>*/}
-        {/*    Status :{' '}*/}
-        {/*    {*/}
-        {/*      ((error as FetchBaseQueryError).data as ResponseEntity)*/}
-        {/*        .responseStatus*/}
-        {/*    }*/}
-        {/*    , Message :{' '}*/}
-        {/*    {*/}
-        {/*      ((error as FetchBaseQueryError).data as ResponseEntity)*/}
-        {/*        .responseMessage*/}
-        {/*    }*/}
-        {/*  </div>*/}
-        {/*)}*/}
-        <button onClick={onClickReset} className="btn btn-xs btn-accent mx-1">
-          {t('SignupForm.Reset')}
-        </button>
       </div>
     );
   }

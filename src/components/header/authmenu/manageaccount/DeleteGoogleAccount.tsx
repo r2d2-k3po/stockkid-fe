@@ -1,15 +1,10 @@
-import React, {
-  ChangeEvent,
-  FC,
-  MouseEvent,
-  useCallback,
-  useEffect,
-  useState
-} from 'react';
+import React, {FC, MouseEvent, useCallback, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
-import {useDeleteAccountMutation} from '../../../../app/api';
+import {useDeleteGoogleAccountMutation} from '../../../../app/api';
 import {useAppDispatch} from '../../../../app/hooks';
 import {updateToken} from '../../../../app/slices/authSlice';
+import GoogleButton from '../GoogleButton';
+import {useGoogleLogin} from '@react-oauth/google';
 
 type DeleteAccountProps = {
   hideThisRef: () => void;
@@ -17,54 +12,42 @@ type DeleteAccountProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const DeleteAccount: FC<DeleteAccountProps> = ({
+const DeleteGoogleAccount: FC<DeleteAccountProps> = ({
   hideThisRef,
   setIsUninitialized,
   setIsLoading
 }) => {
-  const regexFinal = /^.{6,30}$/;
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
 
   const [
-    requestAccountDelete,
+    requestDeleteGoogleAccount,
     {isUninitialized, isLoading, isSuccess, isError, reset}
-  ] = useDeleteAccountMutation();
-
-  const [password, setPassword] = useState<string>('');
-
-  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const regex = /^.{0,30}$/;
-    if (regex.test(e.target.value)) {
-      setPassword(e.target.value.trim());
-    }
-  }, []);
+  ] = useDeleteGoogleAccountMutation();
 
   const onClickCancel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       hideThisRef();
-      setPassword('');
     },
     [hideThisRef]
   );
 
-  const onClickDeleteAccount = useCallback(
-    async (e: MouseEvent<HTMLButtonElement>) => {
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (codeResponse) => {
+      console.log('codeResponse.code : ' + codeResponse.code);
       try {
-        e.stopPropagation();
         const accountDeleteRequest = {
-          password: password
+          authcode: codeResponse.code
         };
-        await requestAccountDelete(accountDeleteRequest);
+        await requestDeleteGoogleAccount(accountDeleteRequest);
       } catch (err) {
         console.log(err);
-      } finally {
-        setPassword('');
       }
     },
-    [password, requestAccountDelete]
-  );
+    onError: (errorResponse) => console.log(errorResponse),
+    flow: 'auth-code'
+  });
 
   useEffect(() => {
     setIsUninitialized(isUninitialized);
@@ -90,15 +73,7 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
   if (isUninitialized || isLoading) {
     return (
       <div className="ml-1 flex items-center gap-1">
-        <input
-          type="password"
-          name="password"
-          placeholder={t('SignupForm.placeholder.password') as string}
-          value={password}
-          onChange={handleChange}
-          className="w-44 max-w-xs input input-bordered input-sm"
-        />
-        <div className="flex-none w-52">
+        <div className="flex items-center">
           <button
             disabled={isLoading}
             onClick={onClickCancel}
@@ -106,17 +81,9 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
           >
             {t('SignupForm.Cancel')}
           </button>
-          <button
-            disabled={!regexFinal.test(password)}
-            onClick={onClickDeleteAccount}
-            className={
-              isLoading
-                ? 'btn btn-xs btn-accent loading'
-                : 'btn btn-xs btn-accent'
-            }
-          >
-            {t('DeleteAccount.DeleteAccount')}
-          </button>
+          <div onClick={() => googleLogin()}>
+            <GoogleButton />
+          </div>
         </div>
       </div>
     );
@@ -130,4 +97,4 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
   }
 };
 
-export default React.memo(DeleteAccount);
+export default React.memo(DeleteGoogleAccount);

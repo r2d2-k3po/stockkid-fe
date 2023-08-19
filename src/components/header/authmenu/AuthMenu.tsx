@@ -19,6 +19,9 @@ import {
   tokenDecoder
 } from '../../../utils/tokenDecoder';
 import {updateToken} from '../../../app/slices/authSlice';
+import {useGoogleLogin} from '@react-oauth/google';
+import GoogleButton from './GoogleButton';
+import {ResponseEntity, useGoogleSigninMutation} from '../../../app/api';
 
 const AuthMenu = () => {
   const {t} = useTranslation();
@@ -32,12 +35,17 @@ const AuthMenu = () => {
     () => (token ? tokenDecoder(token) : null),
     [token]
   );
-  // console.log('decodedToken : ' + JSON.stringify(decodedToken));
+  // console.log('decodedToken : ' + decodedToken?.soc);
+
+  const loginMethod = useMemo(
+    () => (decodedToken ? (decodedToken.soc as string) : null),
+    [decodedToken]
+  );
 
   const [expiresInMinutes, setExpiresInMinutes] = useState<number>(
     decodedToken
       ? getRemainingTimeBeforeExpiration(decodedToken?.exp as number)
-      : 0
+      : 10080
   );
 
   const visibleLoggedInButtonsRef = useRef<HTMLDivElement>(null);
@@ -92,19 +100,47 @@ const AuthMenu = () => {
     if (decodedToken?.exp) {
       const duration = 1000 * 60;
       const id = setInterval(() => {
-        setExpiresInMinutes(
-          getRemainingTimeBeforeExpiration(decodedToken.exp as number)
+        const remainingTime = getRemainingTimeBeforeExpiration(
+          decodedToken.exp as number
         );
+        setExpiresInMinutes(remainingTime);
+        if (remainingTime == 0) {
+          dispatch(updateToken(null));
+        }
       }, duration);
       return () => clearInterval(id);
     }
-  }, [decodedToken?.exp]);
+  }, [decodedToken?.exp, dispatch]);
+
+  const [requestGoogleSignin, {isError, reset}] = useGoogleSigninMutation();
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (codeResponse) => {
+      console.log('codeResponse.code : ' + codeResponse.code);
+      try {
+        const googleSigninRequest = {
+          authcode: codeResponse.code
+        };
+        const data = await requestGoogleSignin(googleSigninRequest).unwrap();
+        const newToken = (data as ResponseEntity).apiObj as string;
+        dispatch(updateToken(newToken));
+        // console.log('googleSignin success, update token : ' + newToken);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    onError: (errorResponse) => console.log(errorResponse),
+    flow: 'auth-code'
+  });
 
   useEffect(() => {
-    if (token && expiresInMinutes === 0) {
-      dispatch(updateToken(null));
+    if (isError) {
+      const id = setTimeout(() => {
+        reset();
+      }, 3000);
+      return () => clearTimeout(id);
     }
-  }, [token, expiresInMinutes, dispatch]);
+  }, [isError, reset]);
 
   return (
     <div className="flex">
@@ -134,13 +170,17 @@ const AuthMenu = () => {
                 </div>
               </div>
             ) : (
-              <div className="mx-2 flex">
+              <div className="mx-2 flex items-center">
                 <div onClick={showRef(visibleLoginFormRef)}>
                   <MaterialSymbolButton icon="account_circle" />
                 </div>
                 <div onClick={showRef(visibleSignupFormRef)}>
                   <MaterialSymbolButton icon="person_add" />
                 </div>
+                <div onClick={() => googleLogin()}>
+                  <GoogleButton />
+                </div>
+                {isError && <div>{t('AuthMenu.GoogleSigninError')}</div>}
               </div>
             ))}
         </div>
@@ -148,7 +188,10 @@ const AuthMenu = () => {
           <LogoutForm hideThisRef={hideRef(visibleLogoutFormRef)} />
         </div>
         <div ref={visibleManageAccountRef} className="hidden">
-          <ManageAccount hideThisRef={hideRef(visibleManageAccountRef)} />
+          <ManageAccount
+            loginMethod={loginMethod}
+            hideThisRef={hideRef(visibleManageAccountRef)}
+          />
         </div>
         <div ref={visibleLoginFormRef} className="hidden">
           <LoginForm hideThisRef={hideRef(visibleLoginFormRef)} />
