@@ -7,9 +7,16 @@ import React, {
   useState
 } from 'react';
 import {useTranslation} from 'react-i18next';
-import {useDeleteAccountMutation} from '../../../../app/api';
-import {useAppDispatch} from '../../../../app/hooks';
-import {updateToken} from '../../../../app/slices/authSlice';
+import {
+  useDeleteAccountMutation,
+  useRefreshTokensMutation
+} from '../../../../app/api';
+import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
+import {
+  AuthState,
+  updateRefreshToken,
+  updateTokens
+} from '../../../../app/slices/authSlice';
 
 type DeleteAccountProps = {
   hideThisRef: () => void;
@@ -25,6 +32,9 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
   const regexFinal = /^.{6,30}$/;
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
+
+  const tokens = useAppSelector((state) => state.auth);
+  const [requestTokensRefresh] = useRefreshTokensMutation();
 
   const [
     requestAccountDelete,
@@ -51,8 +61,14 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
 
   const onClickDeleteAccount = useCallback(
     async (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
       try {
-        e.stopPropagation();
+        if (tokens.accessToken == null && tokens.refreshToken != null) {
+          const data = await requestTokensRefresh(tokens).unwrap();
+          const newTokens = data.apiObj as AuthState;
+          dispatch(updateTokens(newTokens));
+        }
+
         const accountDeleteRequest = {
           password: password
         };
@@ -63,7 +79,7 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
         setPassword('');
       }
     },
-    [password, requestAccountDelete]
+    [password, requestAccountDelete, tokens, requestTokensRefresh, dispatch]
   );
 
   useEffect(() => {
@@ -79,7 +95,7 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
       const id = setTimeout(() => {
         hideThisRef();
         if (isSuccess) {
-          dispatch(updateToken(null));
+          dispatch(updateRefreshToken(null));
         }
         reset();
       }, 3000);

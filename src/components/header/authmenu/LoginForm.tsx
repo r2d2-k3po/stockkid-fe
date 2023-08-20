@@ -7,10 +7,10 @@ import React, {
   useState
 } from 'react';
 import {useTranslation} from 'react-i18next';
-import {ResponseEntity, useLoginMutation} from '../../../app/api';
+import {useLoginMutation} from '../../../app/api';
 import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 import {useAppDispatch} from '../../../app/hooks';
-import {updateToken} from '../../../app/slices/authSlice';
+import {AuthState, updateTokens} from '../../../app/slices/authSlice';
 
 type LoginFormType = Record<'username' | 'password', string>;
 
@@ -90,9 +90,8 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
           password: password
         };
         const data = await requestLogin(loginRequest).unwrap();
-        const newToken = (data as ResponseEntity).apiObj as string;
-        dispatch(updateToken(newToken));
-        // console.log('login success, update token : ' + newToken);
+        const newTokens = data.apiObj as AuthState;
+        dispatch(updateTokens(newTokens));
       } catch (err) {
         console.log(err);
       } finally {

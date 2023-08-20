@@ -6,23 +6,38 @@ export interface User {
 }
 
 export interface AuthState {
-  token: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
 }
 
 const initialState: AuthState = {
-  token: localStorage.getItem('token') || null
+  accessToken: null,
+  refreshToken: localStorage.getItem('refreshToken') || null
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    updateToken: (state: AuthState, action: PayloadAction<string | null>) => {
-      state.token = action.payload;
+    updateTokens: (state: AuthState, action: PayloadAction<AuthState>) => {
+      return action.payload;
+    },
+    updateAccessToken: (
+      state: AuthState,
+      action: PayloadAction<string | null>
+    ) => {
+      state.accessToken = action.payload;
+    },
+    updateRefreshToken: (
+      state: AuthState,
+      action: PayloadAction<string | null>
+    ) => {
+      state.refreshToken = action.payload;
     }
   }
 });
 
-export const {updateToken} = authSlice.actions;
+export const {updateTokens, updateAccessToken, updateRefreshToken} =
+  authSlice.actions;
 
 export default authSlice.reducer;

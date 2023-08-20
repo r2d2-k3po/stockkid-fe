@@ -2,7 +2,7 @@ import React, {FC, MouseEvent, useCallback, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useDeleteGoogleAccountMutation} from '../../../../app/api';
 import {useAppDispatch} from '../../../../app/hooks';
-import {updateToken} from '../../../../app/slices/authSlice';
+import {updateRefreshToken} from '../../../../app/slices/authSlice';
 import GoogleButton from '../GoogleButton';
 import {useGoogleLogin} from '@react-oauth/google';
 
@@ -62,7 +62,7 @@ const DeleteGoogleAccount: FC<DeleteAccountProps> = ({
       const id = setTimeout(() => {
         hideThisRef();
         if (isSuccess) {
-          dispatch(updateToken(null));
+          dispatch(updateRefreshToken(null));
         }
         reset();
       }, 3000);

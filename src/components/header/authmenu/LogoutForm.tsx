@@ -1,8 +1,9 @@
 import React, {FC, MouseEvent, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
-import {useAppDispatch} from '../../../app/hooks';
-import {updateToken} from '../../../app/slices/authSlice';
+import {useAppDispatch, useAppSelector} from '../../../app/hooks';
+import {updateRefreshToken} from '../../../app/slices/authSlice';
 import MaterialSymbolButton from '../../common/MaterialSymbolButton';
+import {useLogoutMutation} from '../../../app/api';
 
 type LogoutFormProps = {
   hideThisRef: () => void;
@@ -10,8 +11,10 @@ type LogoutFormProps = {
 
 const LogoutForm: FC<LogoutFormProps> = ({hideThisRef}) => {
   const {t} = useTranslation();
-
   const dispatch = useAppDispatch();
+
+  const tokens = useAppSelector((state) => state.auth);
+  const [requestLogout] = useLogoutMutation();
 
   const onClickCancel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
@@ -22,12 +25,17 @@ const LogoutForm: FC<LogoutFormProps> = ({hideThisRef}) => {
   );
 
   const onClickLogout = useCallback(
-    (e: MouseEvent<HTMLButtonElement>) => {
+    async (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      dispatch(updateToken(null));
-      hideThisRef();
+      try {
+        await requestLogout(tokens);
+        dispatch(updateRefreshToken(null));
+        hideThisRef();
+      } catch (err) {
+        console.log(err);
+      }
     },
-    [hideThisRef, dispatch]
+    [hideThisRef, dispatch, tokens, requestLogout]
   );
 
   return (

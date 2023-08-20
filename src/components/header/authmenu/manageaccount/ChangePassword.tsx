@@ -7,7 +7,12 @@ import React, {
   useState
 } from 'react';
 import {useTranslation} from 'react-i18next';
-import {useChangePasswordMutation} from '../../../../app/api';
+import {
+  useChangePasswordMutation,
+  useRefreshTokensMutation
+} from '../../../../app/api';
+import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
+import {AuthState, updateTokens} from '../../../../app/slices/authSlice';
 
 type ChangePasswordFormType = Record<
   'oldPassword' | 'newPassword' | 'confirmNewPassword',
@@ -28,6 +33,10 @@ const ChangePassword: FC<ChangePasswordProps> = ({
   const regexFinal = /^.{6,30}$/;
 
   const {t} = useTranslation();
+  const dispatch = useAppDispatch();
+
+  const tokens = useAppSelector((state) => state.auth);
+  const [requestTokensRefresh] = useRefreshTokensMutation();
 
   const [
     requestPasswordChange,
@@ -66,8 +75,14 @@ const ChangePassword: FC<ChangePasswordProps> = ({
 
   const onClickChangePassword = useCallback(
     async (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
       try {
-        e.stopPropagation();
+        if (tokens.accessToken == null && tokens.refreshToken != null) {
+          const data = await requestTokensRefresh(tokens).unwrap();
+          const newTokens = data.apiObj as AuthState;
+          dispatch(updateTokens(newTokens));
+        }
+
         const passwordChangeRequest = {
           oldPassword: oldPassword,
           newPassword: newPassword
@@ -83,7 +98,14 @@ const ChangePassword: FC<ChangePasswordProps> = ({
         });
       }
     },
-    [requestPasswordChange, oldPassword, newPassword]
+    [
+      requestPasswordChange,
+      oldPassword,
+      newPassword,
+      tokens,
+      requestTokensRefresh,
+      dispatch
+    ]
   );
 
   useEffect(() => {
