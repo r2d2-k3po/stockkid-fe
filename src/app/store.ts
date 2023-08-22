@@ -15,7 +15,14 @@ const store = configureStore({
     auth: authReducer
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat([logger, api.middleware])
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredPaths: [
+          'screenPanelMap.uuidPanelMap',
+          'screenLayoutsMap.uuidLayoutsMap'
+        ]
+      }
+    }).concat([logger, api.middleware])
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

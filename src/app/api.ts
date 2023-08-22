@@ -1,6 +1,7 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import {RootState} from './store';
 import {apiBaseUrl} from './constants/baseUrls';
+import {AuthState} from './slices/authSlice';
 
 export interface ResponseEntity {
   apiStatus: string;
@@ -36,9 +37,9 @@ export const api = createApi({
     baseUrl: apiBaseUrl,
     prepareHeaders: (headers, {getState}) => {
       // By default, if we have a token in the store, let's use that for authenticated requests
-      const token = (getState() as RootState).auth.token;
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`);
+      const accessToken = (getState() as RootState).auth.accessToken;
+      if (accessToken) {
+        headers.set('authorization', `Bearer ${accessToken}`);
       }
       return headers;
     },
@@ -69,14 +70,14 @@ export const api = createApi({
     }),
     changePassword: builder.mutation<ResponseEntity, PasswordChangeRequest>({
       query: (passwordChangeRequest) => ({
-        url: 'jwt/member/changePassword',
+        url: 'access/member/changePassword',
         method: 'PATCH',
         body: passwordChangeRequest
       })
     }),
     deleteAccount: builder.mutation<ResponseEntity, AccountDeleteRequest>({
       query: (accountDeleteRequest) => ({
-        url: 'jwt/member/deleteAccount',
+        url: 'access/member/deleteAccount',
         method: 'PATCH',
         body: accountDeleteRequest
       })
@@ -86,6 +87,20 @@ export const api = createApi({
         url: 'google/member/deleteAccount',
         method: 'PATCH',
         body: accountDeleteRequest
+      })
+    }),
+    refreshTokens: builder.mutation<ResponseEntity, AuthState>({
+      query: (tokensRefreshRequest) => ({
+        url: 'refresh/tokens',
+        method: 'PATCH',
+        body: tokensRefreshRequest
+      })
+    }),
+    logout: builder.mutation<ResponseEntity, AuthState>({
+      query: (logoutRequest) => ({
+        url: 'refresh/logout',
+        method: 'PATCH',
+        body: logoutRequest
       })
     })
   })
@@ -97,5 +112,7 @@ export const {
   useGoogleSigninMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation,
-  useDeleteGoogleAccountMutation
+  useDeleteGoogleAccountMutation,
+  useRefreshTokensMutation,
+  useLogoutMutation
 } = api;

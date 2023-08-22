@@ -17,11 +17,14 @@
   },
   "AuthMenu": {
     "GoogleSigninError": "Google sign in error!",
-    "expiresInMinutes": "Logout: in {{expiresInMinutes}} minutes"
+    "expiresInMinutes": "Logout: in {{expiresInMinutesRefresh}} minutes"
   },
   "ChangePassword": {
     "Error": "Password change error!",
     "Success": "Password change success!"
+  },
+  "Common": {
+    "RefreshError": "Refresh error! Logging out!"
   },
   "DeleteAccount": {
     "DeleteAccount": "Delete Account",

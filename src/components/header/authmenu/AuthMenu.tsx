@@ -18,35 +18,43 @@ import {
   getRemainingTimeBeforeExpiration,
   tokenDecoder
 } from '../../../utils/tokenDecoder';
-import {updateToken} from '../../../app/slices/authSlice';
+import {
+  AuthState,
+  updateAccessToken,
+  updateRefreshToken,
+  updateTokens
+} from '../../../app/slices/authSlice';
 import {useGoogleLogin} from '@react-oauth/google';
 import GoogleButton from './GoogleButton';
-import {ResponseEntity, useGoogleSigninMutation} from '../../../app/api';
+import {useGoogleSigninMutation} from '../../../app/api';
 
 const AuthMenu = () => {
   const {t} = useTranslation();
-
   const dispatch = useAppDispatch();
 
-  const token = useAppSelector((state) => state.auth.token);
-  const loggedIn = !(token == null);
-  // console.log('loggedin : ' + loggedIn);
-  const decodedToken = useMemo(
-    () => (token ? tokenDecoder(token) : null),
-    [token]
+  const tokens = useAppSelector((state) => state.auth);
+  const loggedIn = !(tokens.refreshToken == null);
+
+  const decodedAccessToken = useMemo(
+    () => (tokens.accessToken ? tokenDecoder(tokens.accessToken) : null),
+    [tokens.accessToken]
   );
-  // console.log('decodedToken : ' + decodedToken?.soc);
+  const decodedRefreshToken = useMemo(
+    () => (tokens.refreshToken ? tokenDecoder(tokens.refreshToken) : null),
+    [tokens.refreshToken]
+  );
 
   const loginMethod = useMemo(
-    () => (decodedToken ? (decodedToken.soc as string) : null),
-    [decodedToken]
+    () => (decodedRefreshToken ? (decodedRefreshToken.soc as string) : null),
+    [decodedRefreshToken]
   );
 
-  const [expiresInMinutes, setExpiresInMinutes] = useState<number>(
-    decodedToken
-      ? getRemainingTimeBeforeExpiration(decodedToken?.exp as number)
-      : 10080
-  );
+  const [expiresInMinutesRefresh, setExpiresInMinutesRefresh] =
+    useState<number>(
+      decodedRefreshToken
+        ? getRemainingTimeBeforeExpiration(decodedRefreshToken?.exp as number)
+        : 10080
+    );
 
   const visibleLoggedInButtonsRef = useRef<HTMLDivElement>(null);
   const visibleLogoutFormRef = useRef<HTMLDivElement>(null);
@@ -79,38 +87,53 @@ const AuthMenu = () => {
   );
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token as string);
+    if (tokens.refreshToken) {
+      localStorage.setItem('refreshToken', tokens.refreshToken as string);
     } else {
-      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
     }
-  }, [token]);
+  }, [tokens.refreshToken]);
 
-  // update expiresInMinutes immediately after login
+  // update expiresInMinutesRefresh immediately after refreshing tokens
   useEffect(() => {
-    if (decodedToken?.exp) {
-      setExpiresInMinutes(
-        getRemainingTimeBeforeExpiration(decodedToken.exp as number)
+    if (decodedRefreshToken?.exp) {
+      setExpiresInMinutesRefresh(
+        getRemainingTimeBeforeExpiration(decodedRefreshToken.exp as number)
       );
     }
-  }, [decodedToken?.exp]);
+  }, [decodedRefreshToken?.exp]);
 
-  // update expiresInMinutes in 1min after login and then every minute
   useEffect(() => {
-    if (decodedToken?.exp) {
+    if (decodedAccessToken?.exp) {
       const duration = 1000 * 60;
       const id = setInterval(() => {
         const remainingTime = getRemainingTimeBeforeExpiration(
-          decodedToken.exp as number
+          decodedAccessToken.exp as number
         );
-        setExpiresInMinutes(remainingTime);
         if (remainingTime == 0) {
-          dispatch(updateToken(null));
+          dispatch(updateAccessToken(null));
         }
       }, duration);
       return () => clearInterval(id);
     }
-  }, [decodedToken?.exp, dispatch]);
+  }, [decodedAccessToken?.exp, dispatch]);
+
+  // update expiresInMinutes in 1min after refreshing tokens and then every minute
+  useEffect(() => {
+    if (decodedRefreshToken?.exp) {
+      const duration = 1000 * 60;
+      const id = setInterval(() => {
+        const remainingTime = getRemainingTimeBeforeExpiration(
+          decodedRefreshToken.exp as number
+        );
+        setExpiresInMinutesRefresh(remainingTime);
+        if (remainingTime == 0) {
+          dispatch(updateRefreshToken(null));
+        }
+      }, duration);
+      return () => clearInterval(id);
+    }
+  }, [decodedRefreshToken?.exp, dispatch]);
 
   const [requestGoogleSignin, {isError, reset}] = useGoogleSigninMutation();
 
@@ -122,9 +145,8 @@ const AuthMenu = () => {
           authcode: codeResponse.code
         };
         const data = await requestGoogleSignin(googleSigninRequest).unwrap();
-        const newToken = (data as ResponseEntity).apiObj as string;
-        dispatch(updateToken(newToken));
-        // console.log('googleSignin success, update token : ' + newToken);
+        const newTokens = data.apiObj as AuthState;
+        dispatch(updateTokens(newTokens));
       } catch (err) {
         console.log(err);
       }
@@ -159,8 +181,10 @@ const AuthMenu = () => {
             (loggedIn ? (
               <div className="mx-2 flex">
                 <div className="m-1 mr-2 card card-compact bg-accent text-accent-content text-xs py-1 px-2">
-                  <p>{decodedToken?.sub} </p>
-                  <p>{t('AuthMenu.expiresInMinutes', {expiresInMinutes})}</p>
+                  <p>{decodedRefreshToken?.sub} </p>
+                  <p>
+                    {t('AuthMenu.expiresInMinutes', {expiresInMinutesRefresh})}
+                  </p>
                 </div>
                 <div onClick={showRef(visibleLogoutFormRef)}>
                   <MaterialSymbolButton icon="no_accounts" />
