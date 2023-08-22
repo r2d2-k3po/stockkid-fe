@@ -17,11 +17,14 @@
   },
   "AuthMenu": {
     "GoogleSigninError": "구글 로그인 에러!",
-    "expiresInMinutes": "로그아웃: {{expiresInMinutes}}분 후"
+    "expiresInMinutes": "로그아웃: {{expiresInMinutesRefresh}}분 후"
   },
   "ChangePassword": {
     "Error": "비밀번호 변경 에러!",
     "Success": "비밀번호 변경 성공!"
+  },
+  "Common": {
+    "RefreshError": "리프레시 에러! 로그아웃!"
   },
   "DeleteAccount": {
     "DeleteAccount": "계정 삭제",

@@ -12,7 +12,11 @@ import {
   useRefreshTokensMutation
 } from '../../../../app/api';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
-import {AuthState, updateTokens} from '../../../../app/slices/authSlice';
+import {
+  AuthState,
+  updateRefreshToken,
+  updateTokens
+} from '../../../../app/slices/authSlice';
 
 type ChangePasswordFormType = Record<
   'oldPassword' | 'newPassword' | 'confirmNewPassword',
@@ -37,6 +41,7 @@ const ChangePassword: FC<ChangePasswordProps> = ({
 
   const tokens = useAppSelector((state) => state.auth);
   const [requestTokensRefresh] = useRefreshTokensMutation();
+  const [isRefreshFail, setIsRefreshFail] = useState<boolean>(false);
 
   const [
     requestPasswordChange,
@@ -79,8 +84,14 @@ const ChangePassword: FC<ChangePasswordProps> = ({
       try {
         if (tokens.accessToken == null && tokens.refreshToken != null) {
           const data = await requestTokensRefresh(tokens).unwrap();
-          const newTokens = data.apiObj as AuthState;
-          dispatch(updateTokens(newTokens));
+          if (data.apiStatus == 'REFRESH_FAIL') {
+            console.log('REFRESH_FAIL');
+            setIsRefreshFail(true);
+          } else {
+            const newTokens = data.apiObj as AuthState;
+            dispatch(updateTokens(newTokens));
+            setIsRefreshFail(false);
+          }
         }
 
         const passwordChangeRequest = {
@@ -125,6 +136,15 @@ const ChangePassword: FC<ChangePasswordProps> = ({
       return () => clearTimeout(id);
     }
   }, [isSuccess, isError, reset, hideThisRef]);
+
+  useEffect(() => {
+    if (isRefreshFail) {
+      const id = setTimeout(() => {
+        dispatch(updateRefreshToken(null));
+      }, 4000);
+      return () => clearTimeout(id);
+    }
+  }, [isRefreshFail, dispatch]);
 
   if (isUninitialized || isLoading) {
     return (
@@ -185,7 +205,8 @@ const ChangePassword: FC<ChangePasswordProps> = ({
     return (
       <>
         {isSuccess && <div>{t('ChangePassword.Success')}</div>}
-        {isError && <div>{t('ChangePassword.Error')}</div>}
+        {isRefreshFail && <div>{t('Common.RefreshError')}</div>}
+        {!isRefreshFail && isError && <div>{t('ChangePassword.Error')}</div>}
       </>
     );
   }

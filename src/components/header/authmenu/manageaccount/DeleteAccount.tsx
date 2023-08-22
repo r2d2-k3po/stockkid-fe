@@ -35,6 +35,7 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
 
   const tokens = useAppSelector((state) => state.auth);
   const [requestTokensRefresh] = useRefreshTokensMutation();
+  const [isRefreshFail, setIsRefreshFail] = useState<boolean>(false);
 
   const [
     requestAccountDelete,
@@ -65,8 +66,14 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
       try {
         if (tokens.accessToken == null && tokens.refreshToken != null) {
           const data = await requestTokensRefresh(tokens).unwrap();
-          const newTokens = data.apiObj as AuthState;
-          dispatch(updateTokens(newTokens));
+          if (data.apiStatus == 'REFRESH_FAIL') {
+            console.log('REFRESH_FAIL');
+            setIsRefreshFail(true);
+          } else {
+            const newTokens = data.apiObj as AuthState;
+            dispatch(updateTokens(newTokens));
+            setIsRefreshFail(false);
+          }
         }
 
         const accountDeleteRequest = {
@@ -102,6 +109,15 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
       return () => clearTimeout(id);
     }
   }, [isSuccess, isError, reset, hideThisRef, dispatch]);
+
+  useEffect(() => {
+    if (isRefreshFail) {
+      const id = setTimeout(() => {
+        dispatch(updateRefreshToken(null));
+      }, 4000);
+      return () => clearTimeout(id);
+    }
+  }, [isRefreshFail, dispatch]);
 
   if (isUninitialized || isLoading) {
     return (
@@ -140,7 +156,8 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
     return (
       <>
         {isSuccess && <div>{t('DeleteAccount.Success')}</div>}
-        {isError && <div>{t('DeleteAccount.Error')}</div>}
+        {isRefreshFail && <div>{t('Common.RefreshError')}</div>}
+        {!isRefreshFail && isError && <div>{t('DeleteAccount.Error')}</div>}
       </>
     );
   }
