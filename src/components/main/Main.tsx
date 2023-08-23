@@ -10,28 +10,17 @@ import React, {
 } from 'react';
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {
-  moveScreen,
   addScreen,
+  copyScreen,
+  moveScreen,
   removeScreen
-} from '../../app/slices/virtualScreenIdSlice';
+} from '../../app/slices/screensSlice';
 import {v4 as uuidv4} from 'uuid';
 import AlertRemoveScreen from './AlertRemoveScreen';
 import {NavLink, Outlet, useNavigate, useOutletContext} from 'react-router-dom';
 import AlertMoveScreen from './AlertMoveScreen';
 import {panels} from './Panel';
-import {
-  addPanel,
-  addScreenPanel,
-  PanelMap,
-  removeScreenPanel
-} from '../../app/slices/screenPanelMapSlice';
 import {mapReplacer} from '../../utils/mapReplacer';
-import {
-  addPanelLayouts,
-  addScreenLayouts,
-  LayoutItemType,
-  removeScreenLayouts
-} from '../../app/slices/screenLayoutsMapSlice';
 import {breakpoints} from '../../app/constants/reactGridLayoutParemeters';
 import {Layouts} from 'react-grid-layout';
 import type {PanelType} from './Panel';
@@ -42,6 +31,8 @@ import {
 } from '../../app/constants/virtualScreenNumbers';
 import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
+import {screensSelectors} from '../../app/slices/screensSlice';
+import store from '../../app/store';
 
 type ContextType = {
   setCurrentBreakpoint: React.Dispatch<
@@ -56,21 +47,14 @@ export type MainProps = {
 
 const Main: FC<MainProps> = ({mainClassName}) => {
   const {t} = useTranslation();
-
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const visibleScreenButtonsRef = useRef<HTMLDivElement>(null);
   const visibleAlertRemoveScreenRef = useRef<HTMLDivElement>(null);
   const visibleAlertMoveScreenRef = useRef<HTMLDivElement>(null);
 
-  const uuidList = useAppSelector((state) => state.virtualScreenId.uuidList);
-  const uuidPanelMap = useAppSelector(
-    (state) => state.screenPanelMap.uuidPanelMap
-  );
-  const uuidLayoutsMap = useAppSelector(
-    (state) => state.screenLayoutsMap.uuidLayoutsMap
-  );
-  const dispatch = useAppDispatch();
+  const screenTotal = screensSelectors.selectTotal(store.getState());
 
   const [currentScreen, setCurrentScreen] = useState<string>(
     localStorage.getItem('currentScreen') || '1'
@@ -91,11 +75,8 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
   // initialize screen 1
   useEffect(() => {
-    if (!localStorage.getItem('virtualScreenUuidList')) {
-      const uuid = uuidv4();
-      dispatch(addScreen(uuid));
-      dispatch(addScreenPanel(uuid));
-      dispatch(addScreenLayouts(uuid));
+    if (!localStorage.getItem('screens')) {
+      dispatch(addScreen(uuidv4()));
       setCurrentScreen('1');
       navigate('screen/1');
     }
@@ -104,10 +85,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   const addVirtualScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      const uuid = uuidv4();
-      dispatch(addScreen(uuid));
-      dispatch(addScreenPanel(uuid));
-      dispatch(addScreenLayouts(uuid));
+      dispatch(addScreen(uuidv4()));
     },
     [dispatch]
   );
@@ -127,16 +105,14 @@ const Main: FC<MainProps> = ({mainClassName}) => {
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       const index = parseInt(currentScreen) - 1;
-      dispatch(removeScreen(uuidList[index]));
-      dispatch(removeScreenPanel(uuidList[index]));
-      dispatch(removeScreenLayouts(uuidList[index]));
-      if (index >= uuidList.length - 1) {
+      dispatch(removeScreen(index));
+      if (index >= screenTotal - 1) {
         setCurrentScreen(index.toString());
         navigate(`/screen/${index.toString()}`);
       }
       visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertRemoveScreenRef);
     },
-    [currentScreen, uuidList, dispatch, navigate]
+    [screenTotal, currentScreen, dispatch, navigate]
   );
 
   const cancelRemoveCurrentScreen = useCallback(
@@ -155,11 +131,12 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   const reallyMoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      const payload = {
-        currentIndex: parseInt(currentScreen) - 1,
-        targetIndex: parseInt(targetScreen) - 1
-      };
-      dispatch(moveScreen(payload));
+      dispatch(
+        moveScreen({
+          currentIndex: parseInt(currentScreen) - 1,
+          targetIndex: parseInt(targetScreen) - 1
+        })
+      );
       setCurrentScreen(targetScreen);
       navigate(`/screen/${targetScreen}`);
       visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertMoveScreenRef);
@@ -175,14 +152,10 @@ const Main: FC<MainProps> = ({mainClassName}) => {
     []
   );
 
-  const copyCurrentScreenPanel = useCallback(
+  const copyCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      const currentUuid = uuidList[parseInt(currentScreen) - 1];
-      const newUuid = uuidv4();
-      dispatch(addScreen(newUuid));
-      dispatch(addScreenPanel(newUuid));
-      dispatch(addScreenLayouts(newUuid));
+      dispatch(copyScreen(parseInt(currentScreen) - 1));
       if (uuidPanelMap.get(currentUuid)) {
         const currentPanelMap = uuidPanelMap.get(currentUuid) as PanelMap;
         const currentLayouts = uuidLayoutsMap.get(currentUuid) as Layouts;
@@ -208,19 +181,11 @@ const Main: FC<MainProps> = ({mainClassName}) => {
           dispatch(addPanelLayouts(layoutsPayload));
         }
       }
-      const copiedScreen = (uuidList.length + 1).toString();
+      const copiedScreen = (screenTotal + 1).toString();
       setCurrentScreen(copiedScreen);
       navigate('screen/' + copiedScreen);
     },
-    [
-      currentScreen,
-      uuidList,
-      uuidPanelMap,
-      uuidLayoutsMap,
-      currentBreakpoint,
-      dispatch,
-      navigate
-    ]
+    [screenTotal, currentScreen, dispatch, navigate]
   );
 
   const handleChangeSelectedPanel = useCallback(
@@ -358,7 +323,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
                 <button
                   disabled={uuidList.length >= maxVirtualScreenNumber}
                   className="btn btn-xs btn-outline btn-warning"
-                  onClick={copyCurrentScreenPanel}
+                  onClick={copyCurrentScreen}
                 >
                   C
                 </button>
