@@ -4,7 +4,7 @@ import {
   EntityState,
   PayloadAction
 } from '@reduxjs/toolkit';
-import {panels} from '../../components/main/Panel';
+import {panelTypes} from '../../components/main/Panel';
 import {RootState} from '../store';
 
 type copyPanelsPayload = {
@@ -14,7 +14,7 @@ type copyPanelsPayload = {
 
 type Panel = {
   id: string;
-  panelCode: keyof typeof panels;
+  panelCode: keyof typeof panelTypes;
 };
 
 const panelAdapter = createEntityAdapter<Panel>();
@@ -37,7 +37,7 @@ const panelsSlice = createSlice({
         panelAdapter.addOne(state, {
           id: action.payload.newPanelIds[i],
           panelCode: state.entities[action.payload.panelIds[i]]
-            ?.panelCode as keyof typeof panels
+            ?.panelCode as keyof typeof panelTypes
         });
       }
     }

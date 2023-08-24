@@ -1,11 +1,21 @@
 import React, {FC} from 'react';
-import {PanelProps} from '../Panel';
+import {panelTypes} from '../Panel';
+import {panelsSelectors} from '../../../app/slices/panelsSlice';
+import store from '../../../app/store';
+import {EntityId} from '@reduxjs/toolkit';
 
-const Panel0000: FC<PanelProps> = ({uuidP, panelType}) => {
+type CommonPanelProps = {
+  panelId: EntityId;
+};
+
+const Panel0000: FC<CommonPanelProps> = ({panelId}) => {
+  const panelCode = panelsSelectors.selectById(store.getState(), panelId)
+    ?.panelCode as keyof typeof panelTypes;
+
   return (
     <div>
-      <p>{panelType.panelCode}</p>
-      <p> uuidP : {uuidP} </p>
+      <p>{panelCode}</p>
+      <p> panelId : {panelId} </p>
     </div>
   );
 };

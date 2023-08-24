@@ -6,12 +6,13 @@ import React, {
   useMemo
 } from 'react';
 import {useTranslation} from 'react-i18next';
+import {screensSelectors} from '../../app/slices/screensSlice';
+import store from '../../app/store';
 
 type AlertMoveScreenProps = {
   currentScreen: string;
   onClickCancel: MouseEventHandler<HTMLButtonElement>;
   onClickMove: MouseEventHandler<HTMLButtonElement>;
-  uuidListLength: number;
   targetScreen: string;
   setTargetScreen: React.Dispatch<React.SetStateAction<string>>;
 };
@@ -20,15 +21,15 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
   currentScreen,
   onClickMove,
   onClickCancel,
-  uuidListLength,
   targetScreen,
   setTargetScreen
 }) => {
   const {t} = useTranslation();
+  const screenTotal = screensSelectors.selectTotal(store.getState());
 
   const options = useMemo(
     () =>
-      [...Array(uuidListLength)].map(
+      [...Array(screenTotal)].map(
         (unused, index) =>
           index !== parseInt(currentScreen) - 1 && (
             <option value={(index + 1).toString()} key={index}>
@@ -36,7 +37,7 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
             </option>
           )
       ),
-    [currentScreen, uuidListLength]
+    [currentScreen, screenTotal]
   );
 
   const handleChangeSelect = useCallback(
