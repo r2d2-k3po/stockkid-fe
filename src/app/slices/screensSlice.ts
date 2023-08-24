@@ -7,7 +7,7 @@ import {
   PayloadAction
 } from '@reduxjs/toolkit';
 import {RootState} from '../store';
-import {addPanel, copyPanels, removePanels} from './panelsSlice';
+import {addPanel, copyPanels, removePanel, removePanels} from './panelsSlice';
 import {v4 as uuidv4} from 'uuid';
 import {
   breakpoints,
@@ -37,8 +37,8 @@ type removeScreenPanelPayload = {
 };
 
 type Screen = {
-  id: string;
-  panelIds: string[];
+  id: EntityId;
+  panelIds: EntityId[];
   layouts: Layouts;
 };
 
@@ -65,8 +65,8 @@ const screensSlice = createSlice({
       action: PayloadAction<number>
     ) => {
       const screenId = state.ids[action.payload];
-      removePanels(state.entities[screenId]?.panelIds as string[]);
       screenAdapter.removeOne(state, screenId);
+      removePanels(state.entities[screenId]?.panelIds as string[]);
     },
     moveScreen: (
       state: EntityState<Screen>,
@@ -98,12 +98,11 @@ const screensSlice = createSlice({
         });
       });
 
-      const newScreen: Screen = {
+      screenAdapter.addOne(state, {
         id: uuidv4(),
         panelIds: newPanelIds,
         layouts: newLayouts
-      };
-      screenAdapter.addOne(state, newScreen);
+      });
       copyPanels({panelIds: panelIds, newPanelIds: newPanelIds});
     },
     addScreenPanel: (
@@ -134,13 +133,42 @@ const screensSlice = createSlice({
       state: EntityState<Screen>,
       action: PayloadAction<updateScreenLayoutsPayload>
     ) => {
-      screenAdapter.addOne(state, newScreen);
+      const screenId = state.ids[action.payload.currentIndex];
+      const panelIds = state.entities[screenId]?.panelIds as string[];
+
+      screenAdapter.setOne(state, {
+        id: screenId,
+        panelIds: panelIds,
+        layouts: action.payload.layouts
+      });
     },
     removeScreenPanel: (
       state: EntityState<Screen>,
       action: PayloadAction<removeScreenPanelPayload>
     ) => {
-      screenAdapter.addOne(state, newScreen);
+      const screenId = action.payload.screenId;
+      const panelId = action.payload.panelId as string;
+
+      const panelIds = state.entities[screenId]?.panelIds as string[];
+      const layouts = state.entities[screenId]?.layouts as Layouts;
+
+      const newPanelIds = panelIds.filter((id) => id !== panelId);
+      const newLayouts: Layouts = {};
+
+      keysOfBreakpoints.forEach((breakpoint) => {
+        if (layouts[breakpoint]) {
+          newLayouts[breakpoint] = layouts[breakpoint].filter(
+            (layout) => layout.i !== panelId
+          );
+        }
+      });
+
+      screenAdapter.setOne(state, {
+        id: screenId,
+        panelIds: newPanelIds,
+        layouts: newLayouts
+      });
+      removePanel(panelId);
     }
   }
 });
