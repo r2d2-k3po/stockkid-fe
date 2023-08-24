@@ -1,7 +1,12 @@
 import React, {useCallback, useMemo} from 'react';
-import Panel from './Panel';
+import store from '../../app/store';
+import PanelBase from './PanelBase';
 import {Params, useLoaderData} from 'react-router-dom';
-import {useAppDispatch} from '../../app/hooks';
+import {
+  panelsSelectors,
+  screensSelectors,
+  useAppDispatch
+} from '../../app/hooks';
 import {Layout, Layouts, Responsive, WidthProvider} from 'react-grid-layout';
 import {useMainOutletContext} from './Main';
 import {
@@ -11,12 +16,7 @@ import {
   margin,
   rowHeight
 } from '../../app/constants/reactGridLayoutParemeters';
-import {
-  screensSelectors,
-  updateScreenLayouts
-} from '../../app/slices/screensSlice';
-import store from '../../app/store';
-import {panelsSelectors} from '../../app/slices/panelsSlice';
+import {updateScreenLayouts} from '../../app/slices/screensSlice';
 
 export const loader = ({params}: {params: Params}) => {
   return params.currentScreen as string;
@@ -60,7 +60,7 @@ function VirtualScreen() {
   const screenPanels = useMemo(
     () =>
       panelIds.map((panelId) => (
-        <Panel key={panelId} screenId={screenId} panelId={panelId} />
+        <PanelBase key={panelId} screenId={screenId} panelId={panelId} />
       )),
     [screenId, panelIds]
   );

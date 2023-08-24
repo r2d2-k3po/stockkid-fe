@@ -8,7 +8,12 @@ import React, {
   useRef,
   useState
 } from 'react';
-import {useAppDispatch, useAppSelector} from '../../app/hooks';
+import store from '../../app/store';
+import {
+  screensSelectors,
+  useAppDispatch,
+  useAppSelector
+} from '../../app/hooks';
 import {
   addScreen,
   addScreenPanel,
@@ -20,7 +25,6 @@ import {v4 as uuidv4} from 'uuid';
 import AlertRemoveScreen from './AlertRemoveScreen';
 import {NavLink, Outlet, useNavigate, useOutletContext} from 'react-router-dom';
 import AlertMoveScreen from './AlertMoveScreen';
-import {panelTypes} from './Panel';
 import {breakpoints} from '../../app/constants/reactGridLayoutParemeters';
 import {useTranslation} from 'react-i18next';
 import {
@@ -29,8 +33,8 @@ import {
 } from '../../app/constants/virtualScreenNumbers';
 import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
-import {screensSelectors} from '../../app/slices/screensSlice';
-import store from '../../app/store';
+import {PanelCode} from '../../app/slices/panelsSlice';
+import {panelTypes} from './PanelBase';
 
 type ContextType = {
   setCurrentBreakpoint: React.Dispatch<
@@ -63,9 +67,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
   const [targetScreen, setTargetScreen] = useState<string>('0');
 
-  const [selectedPanel, setSelectedPanel] = useState<
-    keyof typeof panelTypes | '0'
-  >('0');
+  const [selectedPanel, setSelectedPanel] = useState<PanelCode | '0'>('0');
 
   const [currentBreakpoint, setCurrentBreakpoint] =
     useState<keyof typeof breakpoints>('lg');
@@ -167,7 +169,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   const handleChangeSelectedPanel = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
       e.stopPropagation();
-      setSelectedPanel(e.target.value as keyof typeof panelTypes | '0');
+      setSelectedPanel(e.target.value as PanelCode | '0');
     },
     []
   );
@@ -179,7 +181,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
         addScreenPanel({
           currentIndex: parseInt(currentScreen) - 1,
           currentBreakpoint: currentBreakpoint,
-          panelCode: selectedPanel as keyof typeof panelTypes
+          panelCode: selectedPanel as PanelCode
         })
       );
     },

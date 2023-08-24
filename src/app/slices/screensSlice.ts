@@ -1,4 +1,4 @@
-import {Layouts} from 'react-grid-layout';
+import {Layout, Layouts} from 'react-grid-layout';
 import {
   createEntityAdapter,
   createSlice,
@@ -6,14 +6,31 @@ import {
   EntityState,
   PayloadAction
 } from '@reduxjs/toolkit';
-import {RootState} from '../store';
-import {addPanel, copyPanels, removePanel, removePanels} from './panelsSlice';
+import {
+  addPanel,
+  copyPanels,
+  PanelCode,
+  removePanel,
+  removePanels
+} from './panelsSlice';
 import {v4 as uuidv4} from 'uuid';
 import {
   breakpoints,
   keysOfBreakpoints
 } from '../constants/reactGridLayoutParemeters';
-import {panelGrids, panelTypes} from '../../components/main/Panel';
+
+type PanelGrids = Record<PanelCode, object>;
+
+const panelGrids: PanelGrids = {
+  panel0000: {i: '', x: 0, y: 0, w: 1, h: 1},
+  panel0001: {i: '', x: 0, y: 0, w: 1, h: 2},
+  panel0002: {i: '', x: 0, y: 0, w: 1, h: 3},
+  panel0003: {i: '', x: 0, y: 0, w: 2, h: 1},
+  panel0004: {i: '', x: 0, y: 0, w: 2, h: 2},
+  panel0005: {i: '', x: 0, y: 0, w: 2, h: 3},
+  panel0006: {i: '', x: 0, y: 0, w: 3, h: 1},
+  panel0007: {i: '', x: 0, y: 0, w: 3, h: 2}
+};
 
 type moveScreenPayload = {
   currentIndex: number;
@@ -23,7 +40,7 @@ type moveScreenPayload = {
 type addScreenPanelPayload = {
   currentIndex: number;
   currentBreakpoint: keyof typeof breakpoints;
-  panelCode: keyof typeof panelTypes;
+  panelCode: PanelCode;
 };
 
 type updateScreenLayoutsPayload = {
@@ -42,7 +59,7 @@ type Screen = {
   layouts: Layouts;
 };
 
-const screenAdapter = createEntityAdapter<Screen>();
+export const screenAdapter = createEntityAdapter<Screen>();
 
 const initialState: EntityState<Screen> = localStorage.getItem('screens')
   ? JSON.parse(localStorage.getItem('screens') as string)
@@ -117,7 +134,10 @@ const screensSlice = createSlice({
       addPanel({id: newPanelId, panelCode: action.payload.panelCode});
 
       panelIds.push(newPanelId);
-      const layout = {...panelGrids[action.payload.panelCode], i: newPanelId};
+      const layout = {
+        ...panelGrids[action.payload.panelCode],
+        i: newPanelId
+      } as Layout;
       if (!layouts[action.payload.currentBreakpoint]) {
         layouts[action.payload.currentBreakpoint] = [];
       }
@@ -184,7 +204,3 @@ export const {
 } = screensSlice.actions;
 
 export default screensSlice.reducer;
-
-export const screensSelectors = screenAdapter.getSelectors<RootState>(
-  (state) => state.screens
-);

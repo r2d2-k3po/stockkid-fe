@@ -1,5 +1,6 @@
 import React, {
   DetailedHTMLProps,
+  FC,
   forwardRef,
   HTMLAttributes,
   MouseEvent,
@@ -7,25 +8,26 @@ import React, {
   useCallback,
   useRef
 } from 'react';
+import store from '../../app/store';
+import AlertRemovePanel from './AlertRemovePanel';
+import {panelsSelectors, useAppDispatch} from '../../app/hooks';
+import {MaterialSymbol} from 'react-material-symbols';
+import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
+import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
+import {EntityId} from '@reduxjs/toolkit';
+import {removeScreenPanel} from '../../app/slices/screensSlice';
 import Panel0000 from './panels/Panel0000';
-import Panel0001 from './panels/Panel0001';
+import Panel0001, {CommonPanelProps} from './panels/Panel0001';
 import Panel0002 from './panels/Panel0002';
 import Panel0003 from './panels/Panel0003';
 import Panel0004 from './panels/Panel0004';
 import Panel0005 from './panels/Panel0005';
 import Panel0006 from './panels/Panel0006';
 import Panel0007 from './panels/Panel0007';
-import AlertRemovePanel from './AlertRemovePanel';
-import {useAppDispatch} from '../../app/hooks';
-import {MaterialSymbol} from 'react-material-symbols';
-import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
-import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
-import {EntityId} from '@reduxjs/toolkit';
-import {panelsSelectors} from '../../app/slices/panelsSlice';
-import store from '../../app/store';
-import {removeScreenPanel} from '../../app/slices/screensSlice';
+import {PanelCode} from '../../app/slices/panelsSlice';
 
-export const panelTypes = {
+type PanelTypes = Record<PanelCode, FC<CommonPanelProps>>;
+export const panelTypes: PanelTypes = {
   panel0000: Panel0000,
   panel0001: Panel0001,
   panel0002: Panel0002,
@@ -36,18 +38,7 @@ export const panelTypes = {
   panel0007: Panel0007
 };
 
-export const panelGrids = {
-  panel0000: {i: '', x: 0, y: 0, w: 1, h: 1},
-  panel0001: {i: '', x: 0, y: 0, w: 1, h: 2},
-  panel0002: {i: '', x: 0, y: 0, w: 1, h: 3},
-  panel0003: {i: '', x: 0, y: 0, w: 2, h: 1},
-  panel0004: {i: '', x: 0, y: 0, w: 2, h: 2},
-  panel0005: {i: '', x: 0, y: 0, w: 2, h: 3},
-  panel0006: {i: '', x: 0, y: 0, w: 3, h: 1},
-  panel0007: {i: '', x: 0, y: 0, w: 3, h: 2}
-};
-
-type PanelProps = {
+type PanelBaseProps = {
   screenId: EntityId;
   panelId: EntityId;
 };
@@ -57,9 +48,9 @@ type ReactDivProps = DetailedHTMLProps<
   HTMLDivElement
 >;
 
-type DivProps = ReactDivProps & PropsWithChildren<PanelProps>;
+type DivProps = ReactDivProps & PropsWithChildren<PanelBaseProps>;
 
-const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
+const PanelBase = forwardRef<HTMLDivElement, DivProps>(function PanelBase(
   {
     screenId,
     panelId,
@@ -151,4 +142,4 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
   );
 });
 
-export default React.memo(Panel);
+export default React.memo(PanelBase);

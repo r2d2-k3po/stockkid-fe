@@ -1,10 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
 
-export interface User {
-  username: string;
-}
-
 export interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;

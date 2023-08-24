@@ -6,8 +6,8 @@ import React, {
   useMemo
 } from 'react';
 import {useTranslation} from 'react-i18next';
-import {screensSelectors} from '../../app/slices/screensSlice';
 import store from '../../app/store';
+import {screensSelectors} from '../../app/hooks';
 
 type AlertMoveScreenProps = {
   currentScreen: string;
