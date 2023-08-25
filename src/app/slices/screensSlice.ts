@@ -2,13 +2,12 @@ import {Layout, Layouts} from 'react-grid-layout';
 import {
   createEntityAdapter,
   createSlice,
-  EntityId,
   EntityState,
   PayloadAction
 } from '@reduxjs/toolkit';
 import {PanelCode} from './panelsSlice';
-import {v4 as uuidv4} from 'uuid';
 import {keysOfBreakpoints} from '../constants/reactGridLayoutParemeters';
+import {v4 as uuidv4} from 'uuid';
 
 type PanelGrids = Record<PanelCode, object>;
 
@@ -25,7 +24,7 @@ const panelGrids: PanelGrids = {
 
 type RemoveScreenPayload = {
   currentIndex: number;
-  panelIds: EntityId[];
+  panelIds: string[];
 };
 
 type MoveScreenPayload = {
@@ -35,13 +34,13 @@ type MoveScreenPayload = {
 
 type CopyScreenPayload = {
   currentIndex: number;
-  panelIds: EntityId[];
-  newPanelIds: EntityId[];
+  panelIds: string[];
+  newPanelIds: string[];
 };
 
 type AddScreenPanelPayload = {
   currentIndex: number;
-  panelId: EntityId;
+  panelId: string;
   panelCode: PanelCode;
 };
 
@@ -51,13 +50,13 @@ type UpdateScreenLayoutsPayload = {
 };
 
 type RemoveScreenPanelPayload = {
-  screenId: EntityId;
-  panelId: EntityId;
+  screenId: string;
+  panelId: string;
 };
 
 type Screen = {
-  id: EntityId;
-  panelIds: EntityId[];
+  id: string;
+  panelIds: string[];
   layouts: Layouts;
 };
 
@@ -98,26 +97,26 @@ const screensSlice = createSlice({
       action: PayloadAction<CopyScreenPayload>
     ) => {
       const screenId = state.ids[action.payload.currentIndex];
-      const panelIds = state.entities[screenId]?.panelIds as string[];
+      const panelIds = action.payload.panelIds;
+      const newPanelIds = action.payload.newPanelIds;
       const layouts = state.entities[screenId]?.layouts as Layouts;
 
-      const newPanelIds: string[] = [];
       const newLayouts: Layouts = {};
 
-      panelIds.forEach((id) => {
-        const newPanelId = uuidv4();
-        newPanelIds.push(newPanelId);
+      for (let i = 0; i < panelIds.length; i++) {
         keysOfBreakpoints.forEach((breakpoint) => {
-          let layout = layouts[breakpoint]?.find((item) => item.i === id);
+          let layout = layouts[breakpoint]?.find(
+            (item) => item.i === panelIds[i]
+          );
           if (layout) {
-            layout = {...layout, i: newPanelId};
+            layout = {...layout, i: newPanelIds[i]};
             if (!newLayouts[breakpoint]) {
               newLayouts[breakpoint] = [];
             }
             newLayouts[breakpoint].push(layout);
           }
         });
-      });
+      }
 
       screenAdapter.addOne(state, {
         id: uuidv4(),
@@ -155,7 +154,7 @@ const screensSlice = createSlice({
       state: EntityState<Screen>,
       action: PayloadAction<UpdateScreenLayoutsPayload>
     ) => {
-      const screenId = state.ids[action.payload.currentIndex];
+      const screenId = state.ids[action.payload.currentIndex] as string;
       const panelIds = state.entities[screenId]?.panelIds as string[];
 
       screenAdapter.setOne(state, {

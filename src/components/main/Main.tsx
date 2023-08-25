@@ -34,7 +34,6 @@ import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
 import {PanelCode} from '../../app/slices/panelsSlice';
 import {panelTypes} from './PanelBase';
-import {EntityId} from '@reduxjs/toolkit';
 
 type ContextType = {
   compactType: 'vertical' | 'horizontal' | null;
@@ -54,7 +53,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   const visibleAlertMoveScreenRef = useRef<HTMLDivElement>(null);
 
   const screenTotal = screensSelectors.selectTotal(store.getState());
-  const screenIds = screensSelectors.selectIds(store.getState());
+  const screenIds = screensSelectors.selectIds(store.getState()) as string[];
   const screens = useAppSelector((state) => state.screens);
   const panels = useAppSelector((state) => state.panels);
 
@@ -65,7 +64,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   const currentIndex = parseInt(currentScreen) - 1;
 
   const currentPanelIds = screens.entities[screenIds[currentIndex]]
-    ?.panelIds as EntityId[];
+    ?.panelIds as string[];
 
   const [targetScreen, setTargetScreen] = useState<string>('0');
 
@@ -161,7 +160,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   const copyCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      const newPanelIds: EntityId[] = [];
+      const newPanelIds: string[] = [];
       for (let i = 0; i < currentPanelIds.length; i++) {
         newPanelIds.push(uuidv4());
       }

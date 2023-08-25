@@ -1,11 +1,10 @@
 import React, {FC} from 'react';
-import {EntityId} from '@reduxjs/toolkit';
 import store from '../../../app/store';
 import {panelsSelectors} from '../../../app/hooks';
 import {PanelCode} from '../../../app/slices/panelsSlice';
 
 export type CommonPanelProps = {
-  panelId: EntityId;
+  panelId: string;
 };
 
 const Panel0001: FC<CommonPanelProps> = ({panelId}) => {

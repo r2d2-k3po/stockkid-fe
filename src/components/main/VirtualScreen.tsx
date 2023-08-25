@@ -29,13 +29,13 @@ function VirtualScreen() {
   const dispatch = useAppDispatch();
 
   const currentIndex = parseInt(currentScreen) - 1;
-  const screenId = screensSelectors.selectIds(store.getState())[currentIndex];
+  const screenId = screensSelectors.selectIds(store.getState())[
+    currentIndex
+  ] as string;
   const layouts = screensSelectors.selectById(store.getState(), screenId)
     ?.layouts as Layouts;
-  const panelIds = screensSelectors.selectById(
-    store.getState(),
-    screenId
-  )?.panelIds;
+  const panelIds = screensSelectors.selectById(store.getState(), screenId)
+    ?.panelIds as string[];
 
   const handleLayoutChange = useCallback(
     (currentLayout: Layout[], allLayouts: Layouts) => {

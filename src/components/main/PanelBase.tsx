@@ -14,10 +14,9 @@ import {panelsSelectors, useAppDispatch} from '../../app/hooks';
 import {MaterialSymbol} from 'react-material-symbols';
 import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
-import {EntityId} from '@reduxjs/toolkit';
 import {removeScreenPanel} from '../../app/slices/screensSlice';
 import Panel0000 from './panels/Panel0000';
-import Panel0001, {CommonPanelProps} from './panels/Panel0001';
+import Panel0001 from './panels/Panel0001';
 import Panel0002 from './panels/Panel0002';
 import Panel0003 from './panels/Panel0003';
 import Panel0004 from './panels/Panel0004';
@@ -25,6 +24,10 @@ import Panel0005 from './panels/Panel0005';
 import Panel0006 from './panels/Panel0006';
 import Panel0007 from './panels/Panel0007';
 import {PanelCode} from '../../app/slices/panelsSlice';
+
+type CommonPanelProps = {
+  panelId: string;
+};
 
 type PanelTypes = Record<PanelCode, FC<CommonPanelProps>>;
 export const panelTypes: PanelTypes = {
@@ -39,8 +42,8 @@ export const panelTypes: PanelTypes = {
 };
 
 type PanelBaseProps = {
-  screenId: EntityId;
-  panelId: EntityId;
+  screenId: string;
+  panelId: string;
 };
 
 type ReactDivProps = DetailedHTMLProps<

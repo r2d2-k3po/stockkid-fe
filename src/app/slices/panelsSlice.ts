@@ -1,9 +1,4 @@
-import {
-  createEntityAdapter,
-  createSlice,
-  EntityId,
-  EntityState
-} from '@reduxjs/toolkit';
+import {createEntityAdapter, createSlice, EntityState} from '@reduxjs/toolkit';
 import {
   addScreenPanel,
   copyScreen,
@@ -22,7 +17,7 @@ export type PanelCode =
   | 'panel0007';
 
 type Panel = {
-  id: EntityId;
+  id: string;
   panelCode: PanelCode;
 };
 
