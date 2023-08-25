@@ -1,5 +1,6 @@
 import React, {
   DetailedHTMLProps,
+  FC,
   forwardRef,
   HTMLAttributes,
   MouseEvent,
@@ -7,6 +8,13 @@ import React, {
   useCallback,
   useRef
 } from 'react';
+import store from '../../app/store';
+import AlertRemovePanel from './AlertRemovePanel';
+import {panelsSelectors, useAppDispatch} from '../../app/hooks';
+import {MaterialSymbol} from 'react-material-symbols';
+import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
+import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
+import {removeScreenPanel} from '../../app/slices/screensSlice';
 import Panel0000 from './panels/Panel0000';
 import Panel0001 from './panels/Panel0001';
 import Panel0002 from './panels/Panel0002';
@@ -15,14 +23,14 @@ import Panel0004 from './panels/Panel0004';
 import Panel0005 from './panels/Panel0005';
 import Panel0006 from './panels/Panel0006';
 import Panel0007 from './panels/Panel0007';
-import {removePanel} from '../../app/slices/screenPanelMapSlice';
-import AlertRemovePanel from './AlertRemovePanel';
-import {useAppDispatch} from '../../app/hooks';
-import {MaterialSymbol} from 'react-material-symbols';
-import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
-import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
+import {PanelCode} from '../../app/slices/panelsSlice';
 
-export const panels = {
+type CommonPanelProps = {
+  panelId: string;
+};
+
+type PanelTypes = Record<PanelCode, FC<CommonPanelProps>>;
+export const panelTypes: PanelTypes = {
   panel0000: Panel0000,
   panel0001: Panel0001,
   panel0002: Panel0002,
@@ -33,28 +41,9 @@ export const panels = {
   panel0007: Panel0007
 };
 
-export const panelGrids = {
-  panel0000: {i: '', x: 0, y: 0, w: 1, h: 1},
-  panel0001: {i: '', x: 0, y: 0, w: 1, h: 2},
-  panel0002: {i: '', x: 0, y: 0, w: 1, h: 3},
-  panel0003: {i: '', x: 0, y: 0, w: 2, h: 1},
-  panel0004: {i: '', x: 0, y: 0, w: 2, h: 2},
-  panel0005: {i: '', x: 0, y: 0, w: 2, h: 3},
-  panel0006: {i: '', x: 0, y: 0, w: 3, h: 1},
-  panel0007: {i: '', x: 0, y: 0, w: 3, h: 2}
-};
-
-export type PanelType = {
-  panelCode: keyof typeof panels;
-};
-
-export type PanelProps = {
-  uuidP: string;
-  panelType: PanelType;
-};
-
-type UuidPanelProps = PanelProps & {
-  uuid: string;
+type PanelBaseProps = {
+  screenId: string;
+  panelId: string;
 };
 
 type ReactDivProps = DetailedHTMLProps<
@@ -62,13 +51,12 @@ type ReactDivProps = DetailedHTMLProps<
   HTMLDivElement
 >;
 
-type DivProps = ReactDivProps & PropsWithChildren<UuidPanelProps>;
+type DivProps = ReactDivProps & PropsWithChildren<PanelBaseProps>;
 
-const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
+const PanelBase = forwardRef<HTMLDivElement, DivProps>(function PanelBase(
   {
-    uuid,
-    uuidP,
-    panelType,
+    screenId,
+    panelId,
     style,
     className: _className,
     onMouseDown,
@@ -82,6 +70,9 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
   const visiblePanelButtonsRef = useRef<HTMLDivElement>(null);
   const visibleAlertRemovePanelRef = useRef<HTMLDivElement>(null);
 
+  const panelCode = panelsSelectors.selectById(store.getState(), panelId)
+    ?.panelCode as PanelCode;
+
   const removeCurrentPanel = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     invisibleRefVisibleRef(visiblePanelButtonsRef, visibleAlertRemovePanelRef);
@@ -90,14 +81,15 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
   const reallyRemoveCurrentPanel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      const payload = {
-        uuid: uuid,
-        uuidP: uuidP
-      };
-      dispatch(removePanel(payload));
+      dispatch(
+        removeScreenPanel({
+          screenId: screenId,
+          panelId: panelId
+        })
+      );
       visibleRefHiddenRef(visiblePanelButtonsRef, visibleAlertRemovePanelRef);
     },
-    [uuid, uuidP, dispatch]
+    [screenId, panelId, dispatch]
   );
 
   const cancelRemoveCurrentPanel = useCallback(
@@ -108,7 +100,7 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
     []
   );
 
-  const SpecificPanel = panels[panelType.panelCode];
+  const SpecificPanel = panelTypes[panelCode];
 
   const className = [
     _className,
@@ -147,10 +139,10 @@ const Panel = forwardRef<HTMLDivElement, DivProps>(function Panel(
           onClickRemove={reallyRemoveCurrentPanel}
         />
       </div>
-      <SpecificPanel uuidP={uuidP} panelType={panelType} />
+      <SpecificPanel panelId={panelId} />
       {children}
     </div>
   );
 });
 
-export default React.memo(Panel);
+export default React.memo(PanelBase);

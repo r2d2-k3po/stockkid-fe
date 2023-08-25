@@ -1,11 +1,20 @@
 import React, {FC} from 'react';
-import {PanelProps} from '../Panel';
+import store from '../../../app/store';
+import {panelsSelectors} from '../../../app/hooks';
+import {PanelCode} from '../../../app/slices/panelsSlice';
 
-const Panel0000: FC<PanelProps> = ({uuidP, panelType}) => {
+type CommonPanelProps = {
+  panelId: string;
+};
+
+const Panel0000: FC<CommonPanelProps> = ({panelId}) => {
+  const panelCode = panelsSelectors.selectById(store.getState(), panelId)
+    ?.panelCode as PanelCode;
+
   return (
     <div>
-      <p>{panelType.panelCode}</p>
-      <p> uuidP : {uuidP} </p>
+      <p>{panelCode}</p>
+      <p> panelId : {panelId} </p>
     </div>
   );
 };
