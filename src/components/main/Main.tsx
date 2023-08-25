@@ -25,7 +25,6 @@ import {v4 as uuidv4} from 'uuid';
 import AlertRemoveScreen from './AlertRemoveScreen';
 import {NavLink, Outlet, useNavigate, useOutletContext} from 'react-router-dom';
 import AlertMoveScreen from './AlertMoveScreen';
-import {breakpoints} from '../../app/constants/reactGridLayoutParemeters';
 import {useTranslation} from 'react-i18next';
 import {
   maxVirtualScreenNumber,
@@ -35,11 +34,9 @@ import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
 import {PanelCode} from '../../app/slices/panelsSlice';
 import {panelTypes} from './PanelBase';
+import {EntityId} from '@reduxjs/toolkit';
 
 type ContextType = {
-  setCurrentBreakpoint: React.Dispatch<
-    React.SetStateAction<keyof typeof breakpoints>
-  >;
   compactType: 'vertical' | 'horizontal' | null;
 };
 
@@ -65,12 +62,14 @@ const Main: FC<MainProps> = ({mainClassName}) => {
     localStorage.getItem('currentScreen') || '1'
   );
 
+  const currentIndex = parseInt(currentScreen) - 1;
+
+  const currentPanelIds = screens.entities[screenIds[currentIndex]]
+    ?.panelIds as EntityId[];
+
   const [targetScreen, setTargetScreen] = useState<string>('0');
 
   const [selectedPanel, setSelectedPanel] = useState<PanelCode | '0'>('0');
-
-  const [currentBreakpoint, setCurrentBreakpoint] =
-    useState<keyof typeof breakpoints>('lg');
 
   const [compactType, setCompactType] = useState<
     'vertical' | 'horizontal' | 'null'
@@ -107,15 +106,19 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   const reallyRemoveCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      const index = parseInt(currentScreen) - 1;
-      dispatch(removeScreen(index));
-      if (index >= screenTotal - 1) {
-        setCurrentScreen(index.toString());
-        navigate(`/screen/${index.toString()}`);
+      dispatch(
+        removeScreen({
+          currentIndex: currentIndex,
+          panelIds: currentPanelIds
+        })
+      );
+      if (currentIndex >= screenTotal - 1) {
+        setCurrentScreen(currentIndex.toString());
+        navigate(`/screen/${currentIndex.toString()}`);
       }
       visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertRemoveScreenRef);
     },
-    [screenTotal, currentScreen, dispatch, navigate]
+    [screenTotal, currentIndex, currentPanelIds, dispatch, navigate]
   );
 
   const cancelRemoveCurrentScreen = useCallback(
@@ -136,7 +139,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
       e.stopPropagation();
       dispatch(
         moveScreen({
-          currentIndex: parseInt(currentScreen) - 1,
+          currentIndex: currentIndex,
           targetIndex: parseInt(targetScreen) - 1
         })
       );
@@ -144,7 +147,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
       navigate(`/screen/${targetScreen}`);
       visibleRefHiddenRef(visibleScreenButtonsRef, visibleAlertMoveScreenRef);
     },
-    [currentScreen, targetScreen, dispatch, navigate]
+    [currentIndex, targetScreen, dispatch, navigate]
   );
 
   const cancelMoveCurrentScreen = useCallback(
@@ -158,12 +161,22 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   const copyCurrentScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      dispatch(copyScreen(parseInt(currentScreen) - 1));
+      const newPanelIds: EntityId[] = [];
+      for (let i = 0; i < currentPanelIds.length; i++) {
+        newPanelIds.push(uuidv4());
+      }
+      dispatch(
+        copyScreen({
+          currentIndex: currentIndex,
+          panelIds: currentPanelIds,
+          newPanelIds: newPanelIds
+        })
+      );
       const copiedScreen = (screenTotal + 1).toString();
       setCurrentScreen(copiedScreen);
       navigate('screen/' + copiedScreen);
     },
-    [screenTotal, currentScreen, dispatch, navigate]
+    [screenTotal, currentIndex, currentPanelIds, dispatch, navigate]
   );
 
   const handleChangeSelectedPanel = useCallback(
@@ -179,13 +192,13 @@ const Main: FC<MainProps> = ({mainClassName}) => {
       e.stopPropagation();
       dispatch(
         addScreenPanel({
-          currentIndex: parseInt(currentScreen) - 1,
-          currentBreakpoint: currentBreakpoint,
+          currentIndex: currentIndex,
+          panelId: uuidv4(),
           panelCode: selectedPanel as PanelCode
         })
       );
     },
-    [currentScreen, selectedPanel, currentBreakpoint, dispatch]
+    [currentIndex, selectedPanel, dispatch]
   );
 
   const handleScreenButtonClick = useCallback(
@@ -343,7 +356,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
           </select>
         </div>
       </div>
-      <Outlet context={{setCurrentBreakpoint, compactType}} />
+      <Outlet context={{compactType}} />
     </div>
   );
 };

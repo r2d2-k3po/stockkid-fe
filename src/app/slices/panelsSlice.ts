@@ -2,9 +2,14 @@ import {
   createEntityAdapter,
   createSlice,
   EntityId,
-  EntityState,
-  PayloadAction
+  EntityState
 } from '@reduxjs/toolkit';
+import {
+  addScreenPanel,
+  copyScreen,
+  removeScreen,
+  removeScreenPanel
+} from './screensSlice';
 
 export type PanelCode =
   | 'panel0000'
@@ -15,11 +20,6 @@ export type PanelCode =
   | 'panel0005'
   | 'panel0006'
   | 'panel0007';
-
-type copyPanelsPayload = {
-  panelIds: EntityId[];
-  newPanelIds: EntityId[];
-};
 
 type Panel = {
   id: EntityId;
@@ -35,26 +35,31 @@ const initialState: EntityState<Panel> = localStorage.getItem('panels')
 const panelsSlice = createSlice({
   name: 'panels',
   initialState,
-  reducers: {
-    addPanel: panelAdapter.addOne,
-    removePanel: panelAdapter.removeOne,
-    removePanels: panelAdapter.removeMany,
-    copyPanels: (
-      state: EntityState<Panel>,
-      action: PayloadAction<copyPanelsPayload>
-    ) => {
-      for (let i = 0; i < action.payload.panelIds.length; i++) {
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(addScreenPanel, (state, action) => {
         panelAdapter.addOne(state, {
-          id: action.payload.newPanelIds[i],
-          panelCode: state.entities[action.payload.panelIds[i]]
-            ?.panelCode as PanelCode
+          id: action.payload.panelId,
+          panelCode: action.payload.panelCode
         });
-      }
-    }
+      })
+      .addCase(removeScreenPanel, (state, action) => {
+        panelAdapter.removeOne(state, action.payload.panelId);
+      })
+      .addCase(removeScreen, (state, action) => {
+        panelAdapter.removeMany(state, action.payload.panelIds);
+      })
+      .addCase(copyScreen, (state, action) => {
+        for (let i = 0; i < action.payload.panelIds.length; i++) {
+          panelAdapter.addOne(state, {
+            id: action.payload.newPanelIds[i],
+            panelCode: state.entities[action.payload.panelIds[i]]
+              ?.panelCode as PanelCode
+          });
+        }
+      });
   }
 });
-
-export const {addPanel, removePanel, removePanels, copyPanels} =
-  panelsSlice.actions;
 
 export default panelsSlice.reducer;

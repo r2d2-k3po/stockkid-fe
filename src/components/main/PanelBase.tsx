@@ -68,7 +68,7 @@ const PanelBase = forwardRef<HTMLDivElement, DivProps>(function PanelBase(
   const visibleAlertRemovePanelRef = useRef<HTMLDivElement>(null);
 
   const panelCode = panelsSelectors.selectById(store.getState(), panelId)
-    ?.panelCode as keyof typeof panelTypes;
+    ?.panelCode as PanelCode;
 
   const removeCurrentPanel = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();

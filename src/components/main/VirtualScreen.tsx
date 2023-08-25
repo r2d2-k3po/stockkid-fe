@@ -2,11 +2,7 @@ import React, {useCallback, useMemo} from 'react';
 import store from '../../app/store';
 import PanelBase from './PanelBase';
 import {Params, useLoaderData} from 'react-router-dom';
-import {
-  panelsSelectors,
-  screensSelectors,
-  useAppDispatch
-} from '../../app/hooks';
+import {screensSelectors, useAppDispatch} from '../../app/hooks';
 import {Layout, Layouts, Responsive, WidthProvider} from 'react-grid-layout';
 import {useMainOutletContext} from './Main';
 import {
@@ -29,21 +25,17 @@ function VirtualScreen() {
   );
 
   const currentScreen = useLoaderData() as string;
-  const {setCurrentBreakpoint, compactType} = useMainOutletContext();
+  const {compactType} = useMainOutletContext();
   const dispatch = useAppDispatch();
 
   const currentIndex = parseInt(currentScreen) - 1;
   const screenId = screensSelectors.selectIds(store.getState())[currentIndex];
   const layouts = screensSelectors.selectById(store.getState(), screenId)
     ?.layouts as Layouts;
-  const panelIds = panelsSelectors.selectIds(store.getState());
-
-  const handleBreakpointChange = useCallback(
-    (newBreakpoint: string) => {
-      setCurrentBreakpoint(newBreakpoint as keyof typeof breakpoints);
-    },
-    [setCurrentBreakpoint]
-  );
+  const panelIds = screensSelectors.selectById(
+    store.getState(),
+    screenId
+  )?.panelIds;
 
   const handleLayoutChange = useCallback(
     (currentLayout: Layout[], allLayouts: Layouts) => {
@@ -59,7 +51,7 @@ function VirtualScreen() {
 
   const screenPanels = useMemo(
     () =>
-      panelIds.map((panelId) => (
+      panelIds?.map((panelId) => (
         <PanelBase key={panelId} screenId={screenId} panelId={panelId} />
       )),
     [screenId, panelIds]
@@ -77,7 +69,7 @@ function VirtualScreen() {
       margin={margin}
       compactType={compactType}
       onLayoutChange={handleLayoutChange}
-      onBreakpointChange={handleBreakpointChange}
+      // onBreakpointChange={handleBreakpointChange}
     >
       {!!screenPanels && screenPanels}
     </ResponsiveReactGridLayout>
