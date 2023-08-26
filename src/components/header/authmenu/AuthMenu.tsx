@@ -19,14 +19,10 @@ import {
   tokenDecoder
 } from '../../../utils/tokenDecoder';
 import {
-  AuthState,
   updateAccessToken,
-  updateRefreshToken,
-  updateTokens
+  updateRefreshToken
 } from '../../../app/slices/authSlice';
-import {useGoogleLogin} from '@react-oauth/google';
-import GoogleButton from './GoogleButton';
-import {useGoogleSigninMutation} from '../../../app/api';
+import GoogleSignin from './GoogleSignin';
 
 const AuthMenu = () => {
   const {t} = useTranslation();
@@ -135,35 +131,6 @@ const AuthMenu = () => {
     }
   }, [decodedRefreshToken?.exp, dispatch]);
 
-  const [requestGoogleSignin, {isError, reset}] = useGoogleSigninMutation();
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (codeResponse) => {
-      console.log('codeResponse.code : ' + codeResponse.code);
-      try {
-        const googleSigninRequest = {
-          authcode: codeResponse.code
-        };
-        const data = await requestGoogleSignin(googleSigninRequest).unwrap();
-        const newTokens = data.apiObj as AuthState;
-        dispatch(updateTokens(newTokens));
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    onError: (errorResponse) => console.log(errorResponse),
-    flow: 'auth-code'
-  });
-
-  useEffect(() => {
-    if (isError) {
-      const id = setTimeout(() => {
-        reset();
-      }, 3000);
-      return () => clearTimeout(id);
-    }
-  }, [isError, reset]);
-
   return (
     <div className="flex">
       <div onClick={toggleShowLoggedInButtons}>
@@ -201,10 +168,7 @@ const AuthMenu = () => {
                 <div onClick={showRef(visibleSignupFormRef)}>
                   <MaterialSymbolButton icon="person_add" />
                 </div>
-                <div onClick={() => googleLogin()}>
-                  <GoogleButton />
-                </div>
-                {isError && <div>{t('AuthMenu.GoogleSigninError')}</div>}
+                <GoogleSignin />
               </div>
             ))}
         </div>
