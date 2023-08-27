@@ -23,6 +23,7 @@ import {
   updateRefreshToken
 } from '../../../app/slices/authSlice';
 import GoogleSignin from './GoogleSignin';
+import NaverLogin from './NaverLogin';
 
 const AuthMenu = () => {
   const {t} = useTranslation();
@@ -169,6 +170,7 @@ const AuthMenu = () => {
                   <MaterialSymbolButton icon="person_add" />
                 </div>
                 <GoogleSignin />
+                <NaverLogin />
               </div>
             ))}
         </div>

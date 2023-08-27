@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import GoogleButton from './GoogleButton';
+import GoogleButton from '../../common/GoogleButton';
 import {useGoogleSigninMutation} from '../../../app/api';
 import {useGoogleLogin} from '@react-oauth/google';
 import {AuthState, updateTokens} from '../../../app/slices/authSlice';

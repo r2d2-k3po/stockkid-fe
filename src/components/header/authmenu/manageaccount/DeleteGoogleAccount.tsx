@@ -3,7 +3,7 @@ import {useTranslation} from 'react-i18next';
 import {useDeleteGoogleAccountMutation} from '../../../../app/api';
 import {useAppDispatch} from '../../../../app/hooks';
 import {updateRefreshToken} from '../../../../app/slices/authSlice';
-import GoogleButton from '../GoogleButton';
+import GoogleButton from '../../../common/GoogleButton';
 import {useGoogleLogin} from '@react-oauth/google';
 
 type DeleteAccountProps = {
