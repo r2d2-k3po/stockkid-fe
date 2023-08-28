@@ -32,6 +32,11 @@ export interface GoogleSigninRequest {
   authcode: string;
 }
 
+export interface NaverSigninRequest {
+  authcode: string;
+  state: string;
+}
+
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
@@ -67,6 +72,13 @@ export const api = createApi({
         url: 'google/member/signin',
         method: 'POST',
         body: googleSigninRequest
+      })
+    }),
+    naverSignin: builder.mutation<ResponseEntity, NaverSigninRequest>({
+      query: (naverSigninRequest) => ({
+        url: 'naver/member/signin',
+        method: 'POST',
+        body: naverSigninRequest
       })
     }),
     changePassword: builder.mutation<ResponseEntity, PasswordChangeRequest>({
@@ -111,6 +123,7 @@ export const {
   useSignupMutation,
   useLoginMutation,
   useGoogleSigninMutation,
+  useNaverSigninMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation,
   useDeleteGoogleAccountMutation,
