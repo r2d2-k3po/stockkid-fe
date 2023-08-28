@@ -21,7 +21,6 @@ import {
   moveScreen,
   removeScreen
 } from '../../app/slices/screensSlice';
-import {v4 as uuidv4} from 'uuid';
 import AlertRemoveScreen from './AlertRemoveScreen';
 import {NavLink, Outlet, useNavigate, useOutletContext} from 'react-router-dom';
 import AlertMoveScreen from './AlertMoveScreen';
@@ -34,6 +33,7 @@ import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
 import {PanelCode} from '../../app/slices/panelsSlice';
 import {panelTypes} from './PanelBase';
+import {nanoid} from 'nanoid';
 
 type ContextType = {
   compactType: 'vertical' | 'horizontal' | null;
@@ -77,7 +77,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   // initialize screen 1
   useEffect(() => {
     if (!localStorage.getItem('screens')) {
-      dispatch(addScreen(uuidv4()));
+      dispatch(addScreen(nanoid()));
       setCurrentScreen('1');
       navigate('screen/1');
     }
@@ -86,7 +86,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   const addVirtualScreen = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      dispatch(addScreen(uuidv4()));
+      dispatch(addScreen(nanoid()));
     },
     [dispatch]
   );
@@ -162,7 +162,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
       e.stopPropagation();
       const newPanelIds: string[] = [];
       for (let i = 0; i < currentPanelIds.length; i++) {
-        newPanelIds.push(uuidv4());
+        newPanelIds.push(nanoid());
       }
       dispatch(
         copyScreen({
@@ -192,7 +192,7 @@ const Main: FC<MainProps> = ({mainClassName}) => {
       dispatch(
         addScreenPanel({
           currentIndex: currentIndex,
-          panelId: uuidv4(),
+          panelId: nanoid(),
           panelCode: selectedPanel as PanelCode
         })
       );

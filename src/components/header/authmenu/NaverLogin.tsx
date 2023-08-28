@@ -8,18 +8,6 @@ import NaverButton from '../../common/NaverButton';
 const NaverLogin = () => {
   const naverIdLoginRef = useRef<HTMLDivElement>(null);
 
-  // const naver_id_login = useCallback(async (e: MouseEvent<HTMLDivElement>) => {
-  //   e.stopPropagation();
-  //
-  //   // try {
-  //   //
-  //   // } catch (err) {
-  //   //   console.log(err);
-  //   // } finally {
-  //   //
-  //   // }
-  // }, []);
-
   const handleClickNaverIdLogin = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
@@ -29,8 +17,7 @@ const NaverLogin = () => {
   );
 
   useEffect(() => {
-    const naver = (window as any).naver;
-    const naverLogin = new naver.LoginWithNaverId({
+    const naverLogin = new (window as any).naver.LoginWithNaverId({
       clientId: naverClientId,
       callbackUrl: naverCallbackUrl,
       isPopup: true,

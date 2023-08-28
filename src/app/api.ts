@@ -33,6 +33,7 @@ export interface GoogleSigninRequest {
 }
 
 export const api = createApi({
+  reducerPath: 'api',
   baseQuery: fetchBaseQuery({
     baseUrl: apiBaseUrl,
     prepareHeaders: (headers, {getState}) => {
