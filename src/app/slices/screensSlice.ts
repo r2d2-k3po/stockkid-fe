@@ -7,7 +7,7 @@ import {
 } from '@reduxjs/toolkit';
 import {PanelCode} from './panelsSlice';
 import {keysOfBreakpoints} from '../constants/reactGridLayoutParemeters';
-import {v4 as uuidv4} from 'uuid';
+import {nanoid} from 'nanoid';
 
 type PanelGrids = Record<PanelCode, object>;
 
@@ -119,7 +119,7 @@ const screensSlice = createSlice({
       }
 
       screenAdapter.addOne(state, {
-        id: uuidv4(),
+        id: nanoid(),
         panelIds: newPanelIds,
         layouts: newLayouts
       });

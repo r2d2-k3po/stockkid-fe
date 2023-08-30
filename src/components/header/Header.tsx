@@ -6,7 +6,7 @@ import Search from './Search';
 import FixedPin from '../common/FixedPin';
 import {useMeasure} from 'react-use';
 import AuthMenu from './authmenu/AuthMenu';
-import {googleClientId} from '../../app/constants/clientIds';
+import {googleClientId} from '../../app/constants/clientInfo';
 import {GoogleOAuthProvider} from '@react-oauth/google';
 
 export type HeaderProps = {

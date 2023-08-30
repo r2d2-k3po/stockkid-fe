@@ -32,7 +32,13 @@ export interface GoogleSigninRequest {
   authcode: string;
 }
 
+export interface NaverSigninRequest {
+  authcode: string;
+  state: string;
+}
+
 export const api = createApi({
+  reducerPath: 'api',
   baseQuery: fetchBaseQuery({
     baseUrl: apiBaseUrl,
     prepareHeaders: (headers, {getState}) => {
@@ -68,6 +74,13 @@ export const api = createApi({
         body: googleSigninRequest
       })
     }),
+    naverSignin: builder.mutation<ResponseEntity, NaverSigninRequest>({
+      query: (naverSigninRequest) => ({
+        url: 'naver/member/signin',
+        method: 'POST',
+        body: naverSigninRequest
+      })
+    }),
     changePassword: builder.mutation<ResponseEntity, PasswordChangeRequest>({
       query: (passwordChangeRequest) => ({
         url: 'access/member/changePassword',
@@ -85,6 +98,13 @@ export const api = createApi({
     deleteGoogleAccount: builder.mutation<ResponseEntity, GoogleSigninRequest>({
       query: (accountDeleteRequest) => ({
         url: 'google/member/deleteAccount',
+        method: 'PATCH',
+        body: accountDeleteRequest
+      })
+    }),
+    deleteNaverAccount: builder.mutation<ResponseEntity, NaverSigninRequest>({
+      query: (accountDeleteRequest) => ({
+        url: 'naver/member/deleteAccount',
         method: 'PATCH',
         body: accountDeleteRequest
       })
@@ -110,9 +130,11 @@ export const {
   useSignupMutation,
   useLoginMutation,
   useGoogleSigninMutation,
+  useNaverSigninMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation,
   useDeleteGoogleAccountMutation,
+  useDeleteNaverAccountMutation,
   useRefreshTokensMutation,
   useLogoutMutation
 } = api;

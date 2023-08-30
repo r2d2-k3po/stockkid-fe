@@ -17,6 +17,7 @@
   },
   "AuthMenu": {
     "GoogleSigninError": "Google sign in error!",
+    "NaverLoginError": "Naver login error!",
     "expiresInMinutes": "Logout: in {{expiresInMinutesRefresh}} minutes"
   },
   "ChangePassword": {

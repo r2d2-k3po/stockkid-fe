@@ -17,6 +17,7 @@
   },
   "AuthMenu": {
     "GoogleSigninError": "구글 로그인 에러!",
+    "NaverLoginError": "네이버 로그인 에러!",
     "expiresInMinutes": "로그아웃: {{expiresInMinutesRefresh}}분 후"
   },
   "ChangePassword": {

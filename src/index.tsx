@@ -14,6 +14,7 @@ import AppError from './components/common/AppError';
 import VirtualScreen, {
   loader as virtualScreenLoader
 } from './components/main/VirtualScreen';
+import NaverCallback, {loader as naverCallbackLoader} from './NaverCallback';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -38,6 +39,11 @@ const router = createBrowserRouter([
         ]
       }
     ]
+  },
+  {
+    path: '/callback/naver',
+    loader: naverCallbackLoader,
+    element: <NaverCallback />
   }
 ]);
 

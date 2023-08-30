@@ -4,6 +4,7 @@ import MaterialSymbolButton from '../../../common/MaterialSymbolButton';
 import ChangePassword from './ChangePassword';
 import DeleteAccount from './DeleteAccount';
 import DeleteGoogleAccount from './DeleteGoogleAccount';
+import DeleteNaverAccount from './DeleteNaverAccount';
 
 type ManageAccountProps = {
   loginMethod: string | null;
@@ -71,6 +72,13 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
       )}
       {loginMethod == 'GGL' && currentTask == 'deleteAccount' && (
         <DeleteGoogleAccount
+          hideThisRef={hideThisRef}
+          setIsUninitialized={setIsUninitialized}
+          setIsLoading={setIsLoading}
+        />
+      )}
+      {loginMethod == 'NAV' && currentTask == 'deleteAccount' && (
+        <DeleteNaverAccount
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}
           setIsLoading={setIsLoading}
