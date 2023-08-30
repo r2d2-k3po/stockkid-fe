@@ -40,6 +40,8 @@ const NaverCallback = () => {
   return (
     <>
       <div>Naver Login Callback</div>
+      <div>naverResponse.state : {naverResponse.state}</div>
+      <div>naverState : {naverState}</div>
       {(!naverResponse.code || !checkState) && (
         <div>{t('AuthMenu.NaverLoginError')}</div>
       )}

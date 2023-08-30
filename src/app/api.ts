@@ -102,6 +102,13 @@ export const api = createApi({
         body: accountDeleteRequest
       })
     }),
+    deleteNaverAccount: builder.mutation<ResponseEntity, NaverSigninRequest>({
+      query: (accountDeleteRequest) => ({
+        url: 'naver/member/deleteAccount',
+        method: 'PATCH',
+        body: accountDeleteRequest
+      })
+    }),
     refreshTokens: builder.mutation<ResponseEntity, AuthState>({
       query: (tokensRefreshRequest) => ({
         url: 'refresh/tokens',
@@ -127,6 +134,7 @@ export const {
   useChangePasswordMutation,
   useDeleteAccountMutation,
   useDeleteGoogleAccountMutation,
+  useDeleteNaverAccountMutation,
   useRefreshTokensMutation,
   useLogoutMutation
 } = api;

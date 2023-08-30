@@ -76,7 +76,6 @@ const NaverLogin = () => {
               console.log(err);
             } finally {
               localStorage.removeItem('code');
-              localStorage.removeItem('com.naver.nid.oauth.state_token');
             }
           }
         } else {
@@ -91,6 +90,7 @@ const NaverLogin = () => {
     if (isSuccess || isError) {
       const id = setTimeout(() => {
         reset();
+        setIsClicked(false);
       }, 3000);
       return () => clearTimeout(id);
     }
