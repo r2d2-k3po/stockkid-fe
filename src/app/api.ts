@@ -1,7 +1,13 @@
-import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
+import {
+  BaseQueryFn,
+  createApi,
+  FetchArgs,
+  fetchBaseQuery,
+  FetchBaseQueryError
+} from '@reduxjs/toolkit/query/react';
 import {RootState} from './store';
 import {apiBaseUrl} from './constants/baseUrls';
-import {AuthState} from './slices/authSlice';
+import {AuthState, updateRefreshToken, updateTokens} from './slices/authSlice';
 
 export interface ResponseEntity {
   apiStatus: string;
@@ -37,20 +43,51 @@ export interface NaverSigninRequest {
   state: string;
 }
 
+const baseQuery = fetchBaseQuery({
+  baseUrl: apiBaseUrl,
+  prepareHeaders: (headers, {getState}) => {
+    const accessToken = (getState() as RootState).auth.accessToken;
+    if (accessToken) {
+      headers.set('authorization', `Bearer ${accessToken}`);
+    }
+    return headers;
+  }
+});
+
+const baseQueryWithRefresh: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+  if (result.error && result.error.status === 401) {
+    // try to get a new token
+    const refreshResult = await baseQuery(
+      {
+        url: 'refresh/tokens',
+        method: 'PATCH',
+        body: (api.getState() as RootState).auth
+      },
+      api,
+      extraOptions
+    );
+    if (refreshResult.data) {
+      // store the new token
+      api.dispatch(
+        updateTokens((refreshResult.data as ResponseEntity).apiObj as AuthState)
+      );
+      // retry the initial query
+      result = await baseQuery(args, api, extraOptions);
+    } else {
+      api.dispatch(updateRefreshToken(null));
+    }
+  }
+  return result;
+};
+
 export const api = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({
-    baseUrl: apiBaseUrl,
-    prepareHeaders: (headers, {getState}) => {
-      // By default, if we have a token in the store, let's use that for authenticated requests
-      const accessToken = (getState() as RootState).auth.accessToken;
-      if (accessToken) {
-        headers.set('authorization', `Bearer ${accessToken}`);
-      }
-      return headers;
-    },
-    jsonContentType: 'application/json'
-  }),
+  baseQuery: baseQueryWithRefresh,
   tagTypes: [],
   endpoints: (builder) => ({
     signup: builder.mutation<ResponseEntity, SignupRequest>({
@@ -109,13 +146,6 @@ export const api = createApi({
         body: accountDeleteRequest
       })
     }),
-    refreshTokens: builder.mutation<ResponseEntity, AuthState>({
-      query: (tokensRefreshRequest) => ({
-        url: 'refresh/tokens',
-        method: 'PATCH',
-        body: tokensRefreshRequest
-      })
-    }),
     logout: builder.mutation<ResponseEntity, AuthState>({
       query: (logoutRequest) => ({
         url: 'refresh/logout',
@@ -135,6 +165,5 @@ export const {
   useDeleteAccountMutation,
   useDeleteGoogleAccountMutation,
   useDeleteNaverAccountMutation,
-  useRefreshTokensMutation,
   useLogoutMutation
 } = api;
