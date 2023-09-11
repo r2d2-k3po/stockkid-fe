@@ -21,6 +21,7 @@ import {
 import {updateRefreshToken} from '../../../app/slices/authSlice';
 import GoogleSignin from './GoogleSignin';
 import NaverLogin from './NaverLogin';
+import KakaoLogin from './KakaoLogin';
 
 const AuthMenu = () => {
   const {t} = useTranslation();
@@ -149,6 +150,7 @@ const AuthMenu = () => {
                 </div>
                 <GoogleSignin />
                 <NaverLogin />
+                <KakaoLogin />
               </div>
             ))}
         </div>
