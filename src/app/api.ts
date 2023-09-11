@@ -6,7 +6,6 @@ import {
   FetchBaseQueryError
 } from '@reduxjs/toolkit/query/react';
 import {RootState} from './store';
-import {apiBaseUrl} from './constants/baseUrls';
 import {AuthState, updateRefreshToken, updateTokens} from './slices/authSlice';
 
 export interface ResponseEntity {
@@ -44,7 +43,7 @@ export interface NaverSigninRequest {
 }
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: apiBaseUrl,
+  baseUrl: process.env.REACT_APP_apiBaseUrl,
   prepareHeaders: (headers, {getState}) => {
     const accessToken = (getState() as RootState).auth.accessToken;
     if (accessToken) {

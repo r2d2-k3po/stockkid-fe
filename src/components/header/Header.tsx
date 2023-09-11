@@ -6,7 +6,6 @@ import Search from './Search';
 import FixedPin from '../common/FixedPin';
 import {useMeasure} from 'react-use';
 import AuthMenu from './authmenu/AuthMenu';
-import {googleClientId} from '../../app/constants/clientInfo';
 import {GoogleOAuthProvider} from '@react-oauth/google';
 
 export type HeaderProps = {
@@ -32,7 +31,9 @@ const Header: FC<HeaderProps> = ({
     <div ref={measureRef} className={headerClassName}>
       <div className="navbar bg-neutral text-neutral-content">
         <div className="navbar-start">
-          <GoogleOAuthProvider clientId={googleClientId}>
+          <GoogleOAuthProvider
+            clientId={process.env.REACT_APP_googleClientId as string}
+          >
             <AuthMenu />
           </GoogleOAuthProvider>
         </div>

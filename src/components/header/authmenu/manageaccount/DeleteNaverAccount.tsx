@@ -14,10 +14,6 @@ import {
 } from '../../../../app/api';
 import {updateRefreshToken} from '../../../../app/slices/authSlice';
 import NaverButton from '../../../common/NaverButton';
-import {
-  naverCallbackUrl,
-  naverClientId
-} from '../../../../app/constants/clientInfo';
 
 type DeleteAccountProps = {
   hideThisRef: () => void;
@@ -61,8 +57,8 @@ const DeleteNaverAccount: FC<DeleteAccountProps> = ({
 
   useEffect(() => {
     const naverLogin = new (window as any).naver.LoginWithNaverId({
-      clientId: naverClientId,
-      callbackUrl: naverCallbackUrl,
+      clientId: process.env.REACT_APP_naverClientId,
+      callbackUrl: process.env.REACT_APP_naverCallbackUrl,
       isPopup: true,
       loginButton: {
         color: 'green', // 색상
