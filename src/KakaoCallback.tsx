@@ -25,11 +25,11 @@ const KakaoCallback = () => {
   useEffect(() => {
     if (kakaoResponse.code && checkState) {
       localStorage.setItem('code', kakaoResponse.code);
-      window.close();
+      // window.close();
     } else {
       localStorage.removeItem('code');
       const id = setTimeout(() => {
-        window.close();
+        // window.close();
       }, 3000);
       return () => clearTimeout(id);
     }

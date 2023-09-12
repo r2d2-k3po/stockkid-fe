@@ -7,9 +7,8 @@ import {AuthState, updateTokens} from '../../../app/slices/authSlice';
 import {nanoid} from 'nanoid';
 
 const KakaoLogin = () => {
-  const {Kakao} = window as any;
-  const kakaoState = nanoid();
-  const kakaoNonce = nanoid();
+  const [kakaoState, setKakaoState] = useState<string | null>(null);
+  const [kakaoNonce, setKakaoNonce] = useState<string | null>(null);
 
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
@@ -22,22 +21,28 @@ const KakaoLogin = () => {
   const handleClickKakaoLogin = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      Kakao.Auth.authorize({
-        redirectUri: process.env.REACT_APP_kakaoCallbackUrl,
-        state: kakaoState,
-        nonce: kakaoNonce
-      });
+      const url = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${process.env.REACT_APP_kakaoRestApiKey}&redirect_uri=${process.env.REACT_APP_kakaoCallbackUrl}&state=${kakaoState}&nonce=${kakaoNonce}`;
       setIsClicked(true);
+      window.open(url, '', 'popup');
     },
-    [Kakao, kakaoState, kakaoNonce]
+    [kakaoState, kakaoNonce]
   );
 
   useEffect(() => {
-    if (!Kakao.isInitialized()) {
-      Kakao.init(process.env.REACT_APP_kakaoJavaScriptKey);
-      localStorage.setItem('kakao.state', kakaoState);
+    if (!kakaoState) {
+      const id = nanoid();
+      setKakaoState(id);
+      localStorage.setItem('kakao.state', id as string);
     }
-  }, [Kakao, kakaoState]);
+  }, [kakaoState]);
+
+  useEffect(() => {
+    if (!kakaoNonce) {
+      const id = nanoid();
+      setKakaoNonce(id);
+      localStorage.setItem('kakao.nonce', id as string);
+    }
+  }, [kakaoNonce]);
 
   useEffect(() => {
     async function kakaoSignin(kakaoSigninRequest: KakaoSigninRequest) {
@@ -54,8 +59,7 @@ const KakaoLogin = () => {
           if (authcode && kakaoState) {
             const kakaoSigninRequest = {
               authcode: authcode as string,
-              state: kakaoState,
-              nonce: kakaoNonce
+              nonce: kakaoNonce as string
             };
             try {
               kakaoSignin(kakaoSigninRequest);

@@ -44,7 +44,6 @@ export interface NaverSigninRequest {
 
 export interface KakaoSigninRequest {
   authcode: string;
-  state: string;
   nonce: string;
 }
 
