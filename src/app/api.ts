@@ -42,6 +42,12 @@ export interface NaverSigninRequest {
   state: string;
 }
 
+export interface KakaoSigninRequest {
+  authcode: string;
+  state: string;
+  nonce: string;
+}
+
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.REACT_APP_apiBaseUrl,
   prepareHeaders: (headers, {getState}) => {
@@ -117,6 +123,13 @@ export const api = createApi({
         body: naverSigninRequest
       })
     }),
+    kakaoSignin: builder.mutation<ResponseEntity, KakaoSigninRequest>({
+      query: (kakaoSigninRequest) => ({
+        url: 'kakao/member/signin',
+        method: 'POST',
+        body: kakaoSigninRequest
+      })
+    }),
     changePassword: builder.mutation<ResponseEntity, PasswordChangeRequest>({
       query: (passwordChangeRequest) => ({
         url: 'access/member/changePassword',
@@ -145,6 +158,13 @@ export const api = createApi({
         body: accountDeleteRequest
       })
     }),
+    deleteKakaoAccount: builder.mutation<ResponseEntity, KakaoSigninRequest>({
+      query: (accountDeleteRequest) => ({
+        url: 'kakao/member/deleteAccount',
+        method: 'PATCH',
+        body: accountDeleteRequest
+      })
+    }),
     logout: builder.mutation<ResponseEntity, AuthState>({
       query: (logoutRequest) => ({
         url: 'refresh/logout',
@@ -160,9 +180,11 @@ export const {
   useLoginMutation,
   useGoogleSigninMutation,
   useNaverSigninMutation,
+  useKakaoSigninMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation,
   useDeleteGoogleAccountMutation,
   useDeleteNaverAccountMutation,
+  useDeleteKakaoAccountMutation,
   useLogoutMutation
 } = api;
