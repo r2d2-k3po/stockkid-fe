@@ -1,10 +1,18 @@
-import React, {ChangeEvent, FC, MouseEvent, useCallback, useState} from 'react';
+import React, {
+  ChangeEvent,
+  FC,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useState
+} from 'react';
 import {useTranslation} from 'react-i18next';
 import MaterialSymbolButton from '../../../common/MaterialSymbolButton';
 import ChangePassword from './ChangePassword';
 import DeleteAccount from './DeleteAccount';
 import DeleteGoogleAccount from './DeleteGoogleAccount';
 import DeleteNaverAccount from './DeleteNaverAccount';
+import DeleteKakaoAccount from './DeleteKakaoAccount';
 
 type ManageAccountProps = {
   loginMethod: string | null;
@@ -16,7 +24,7 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
 
   const [currentTask, setCurrentTask] = useState<
     'changePassword' | 'deleteAccount'
-  >(loginMethod == 'UP' ? 'changePassword' : 'deleteAccount');
+  >('changePassword');
 
   const [isUninitialized, setIsUninitialized] = useState<boolean>(true);
 
@@ -34,6 +42,10 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
     },
     [hideThisRef]
   );
+
+  useEffect(() => {
+    setCurrentTask(loginMethod == 'UP' ? 'changePassword' : 'deleteAccount');
+  }, [loginMethod]);
 
   return (
     <div className="mx-2 flex items-center gap-1 w-full">
@@ -79,6 +91,13 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
       )}
       {loginMethod == 'NAV' && currentTask == 'deleteAccount' && (
         <DeleteNaverAccount
+          hideThisRef={hideThisRef}
+          setIsUninitialized={setIsUninitialized}
+          setIsLoading={setIsLoading}
+        />
+      )}
+      {loginMethod == 'KKO' && currentTask == 'deleteAccount' && (
+        <DeleteKakaoAccount
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}
           setIsLoading={setIsLoading}
