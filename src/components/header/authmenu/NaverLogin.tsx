@@ -5,10 +5,6 @@ import React, {
   useRef,
   useState
 } from 'react';
-import {
-  naverCallbackUrl,
-  naverClientId
-} from '../../../app/constants/clientInfo';
 import NaverButton from '../../common/NaverButton';
 import {AuthState, updateTokens} from '../../../app/slices/authSlice';
 import {NaverSigninRequest, useNaverSigninMutation} from '../../../app/api';
@@ -37,8 +33,8 @@ const NaverLogin = () => {
 
   useEffect(() => {
     const naverLogin = new (window as any).naver.LoginWithNaverId({
-      clientId: naverClientId,
-      callbackUrl: naverCallbackUrl,
+      clientId: process.env.REACT_APP_naverClientId,
+      callbackUrl: process.env.REACT_APP_naverCallbackUrl,
       isPopup: true,
       loginButton: {
         color: 'green', // 색상

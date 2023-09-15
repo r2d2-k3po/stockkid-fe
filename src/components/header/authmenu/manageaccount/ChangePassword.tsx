@@ -7,16 +7,7 @@ import React, {
   useState
 } from 'react';
 import {useTranslation} from 'react-i18next';
-import {
-  useChangePasswordMutation,
-  useRefreshTokensMutation
-} from '../../../../app/api';
-import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
-import {
-  AuthState,
-  updateRefreshToken,
-  updateTokens
-} from '../../../../app/slices/authSlice';
+import {useChangePasswordMutation} from '../../../../app/api';
 
 type ChangePasswordFormType = Record<
   'oldPassword' | 'newPassword' | 'confirmNewPassword',
@@ -37,11 +28,6 @@ const ChangePassword: FC<ChangePasswordProps> = ({
   const regexFinal = /^.{6,30}$/;
 
   const {t} = useTranslation();
-  const dispatch = useAppDispatch();
-
-  const tokens = useAppSelector((state) => state.auth);
-  const [requestTokensRefresh] = useRefreshTokensMutation();
-  const [isRefreshFail, setIsRefreshFail] = useState<boolean>(false);
 
   const [
     requestPasswordChange,
@@ -82,18 +68,6 @@ const ChangePassword: FC<ChangePasswordProps> = ({
     async (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       try {
-        if (tokens.accessToken == null && tokens.refreshToken != null) {
-          const data = await requestTokensRefresh(tokens).unwrap();
-          if (data.apiStatus == 'REFRESH_FAIL') {
-            console.log('REFRESH_FAIL');
-            setIsRefreshFail(true);
-          } else {
-            const newTokens = data.apiObj as AuthState;
-            dispatch(updateTokens(newTokens));
-            setIsRefreshFail(false);
-          }
-        }
-
         const passwordChangeRequest = {
           oldPassword: oldPassword,
           newPassword: newPassword
@@ -109,14 +83,7 @@ const ChangePassword: FC<ChangePasswordProps> = ({
         });
       }
     },
-    [
-      requestPasswordChange,
-      oldPassword,
-      newPassword,
-      tokens,
-      requestTokensRefresh,
-      dispatch
-    ]
+    [requestPasswordChange, oldPassword, newPassword]
   );
 
   useEffect(() => {
@@ -136,15 +103,6 @@ const ChangePassword: FC<ChangePasswordProps> = ({
       return () => clearTimeout(id);
     }
   }, [isSuccess, isError, reset, hideThisRef]);
-
-  useEffect(() => {
-    if (isRefreshFail) {
-      const id = setTimeout(() => {
-        dispatch(updateRefreshToken(null));
-      }, 4000);
-      return () => clearTimeout(id);
-    }
-  }, [isRefreshFail, dispatch]);
 
   if (isUninitialized || isLoading) {
     return (
@@ -205,8 +163,7 @@ const ChangePassword: FC<ChangePasswordProps> = ({
     return (
       <>
         {isSuccess && <div>{t('ChangePassword.Success')}</div>}
-        {isRefreshFail && <div>{t('Common.RefreshError')}</div>}
-        {!isRefreshFail && isError && <div>{t('ChangePassword.Error')}</div>}
+        {isError && <div>{t('ChangePassword.Error')}</div>}
       </>
     );
   }

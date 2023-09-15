@@ -29,10 +29,11 @@ const LogoutForm: FC<LogoutFormProps> = ({hideThisRef}) => {
       e.stopPropagation();
       try {
         await requestLogout(tokens);
-        dispatch(updateRefreshToken(null));
-        hideThisRef();
       } catch (err) {
         console.log(err);
+      } finally {
+        dispatch(updateRefreshToken(null));
+        hideThisRef();
       }
     },
     [hideThisRef, dispatch, tokens, requestLogout]

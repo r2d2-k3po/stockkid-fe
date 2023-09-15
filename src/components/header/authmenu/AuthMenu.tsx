@@ -18,12 +18,10 @@ import {
   getRemainingTimeBeforeExpiration,
   tokenDecoder
 } from '../../../utils/tokenDecoder';
-import {
-  updateAccessToken,
-  updateRefreshToken
-} from '../../../app/slices/authSlice';
+import {updateRefreshToken} from '../../../app/slices/authSlice';
 import GoogleSignin from './GoogleSignin';
 import NaverLogin from './NaverLogin';
+import KakaoLogin from './KakaoLogin';
 
 const AuthMenu = () => {
   const {t} = useTranslation();
@@ -32,10 +30,6 @@ const AuthMenu = () => {
   const tokens = useAppSelector((state) => state.auth);
   const loggedIn = !(tokens.refreshToken == null);
 
-  const decodedAccessToken = useMemo(
-    () => (tokens.accessToken ? tokenDecoder(tokens.accessToken) : null),
-    [tokens.accessToken]
-  );
   const decodedRefreshToken = useMemo(
     () => (tokens.refreshToken ? tokenDecoder(tokens.refreshToken) : null),
     [tokens.refreshToken]
@@ -100,21 +94,6 @@ const AuthMenu = () => {
     }
   }, [decodedRefreshToken?.exp]);
 
-  useEffect(() => {
-    if (decodedAccessToken?.exp) {
-      const duration = 1000 * 60;
-      const id = setInterval(() => {
-        const remainingTime = getRemainingTimeBeforeExpiration(
-          decodedAccessToken.exp as number
-        );
-        if (remainingTime == 0) {
-          dispatch(updateAccessToken(null));
-        }
-      }, duration);
-      return () => clearInterval(id);
-    }
-  }, [decodedAccessToken?.exp, dispatch]);
-
   // update expiresInMinutes in 1min after refreshing tokens and then every minute
   useEffect(() => {
     if (decodedRefreshToken?.exp) {
@@ -171,6 +150,7 @@ const AuthMenu = () => {
                 </div>
                 <GoogleSignin />
                 <NaverLogin />
+                <KakaoLogin />
               </div>
             ))}
         </div>

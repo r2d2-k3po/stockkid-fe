@@ -15,6 +15,7 @@ import VirtualScreen, {
   loader as virtualScreenLoader
 } from './components/main/VirtualScreen';
 import NaverCallback, {loader as naverCallbackLoader} from './NaverCallback';
+import KakaoCallback, {loader as kakaoCallbackLoader} from './KakaoCallback';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -44,6 +45,11 @@ const router = createBrowserRouter([
     path: '/callback/naver',
     loader: naverCallbackLoader,
     element: <NaverCallback />
+  },
+  {
+    path: '/callback/kakao',
+    loader: kakaoCallbackLoader,
+    element: <KakaoCallback />
   }
 ]);
 

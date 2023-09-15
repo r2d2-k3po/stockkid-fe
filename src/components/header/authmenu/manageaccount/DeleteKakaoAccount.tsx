@@ -1,19 +1,13 @@
-import React, {
-  FC,
-  MouseEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react';
+import React, {FC, MouseEvent, useCallback, useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useAppDispatch} from '../../../../app/hooks';
 import {
-  NaverSigninRequest,
-  useDeleteNaverAccountMutation
+  KakaoSigninRequest,
+  useDeleteKakaoAccountMutation
 } from '../../../../app/api';
 import {updateRefreshToken} from '../../../../app/slices/authSlice';
-import NaverButton from '../../../common/NaverButton';
+import KakaoButton from '../../../common/KakaoButton';
+import {nanoid} from 'nanoid';
 
 type DeleteAccountProps = {
   hideThisRef: () => void;
@@ -21,22 +15,23 @@ type DeleteAccountProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const DeleteNaverAccount: FC<DeleteAccountProps> = ({
+const DeleteKakaoAccount: FC<DeleteAccountProps> = ({
   hideThisRef,
   setIsUninitialized,
   setIsLoading
 }) => {
+  const [kakaoState, setKakaoState] = useState<string | null>(null);
+  const [kakaoNonce, setKakaoNonce] = useState<string | null>(null);
+
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
 
   const [isClicked, setIsClicked] = useState<boolean>(false);
 
-  const naverIdLoginRef = useRef<HTMLDivElement>(null);
-
   const [
-    requestDeleteNaverAccount,
+    requestDeleteKakaoAccount,
     {isUninitialized, isLoading, isSuccess, isError, reset}
-  ] = useDeleteNaverAccountMutation();
+  ] = useDeleteKakaoAccountMutation();
 
   const onClickCancel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
@@ -46,33 +41,35 @@ const DeleteNaverAccount: FC<DeleteAccountProps> = ({
     [hideThisRef]
   );
 
-  const handleClickNaverIdLogin = useCallback(
+  const handleClickKakaoLogin = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      (naverIdLoginRef.current?.children[0] as HTMLElement).click();
+      const url = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${process.env.REACT_APP_kakaoRestApiKey}&redirect_uri=${process.env.REACT_APP_kakaoCallbackUrl}&state=${kakaoState}&nonce=${kakaoNonce}`;
       setIsClicked(true);
+      window.open(url, '', 'popup');
     },
-    []
+    [kakaoState, kakaoNonce]
   );
 
   useEffect(() => {
-    const naverLogin = new (window as any).naver.LoginWithNaverId({
-      clientId: process.env.REACT_APP_naverClientId,
-      callbackUrl: process.env.REACT_APP_naverCallbackUrl,
-      isPopup: true,
-      loginButton: {
-        color: 'green', // 색상
-        type: 3, // 버튼 크기
-        height: '10' // 버튼 높이
-      }
-    });
-
-    naverLogin.init();
-  }, []);
+    if (!kakaoState) {
+      const id = nanoid();
+      setKakaoState(id);
+      localStorage.setItem('kakao.state', id as string);
+    }
+  }, [kakaoState]);
 
   useEffect(() => {
-    async function naverSignin(naverSigninRequest: NaverSigninRequest) {
-      await requestDeleteNaverAccount(naverSigninRequest);
+    if (!kakaoNonce) {
+      const id = nanoid();
+      setKakaoNonce(id);
+      localStorage.setItem('kakao.nonce', id as string);
+    }
+  }, [kakaoNonce]);
+
+  useEffect(() => {
+    async function kakaoSignin(kakaoSigninRequest: KakaoSigninRequest) {
+      await requestDeleteKakaoAccount(kakaoSigninRequest);
     }
 
     if (isClicked) {
@@ -80,16 +77,13 @@ const DeleteNaverAccount: FC<DeleteAccountProps> = ({
       const id = setInterval(() => {
         if (isUninitialized) {
           const authcode = localStorage.getItem('code');
-          const naverState = localStorage.getItem(
-            'com.naver.nid.oauth.state_token'
-          );
-          if (authcode && naverState) {
-            const naverSigninRequest = {
+          if (authcode && kakaoState) {
+            const kakaoSigninRequest = {
               authcode: authcode as string,
-              state: naverState as string
+              nonce: kakaoNonce as string
             };
             try {
-              naverSignin(naverSigninRequest);
+              kakaoSignin(kakaoSigninRequest);
             } catch (err) {
               console.log(err);
             } finally {
@@ -102,7 +96,14 @@ const DeleteNaverAccount: FC<DeleteAccountProps> = ({
       }, duration);
       return () => clearInterval(id);
     }
-  }, [isClicked, isUninitialized, requestDeleteNaverAccount, dispatch]);
+  }, [
+    kakaoState,
+    kakaoNonce,
+    isClicked,
+    isUninitialized,
+    requestDeleteKakaoAccount,
+    dispatch
+  ]);
 
   useEffect(() => {
     setIsUninitialized(isUninitialized);
@@ -137,9 +138,8 @@ const DeleteNaverAccount: FC<DeleteAccountProps> = ({
           >
             {t('SignupForm.Cancel')}
           </button>
-          <div id="naverIdLogin" className="hidden" ref={naverIdLoginRef} />
-          <div onClick={handleClickNaverIdLogin}>
-            <NaverButton />
+          <div onClick={handleClickKakaoLogin}>
+            <KakaoButton />
           </div>
         </div>
       </div>
@@ -154,4 +154,4 @@ const DeleteNaverAccount: FC<DeleteAccountProps> = ({
   }
 };
 
-export default React.memo(DeleteNaverAccount);
+export default React.memo(DeleteKakaoAccount);

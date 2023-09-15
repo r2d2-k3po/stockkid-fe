@@ -17,6 +17,7 @@
   },
   "AuthMenu": {
     "GoogleSigninError": "Google sign in error!",
+    "KakaoLoginError": "Kakao login error!",
     "NaverLoginError": "Naver login error!",
     "expiresInMinutes": "Logout: in {{expiresInMinutesRefresh}} minutes"
   },

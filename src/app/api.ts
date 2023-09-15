@@ -1,7 +1,12 @@
-import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
+import {
+  BaseQueryFn,
+  createApi,
+  FetchArgs,
+  fetchBaseQuery,
+  FetchBaseQueryError
+} from '@reduxjs/toolkit/query/react';
 import {RootState} from './store';
-import {apiBaseUrl} from './constants/baseUrls';
-import {AuthState} from './slices/authSlice';
+import {AuthState, updateRefreshToken, updateTokens} from './slices/authSlice';
 
 export interface ResponseEntity {
   apiStatus: string;
@@ -37,20 +42,56 @@ export interface NaverSigninRequest {
   state: string;
 }
 
+export interface KakaoSigninRequest {
+  authcode: string;
+  nonce: string;
+}
+
+const baseQuery = fetchBaseQuery({
+  baseUrl: process.env.REACT_APP_apiBaseUrl,
+  prepareHeaders: (headers, {getState}) => {
+    const accessToken = (getState() as RootState).auth.accessToken;
+    if (accessToken) {
+      headers.set('authorization', `Bearer ${accessToken}`);
+    }
+    return headers;
+  }
+});
+
+const baseQueryWithRefresh: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+  if (result.error && result.error.status === 401) {
+    // try to get a new token
+    const refreshResult = await baseQuery(
+      {
+        url: 'refresh/tokens',
+        method: 'PATCH',
+        body: (api.getState() as RootState).auth
+      },
+      api,
+      extraOptions
+    );
+    if (refreshResult.data) {
+      // store the new token
+      api.dispatch(
+        updateTokens((refreshResult.data as ResponseEntity).apiObj as AuthState)
+      );
+      // retry the initial query
+      result = await baseQuery(args, api, extraOptions);
+    } else {
+      api.dispatch(updateRefreshToken(null));
+    }
+  }
+  return result;
+};
+
 export const api = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({
-    baseUrl: apiBaseUrl,
-    prepareHeaders: (headers, {getState}) => {
-      // By default, if we have a token in the store, let's use that for authenticated requests
-      const accessToken = (getState() as RootState).auth.accessToken;
-      if (accessToken) {
-        headers.set('authorization', `Bearer ${accessToken}`);
-      }
-      return headers;
-    },
-    jsonContentType: 'application/json'
-  }),
+  baseQuery: baseQueryWithRefresh,
   tagTypes: [],
   endpoints: (builder) => ({
     signup: builder.mutation<ResponseEntity, SignupRequest>({
@@ -81,6 +122,13 @@ export const api = createApi({
         body: naverSigninRequest
       })
     }),
+    kakaoSignin: builder.mutation<ResponseEntity, KakaoSigninRequest>({
+      query: (kakaoSigninRequest) => ({
+        url: 'kakao/member/signin',
+        method: 'POST',
+        body: kakaoSigninRequest
+      })
+    }),
     changePassword: builder.mutation<ResponseEntity, PasswordChangeRequest>({
       query: (passwordChangeRequest) => ({
         url: 'access/member/changePassword',
@@ -109,11 +157,11 @@ export const api = createApi({
         body: accountDeleteRequest
       })
     }),
-    refreshTokens: builder.mutation<ResponseEntity, AuthState>({
-      query: (tokensRefreshRequest) => ({
-        url: 'refresh/tokens',
+    deleteKakaoAccount: builder.mutation<ResponseEntity, KakaoSigninRequest>({
+      query: (accountDeleteRequest) => ({
+        url: 'kakao/member/deleteAccount',
         method: 'PATCH',
-        body: tokensRefreshRequest
+        body: accountDeleteRequest
       })
     }),
     logout: builder.mutation<ResponseEntity, AuthState>({
@@ -131,10 +179,11 @@ export const {
   useLoginMutation,
   useGoogleSigninMutation,
   useNaverSigninMutation,
+  useKakaoSigninMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation,
   useDeleteGoogleAccountMutation,
   useDeleteNaverAccountMutation,
-  useRefreshTokensMutation,
+  useDeleteKakaoAccountMutation,
   useLogoutMutation
 } = api;
