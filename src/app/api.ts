@@ -64,8 +64,12 @@ const baseQueryWithRefresh: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
-  if (result.error && result.error.status === 401) {
-    // try to get a new token
+  if (
+    result.error &&
+    result.error.status === 401 &&
+    (api.getState() as RootState).auth.refreshToken
+  ) {
+    // try to get new tokens
     const refreshResult = await baseQuery(
       {
         url: 'refresh/tokens',
@@ -76,7 +80,7 @@ const baseQueryWithRefresh: BaseQueryFn<
       extraOptions
     );
     if (refreshResult.data) {
-      // store the new token
+      // store the new tokens
       api.dispatch(
         updateTokens((refreshResult.data as ResponseEntity).apiObj as AuthState)
       );
