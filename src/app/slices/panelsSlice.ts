@@ -2,6 +2,7 @@ import {createEntityAdapter, createSlice, EntityState} from '@reduxjs/toolkit';
 import {
   addScreenPanel,
   copyScreen,
+  loadScreens,
   removeScreen,
   removeScreenPanel
 } from './screensSlice';
@@ -16,7 +17,7 @@ export type PanelCode =
   | 'panel0006'
   | 'panel0007';
 
-type Panel = {
+export type Panel = {
   id: string;
   panelCode: PanelCode;
 };
@@ -53,6 +54,9 @@ const panelsSlice = createSlice({
               ?.panelCode as PanelCode
           });
         }
+      })
+      .addCase(loadScreens, (state, action) => {
+        return action.payload.panels;
       });
   }
 });

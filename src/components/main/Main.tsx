@@ -211,21 +211,24 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
   const screenButtons = useMemo(
     () =>
-      screenIds.map((uuid, index) => (
-        <NavLink
-          key={uuid}
-          to={`/screen/${(index + 1).toString()}`}
-          className={({isActive, isPending}) =>
-            [
-              'btn btn-xs btn-outline btn-primary',
-              isPending ? 'loading' : isActive ? 'btn-active' : ''
-            ].join(' ')
-          }
-          onClick={handleScreenButtonClick}
-        >
-          {index + 1}
-        </NavLink>
-      )),
+      screenIds.map(
+        (uuid, index) =>
+          uuid && (
+            <NavLink
+              key={uuid}
+              to={`/screen/${(index + 1).toString()}`}
+              className={({isActive, isPending}) =>
+                [
+                  'btn btn-xs btn-outline btn-primary',
+                  isPending ? 'loading' : isActive ? 'btn-active' : ''
+                ].join(' ')
+              }
+              onClick={handleScreenButtonClick}
+            >
+              {index + 1}
+            </NavLink>
+          )
+      ),
     [screenIds, handleScreenButtonClick]
   );
 
