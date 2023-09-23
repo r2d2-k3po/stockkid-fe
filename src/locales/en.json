@@ -61,6 +61,8 @@
     }
   },
   "ScreenComposition": {
+    "Error": "Task error!",
+    "Success": "Task success!",
     "placeholder": {
       "title": "screen title"
     },

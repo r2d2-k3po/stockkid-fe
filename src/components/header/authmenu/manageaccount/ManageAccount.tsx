@@ -80,7 +80,6 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
         <ScreenComposition
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}
-          setIsLoading={setIsLoading}
         />
       )}
       {loginMethod == 'UP' && currentTask == 'changePassword' && (

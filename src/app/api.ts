@@ -47,6 +47,12 @@ export interface KakaoSigninRequest {
   nonce: string;
 }
 
+export interface ScreenCompositionSaveRequest {
+  number: string;
+  screenTitle: string;
+  screenSetting: string;
+}
+
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.REACT_APP_apiBaseUrl,
   prepareHeaders: (headers, {getState}) => {
@@ -174,6 +180,28 @@ export const api = createApi({
         method: 'PATCH',
         body: logoutRequest
       })
+    }),
+    saveScreenComposition: builder.mutation<
+      ResponseEntity,
+      ScreenCompositionSaveRequest
+    >({
+      query: (screenCompositionSaveRequest) => ({
+        url: 'access/memberSettings/saveScreenComposition',
+        method: 'PATCH',
+        body: screenCompositionSaveRequest
+      })
+    }),
+    loadScreenComposition: builder.mutation<ResponseEntity, string>({
+      query: (number) => ({
+        url: `access/memberSettings/loadScreenComposition/${number}`,
+        method: 'GET'
+      })
+    }),
+    loadScreenCompositionDefault: builder.mutation<ResponseEntity, string>({
+      query: (number) => ({
+        url: `access/memberSettings/loadScreenCompositionDefault/${number}`,
+        method: 'GET'
+      })
     })
   })
 });
@@ -189,5 +217,8 @@ export const {
   useDeleteGoogleAccountMutation,
   useDeleteNaverAccountMutation,
   useDeleteKakaoAccountMutation,
-  useLogoutMutation
+  useLogoutMutation,
+  useSaveScreenCompositionMutation,
+  useLoadScreenCompositionMutation,
+  useLoadScreenCompositionDefaultMutation
 } = api;

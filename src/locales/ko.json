@@ -61,6 +61,8 @@
     }
   },
   "ScreenComposition": {
+    "Error": "작업 에러!",
+    "Success": "작업 성공!",
     "placeholder": {
       "title": "스크린 타이틀"
     },

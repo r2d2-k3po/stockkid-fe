@@ -7,29 +7,50 @@ import React, {
   useState
 } from 'react';
 import {useTranslation} from 'react-i18next';
-import {useAppDispatch} from '../../../../app/hooks';
-import {updateRefreshToken} from '../../../../app/slices/authSlice';
-import {useChangePasswordMutation} from '../../../../app/api';
+import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
+import {
+  useLoadScreenCompositionDefaultMutation,
+  useLoadScreenCompositionMutation,
+  useSaveScreenCompositionMutation
+} from '../../../../app/api';
+import {loadScreens} from '../../../../app/slices/screensSlice';
+import {EntityState} from '@reduxjs/toolkit';
+import {Panel} from '../../../../app/slices/panelsSlice';
+import {Screen} from '../../../../app/slices/screensSlice';
+
+interface ScreenSetting {
+  screens: EntityState<Screen>;
+  panels: EntityState<Panel>;
+}
+
+interface ScreenSettingLoad {
+  screenSetting: string;
+}
 
 type ScreenCompositionProps = {
   hideThisRef: () => void;
   setIsUninitialized: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ScreenComposition: FC<ScreenCompositionProps> = ({
   hideThisRef,
-  setIsUninitialized,
-  setIsLoading
+  setIsUninitialized
 }) => {
   const {t} = useTranslation();
   const regexFinal = /^.{1,20}$/;
   const dispatch = useAppDispatch();
 
+  const screens = useAppSelector((state) => state.screens);
+  const panels = useAppSelector((state) => state.panels);
+
+  const [requestScreenCompositionSave, {isLoading: isLoadingSave}] =
+    useSaveScreenCompositionMutation();
+  const [requestScreenCompositionLoad, {isLoading: isLoadingLoad}] =
+    useLoadScreenCompositionMutation();
   const [
-    requestPasswordChange,
-    {isUninitialized, isLoading, isSuccess, isError, reset}
-  ] = useChangePasswordMutation();
+    requestScreenCompositionDefaultLoad,
+    {isLoading: isLoadingLoadDefault}
+  ] = useLoadScreenCompositionDefaultMutation();
 
   const [currentTask, setCurrentTask] = useState<'save' | 'load'>('save');
 
@@ -80,112 +101,152 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
     [hideThisRef]
   );
 
-  const onClickDeleteAccount = useCallback(
+  const onClickHandleTask = useCallback(
     async (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
+      const key = 'screenSetting' + currentNumber;
+      if (currentTask == 'save') {
+        const screenSetting = {
+          screens: screens,
+          panels: panels
+        };
+        if (currentTarget == 'localStorage') {
+          localStorage.setItem('screenTitle' + currentNumber, currentTitle);
+          localStorage.setItem(key, JSON.stringify(screenSetting));
+        } else if (currentTarget == 'server') {
+          const screenCompositionSaveRequest = {
+            number: currentNumber,
+            screenTitle: currentTitle,
+            screenSetting: JSON.stringify(screenSetting)
+          };
+          await requestScreenCompositionSave(screenCompositionSaveRequest);
+        }
+      } else if (currentTask == 'load') {
+        if (currentTarget == 'localStorage') {
+          if (localStorage.getItem(key)) {
+            const screenSetting = JSON.parse(
+              localStorage.getItem(key) as string
+            ) as ScreenSetting;
+            dispatch(loadScreens(screenSetting));
+          }
+        } else if (currentTarget == 'server') {
+          const data = await requestScreenCompositionLoad(
+            currentNumber
+          ).unwrap();
+          const screenSetting = JSON.parse(
+            (data.apiObj as ScreenSettingLoad).screenSetting
+          ) as ScreenSetting;
+          dispatch(loadScreens(screenSetting));
+        } else if (currentTarget == 'serverDefault') {
+          const data = await requestScreenCompositionDefaultLoad(
+            currentNumber
+          ).unwrap();
+          const screenSetting = JSON.parse(
+            (data.apiObj as ScreenSettingLoad).screenSetting
+          ) as ScreenSetting;
+          dispatch(loadScreens(screenSetting));
+        }
+      }
     },
-    []
+    [
+      currentTask,
+      currentTarget,
+      currentNumber,
+      currentTitle,
+      screens,
+      panels,
+      requestScreenCompositionSave,
+      requestScreenCompositionLoad,
+      requestScreenCompositionDefaultLoad,
+      dispatch
+    ]
   );
 
   useEffect(() => {
-    setIsUninitialized(isUninitialized);
-  }, [isUninitialized, setIsUninitialized]);
+    setIsUninitialized(true);
+  }, [setIsUninitialized]);
 
-  useEffect(() => {
-    setIsLoading(isLoading);
-  }, [isLoading, setIsLoading]);
-
-  useEffect(() => {
-    if (isSuccess || isError) {
-      const id = setTimeout(() => {
-        hideThisRef();
-        if (isSuccess) {
-          dispatch(updateRefreshToken(null));
-        }
-        reset();
-      }, 3000);
-      return () => clearTimeout(id);
-    }
-  }, [isSuccess, isError, reset, hideThisRef, dispatch]);
-
-  if (isUninitialized || isLoading) {
-    return (
-      <div className="ml-1 flex items-center gap-1">
-        <select
-          onChange={handleChangeTask}
-          className="max-w-xs select select-info select-xs"
-          value={currentTask}
-        >
-          <option value="save">{t('ScreenComposition.selectTask.save')}</option>
-          <option value="load">{t('ScreenComposition.selectTask.load')}</option>
-        </select>
-        <select
-          onChange={handleChangeTarget}
-          className="max-w-xs select select-info select-xs"
-          value={currentTarget}
-        >
-          <option value="localStorage">
-            {t('ScreenComposition.selectTarget.localStorage')}
+  return (
+    <div className="ml-1 flex items-center gap-1">
+      <select
+        onChange={handleChangeTask}
+        className="max-w-xs select select-info select-xs"
+        value={currentTask}
+      >
+        <option value="save">{t('ScreenComposition.selectTask.save')}</option>
+        <option value="load">{t('ScreenComposition.selectTask.load')}</option>
+      </select>
+      <select
+        onChange={handleChangeTarget}
+        className="max-w-xs select select-info select-xs"
+        value={currentTarget}
+      >
+        <option value="localStorage">
+          {t('ScreenComposition.selectTarget.localStorage')}
+        </option>
+        <option value="server">
+          {t('ScreenComposition.selectTarget.server')}
+        </option>
+        {currentTask == 'load' && (
+          <option value="serverDefault">
+            {t('ScreenComposition.selectTarget.serverDefault')}
           </option>
-          <option value="server">
-            {t('ScreenComposition.selectTarget.server')}
-          </option>
-          {currentTask == 'load' && (
-            <option value="serverDefault">
-              {t('ScreenComposition.selectTarget.serverDefault')}
-            </option>
-          )}
-        </select>
-        <select
-          onChange={handleChangeNumber}
-          className="max-w-xs select select-info select-xs"
-          value={currentNumber}
-        >
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-        </select>
-        {currentTask == 'save' && (
-          <input
-            type="text"
-            name="currentTitle"
-            placeholder={t('ScreenComposition.placeholder.title') as string}
-            value={currentTitle}
-            onChange={handleChangeTitle}
-            className="w-28 max-w-xs input input-bordered input-sm"
-          />
         )}
-        <div className="flex-none w-52">
-          <button
-            disabled={isLoading}
-            onClick={onClickCancel}
-            className="btn btn-xs btn-ghost mr-1"
-          >
-            {t('SignupForm.Cancel')}
-          </button>
-          <button
-            disabled={!regexFinal.test(currentTitle)}
-            onClick={onClickDeleteAccount}
-            className={
-              isLoading
-                ? 'btn btn-xs btn-accent loading'
-                : 'btn btn-xs btn-accent'
-            }
-          >
-            {currentTask == 'save' && t('ScreenComposition.selectTask.save')}
-            {currentTask == 'load' && t('ScreenComposition.selectTask.load')}
-          </button>
-        </div>
+      </select>
+      <select
+        onChange={handleChangeNumber}
+        className="max-w-xs select select-info select-xs"
+        value={currentNumber}
+      >
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+      {currentTask == 'save' && (
+        <input
+          type="text"
+          name="currentTitle"
+          placeholder={t('ScreenComposition.placeholder.title') as string}
+          value={currentTitle}
+          onChange={handleChangeTitle}
+          className="w-28 max-w-xs input input-bordered input-sm"
+        />
+      )}
+      {currentTask == 'load' &&
+        currentTarget == 'localStorage' &&
+        localStorage.getItem('screenTitle' + currentNumber) && (
+          <div className="ml-1">
+            {localStorage.getItem('screenTitle' + currentNumber)}
+          </div>
+        )}
+      <div className="flex-none w-52">
+        <button
+          disabled={isLoadingSave || isLoadingLoad || isLoadingLoadDefault}
+          onClick={onClickCancel}
+          className="btn btn-xs btn-ghost mr-1"
+        >
+          {t('SignupForm.Cancel')}
+        </button>
+        <button
+          disabled={
+            (currentTask == 'save' && !regexFinal.test(currentTitle)) ||
+            (currentTask == 'load' &&
+              currentTarget == 'localStorage' &&
+              localStorage.getItem('screenTitle' + currentNumber) == null)
+          }
+          onClick={onClickHandleTask}
+          className={
+            isLoadingSave || isLoadingLoad || isLoadingLoadDefault
+              ? 'btn btn-xs btn-accent loading'
+              : 'btn btn-xs btn-accent'
+          }
+        >
+          {currentTask == 'save' && t('ScreenComposition.selectTask.save')}
+          {currentTask == 'load' && t('ScreenComposition.selectTask.load')}
+        </button>
       </div>
-    );
-  } else {
-    return (
-      <>
-        {isSuccess && <div>{t('DeleteAccount.Success')}</div>}
-        {isError && <div>{t('DeleteAccount.Error')}</div>}
-      </>
-    );
-  }
+    </div>
+  );
 };
 
 export default React.memo(ScreenComposition);

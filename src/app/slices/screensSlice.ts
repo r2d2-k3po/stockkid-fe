@@ -59,7 +59,7 @@ type LoadScreensPayload = {
   panels: EntityState<Panel>;
 };
 
-type Screen = {
+export type Screen = {
   id: string;
   panelIds: string[];
   layouts: Layouts;
