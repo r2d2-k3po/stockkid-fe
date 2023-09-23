@@ -114,7 +114,7 @@ export const api = createApi({
     login: builder.mutation<ResponseEntity, LoginRequest>({
       query: (loginRequest) => ({
         url: 'member/login',
-        method: 'POST',
+        method: 'PATCH',
         body: loginRequest
       })
     }),
@@ -187,20 +187,28 @@ export const api = createApi({
     >({
       query: (screenCompositionSaveRequest) => ({
         url: 'access/memberSettings/saveScreenComposition',
-        method: 'PATCH',
+        method: 'POST',
         body: screenCompositionSaveRequest
       })
     }),
-    loadScreenComposition: builder.mutation<ResponseEntity, string>({
+    loadScreenSetting: builder.query<ResponseEntity, string>({
       query: (number) => ({
-        url: `access/memberSettings/loadScreenComposition/${number}`,
-        method: 'GET'
+        url: `access/memberSettings/loadScreenSetting/${number}`
       })
     }),
-    loadScreenCompositionDefault: builder.mutation<ResponseEntity, string>({
+    loadScreenSettingDefault: builder.query<ResponseEntity, string>({
       query: (number) => ({
-        url: `access/memberSettings/loadScreenCompositionDefault/${number}`,
-        method: 'GET'
+        url: `access/memberSettings/loadScreenSettingDefault/${number}`
+      })
+    }),
+    loadScreenTitles: builder.query<ResponseEntity, void>({
+      query: () => ({
+        url: `access/memberSettings/loadScreenTitles`
+      })
+    }),
+    loadScreenTitlesDefault: builder.query<ResponseEntity, void>({
+      query: () => ({
+        url: `access/memberSettings/loadScreenTitlesDefault`
       })
     })
   })
@@ -219,6 +227,8 @@ export const {
   useDeleteKakaoAccountMutation,
   useLogoutMutation,
   useSaveScreenCompositionMutation,
-  useLoadScreenCompositionMutation,
-  useLoadScreenCompositionDefaultMutation
+  useLazyLoadScreenSettingQuery,
+  useLazyLoadScreenSettingDefaultQuery,
+  useLoadScreenTitlesQuery,
+  useLoadScreenTitlesDefaultQuery
 } = api;

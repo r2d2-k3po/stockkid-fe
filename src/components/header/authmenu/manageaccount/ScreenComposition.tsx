@@ -9,8 +9,10 @@ import React, {
 import {useTranslation} from 'react-i18next';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {
-  useLoadScreenCompositionDefaultMutation,
-  useLoadScreenCompositionMutation,
+  useLazyLoadScreenSettingDefaultQuery,
+  useLazyLoadScreenSettingQuery,
+  useLoadScreenTitlesDefaultQuery,
+  useLoadScreenTitlesQuery,
   useSaveScreenCompositionMutation
 } from '../../../../app/api';
 import {loadScreens} from '../../../../app/slices/screensSlice';
@@ -25,6 +27,14 @@ interface ScreenSetting {
 
 interface ScreenSettingLoad {
   screenSetting: string;
+}
+
+interface ScreenTitles {
+  screenTitle1: string;
+  screenTitle2: string;
+  screenTitle3: string;
+
+  [key: string]: string;
 }
 
 type ScreenCompositionProps = {
@@ -45,12 +55,12 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
 
   const [requestScreenCompositionSave, {isLoading: isLoadingSave}] =
     useSaveScreenCompositionMutation();
-  const [requestScreenCompositionLoad, {isLoading: isLoadingLoad}] =
-    useLoadScreenCompositionMutation();
-  const [
-    requestScreenCompositionDefaultLoad,
-    {isLoading: isLoadingLoadDefault}
-  ] = useLoadScreenCompositionDefaultMutation();
+  const [requestScreenSettingLoad, {isFetching: isLoadingLoad}] =
+    useLazyLoadScreenSettingQuery();
+  const [requestScreenSettingDefaultLoad, {isFetching: isLoadingLoadDefault}] =
+    useLazyLoadScreenSettingDefaultQuery();
+  const {data: dataScreenTitles} = useLoadScreenTitlesQuery();
+  const {data: dataScreenTitlesDefault} = useLoadScreenTitlesDefaultQuery();
 
   const [currentTask, setCurrentTask] = useState<'save' | 'load'>('save');
 
@@ -130,15 +140,13 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
             dispatch(loadScreens(screenSetting));
           }
         } else if (currentTarget == 'server') {
-          const data = await requestScreenCompositionLoad(
-            currentNumber
-          ).unwrap();
+          const data = await requestScreenSettingLoad(currentNumber).unwrap();
           const screenSetting = JSON.parse(
             (data.apiObj as ScreenSettingLoad).screenSetting
           ) as ScreenSetting;
           dispatch(loadScreens(screenSetting));
         } else if (currentTarget == 'serverDefault') {
-          const data = await requestScreenCompositionDefaultLoad(
+          const data = await requestScreenSettingDefaultLoad(
             currentNumber
           ).unwrap();
           const screenSetting = JSON.parse(
@@ -156,8 +164,8 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
       screens,
       panels,
       requestScreenCompositionSave,
-      requestScreenCompositionLoad,
-      requestScreenCompositionDefaultLoad,
+      requestScreenSettingLoad,
+      requestScreenSettingDefaultLoad,
       dispatch
     ]
   );
@@ -217,6 +225,32 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
         localStorage.getItem('screenTitle' + currentNumber) && (
           <div className="ml-1">
             {localStorage.getItem('screenTitle' + currentNumber)}
+          </div>
+        )}
+      {currentTask == 'load' &&
+        currentTarget == 'server' &&
+        (dataScreenTitles?.apiObj as ScreenTitles)[
+          'screenTitle' + currentNumber
+        ] && (
+          <div className="ml-1">
+            {
+              (dataScreenTitles?.apiObj as ScreenTitles)[
+                'screenTitle' + currentNumber
+              ]
+            }
+          </div>
+        )}
+      {currentTask == 'load' &&
+        currentTarget == 'serverDefault' &&
+        (dataScreenTitlesDefault?.apiObj as ScreenTitles)[
+          'screenTitle' + currentNumber
+        ] && (
+          <div className="ml-1">
+            {
+              (dataScreenTitlesDefault?.apiObj as ScreenTitles)[
+                'screenTitle' + currentNumber
+              ]
+            }
           </div>
         )}
       <div className="flex-none w-52">
