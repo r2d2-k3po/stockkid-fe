@@ -102,7 +102,7 @@ const baseQueryWithRefresh: BaseQueryFn<
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithRefresh,
-  tagTypes: [],
+  tagTypes: ['ScreenTitles'],
   endpoints: (builder) => ({
     signup: builder.mutation<ResponseEntity, SignupRequest>({
       query: (signupRequest) => ({
@@ -189,7 +189,8 @@ export const api = createApi({
         url: 'access/memberSettings/saveScreenComposition',
         method: 'POST',
         body: screenCompositionSaveRequest
-      })
+      }),
+      invalidatesTags: ['ScreenTitles']
     }),
     loadScreenSetting: builder.query<ResponseEntity, string>({
       query: (number) => ({
@@ -204,7 +205,8 @@ export const api = createApi({
     loadScreenTitles: builder.query<ResponseEntity, void>({
       query: () => ({
         url: `access/memberSettings/loadScreenTitles`
-      })
+      }),
+      providesTags: ['ScreenTitles']
     }),
     loadScreenTitlesDefault: builder.query<ResponseEntity, void>({
       query: () => ({
@@ -229,6 +231,6 @@ export const {
   useSaveScreenCompositionMutation,
   useLazyLoadScreenSettingQuery,
   useLazyLoadScreenSettingDefaultQuery,
-  useLoadScreenTitlesQuery,
-  useLoadScreenTitlesDefaultQuery
+  useLazyLoadScreenTitlesQuery,
+  useLazyLoadScreenTitlesDefaultQuery
 } = api;

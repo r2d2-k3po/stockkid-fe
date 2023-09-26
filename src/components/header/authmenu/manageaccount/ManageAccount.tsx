@@ -60,7 +60,7 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
       {(isUninitialized || isLoading) && (
         <select
           onChange={handleChangeTask}
-          className="max-w-xs select select-info select-xs"
+          className="max-w-xs select select-info select-xs text-accent-content"
           value={currentTask}
         >
           <option value="screenComposition">

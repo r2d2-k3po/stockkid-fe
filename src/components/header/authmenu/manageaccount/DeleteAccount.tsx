@@ -96,7 +96,7 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
           placeholder={t('SignupForm.placeholder.password') as string}
           value={password}
           onChange={handleChange}
-          className="w-44 max-w-xs input input-bordered input-sm"
+          className="w-44 max-w-xs input input-bordered input-sm text-accent-content"
         />
         <div className="flex-none w-52">
           <button

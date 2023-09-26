@@ -113,7 +113,7 @@ const ChangePassword: FC<ChangePasswordProps> = ({
           placeholder={t('ManageAccount.placeholder.oldPassword') as string}
           value={oldPassword}
           onChange={handleChange('oldPassword')}
-          className="w-44 max-w-xs input input-bordered input-sm"
+          className="w-44 max-w-xs input input-bordered input-sm text-accent-content"
         />
         <input
           type="password"
@@ -121,7 +121,7 @@ const ChangePassword: FC<ChangePasswordProps> = ({
           placeholder={t('ManageAccount.placeholder.newPassword') as string}
           value={newPassword}
           onChange={handleChange('newPassword')}
-          className="w-44 max-w-xs input input-bordered input-sm"
+          className="w-44 max-w-xs input input-bordered input-sm text-accent-content"
         />
         <input
           type="password"
@@ -131,7 +131,7 @@ const ChangePassword: FC<ChangePasswordProps> = ({
           }
           value={confirmNewPassword}
           onChange={handleChange('confirmNewPassword')}
-          className="w-44 max-w-xs input input-bordered input-sm"
+          className="w-44 max-w-xs input input-bordered input-sm text-accent-content"
         />
         <div className="flex-none w-52">
           <button

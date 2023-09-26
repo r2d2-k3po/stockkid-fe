@@ -112,7 +112,7 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
           placeholder={t('SignupForm.placeholder.username') as string}
           value={username}
           onChange={handleChange('username')}
-          className="w-full max-w-xs input input-bordered input-sm"
+          className="w-full max-w-xs input input-bordered input-sm text-accent-content"
         />
         <input
           type="password"
@@ -120,7 +120,7 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
           placeholder={t('SignupForm.placeholder.password') as string}
           value={password}
           onChange={handleChange('password')}
-          className="w-full max-w-xs input input-bordered input-sm"
+          className="w-full max-w-xs input input-bordered input-sm text-accent-content"
         />
         <input
           type="password"
@@ -128,7 +128,7 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
           placeholder={t('SignupForm.placeholder.confirmPassword') as string}
           value={confirmPassword}
           onChange={handleChange('confirmPassword')}
-          className="w-full max-w-xs input input-bordered input-sm"
+          className="w-full max-w-xs input input-bordered input-sm text-accent-content"
         />
         <div className="flex-none">
           <button

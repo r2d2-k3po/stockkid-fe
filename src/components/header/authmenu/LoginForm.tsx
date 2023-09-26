@@ -138,7 +138,7 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
           placeholder={t('SignupForm.placeholder.username') as string}
           value={username}
           onChange={handleChange('username')}
-          className="w-full max-w-xs input input-bordered input-sm"
+          className="w-full max-w-xs input input-bordered input-sm text-accent-content"
         />
         <input
           type="password"
@@ -146,7 +146,7 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
           placeholder={t('SignupForm.placeholder.password') as string}
           value={password}
           onChange={handleChange('password')}
-          className="w-full max-w-xs input input-bordered input-sm"
+          className="w-full max-w-xs input input-bordered input-sm text-accent-content"
         />
         <div className="form-control btn btn-ghost btn-sm">
           <label className="label cursor-pointer">
