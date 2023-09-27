@@ -3,11 +3,10 @@ import GoogleButton from '../../common/GoogleButton';
 import {useGoogleSigninMutation} from '../../../app/api';
 import {useGoogleLogin} from '@react-oauth/google';
 import {AuthState, updateTokens} from '../../../app/slices/authSlice';
-import {useTranslation} from 'react-i18next';
 import {useAppDispatch} from '../../../app/hooks';
+import MaterialSymbolError from '../../common/MaterialSymbolError';
 
 const GoogleSignin = () => {
-  const {t} = useTranslation();
   const dispatch = useAppDispatch();
 
   const [requestGoogleSignin, {isError, reset}] = useGoogleSigninMutation();
@@ -44,7 +43,7 @@ const GoogleSignin = () => {
       <div onClick={() => googleLogin()}>
         <GoogleButton />
       </div>
-      {isError && <div>{t('AuthMenu.GoogleSigninError')}</div>}
+      {isError && <MaterialSymbolError />}
     </>
   );
 };

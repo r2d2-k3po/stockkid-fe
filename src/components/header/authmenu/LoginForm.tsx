@@ -11,6 +11,7 @@ import {useLoginMutation} from '../../../app/api';
 import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 import {useAppDispatch} from '../../../app/hooks';
 import {AuthState, updateTokens} from '../../../app/slices/authSlice';
+import MaterialSymbolError from '../../common/MaterialSymbolError';
 
 type LoginFormType = Record<'username' | 'password', string>;
 
@@ -191,7 +192,7 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
             <button onClick={onClickReset}>
               <MaterialSymbolButton icon="account_circle" />
             </button>
-            <div>{t('LoginForm.LoginError')}</div>
+            <MaterialSymbolError />
           </>
         )}
       </div>

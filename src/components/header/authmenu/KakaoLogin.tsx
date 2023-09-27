@@ -1,16 +1,15 @@
 import React, {MouseEvent, useCallback, useEffect, useState} from 'react';
 import KakaoButton from '../../common/KakaoButton';
-import {useTranslation} from 'react-i18next';
 import {useAppDispatch} from '../../../app/hooks';
 import {KakaoSigninRequest, useKakaoSigninMutation} from '../../../app/api';
 import {AuthState, updateTokens} from '../../../app/slices/authSlice';
 import {nanoid} from 'nanoid';
+import MaterialSymbolError from '../../common/MaterialSymbolError';
 
 const KakaoLogin = () => {
   const [kakaoState, setKakaoState] = useState<string | null>(null);
   const [kakaoNonce, setKakaoNonce] = useState<string | null>(null);
 
-  const {t} = useTranslation();
   const dispatch = useAppDispatch();
 
   const [isClicked, setIsClicked] = useState<boolean>(false);
@@ -53,7 +52,7 @@ const KakaoLogin = () => {
 
     if (isClicked) {
       const duration = 500;
-      const id = setInterval(() => {
+      const intervalId = setInterval(() => {
         if (isUninitialized) {
           const authcode = localStorage.getItem('code');
           if (authcode && kakaoState) {
@@ -70,10 +69,17 @@ const KakaoLogin = () => {
             }
           }
         } else {
-          clearInterval(id);
+          clearInterval(intervalId);
         }
       }, duration);
-      return () => clearInterval(id);
+      const timeoutId = setTimeout(() => {
+        reset();
+        setIsClicked(false);
+      }, 60000);
+      return () => {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+      };
     }
   }, [
     kakaoState,
@@ -81,7 +87,8 @@ const KakaoLogin = () => {
     isClicked,
     isUninitialized,
     requestKakaoSignin,
-    dispatch
+    dispatch,
+    reset
   ]);
 
   useEffect(() => {
@@ -99,7 +106,7 @@ const KakaoLogin = () => {
       <div onClick={handleClickKakaoLogin}>
         <KakaoButton />
       </div>
-      {isError && <div>{t('AuthMenu.KakaoLoginError')}</div>}
+      {isError && <MaterialSymbolError />}
     </>
   );
 };
