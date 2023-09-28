@@ -8,6 +8,8 @@ import React, {
 } from 'react';
 import {useTranslation} from 'react-i18next';
 import {useChangePasswordMutation} from '../../../../app/api';
+import MaterialSymbolError from '../../../common/MaterialSymbolError';
+import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
 type ChangePasswordFormType = Record<
   'oldPassword' | 'newPassword' | 'confirmNewPassword',
@@ -162,8 +164,8 @@ const ChangePassword: FC<ChangePasswordProps> = ({
   } else {
     return (
       <>
-        {isSuccess && <div>{t('ChangePassword.Success')}</div>}
-        {isError && <div>{t('ChangePassword.Error')}</div>}
+        {isSuccess && <MaterialSymbolSuccess />}
+        {isError && <MaterialSymbolError />}
       </>
     );
   }

@@ -192,12 +192,12 @@ export const api = createApi({
       }),
       invalidatesTags: ['ScreenTitles']
     }),
-    loadScreenSetting: builder.query<ResponseEntity, string>({
+    loadScreenSetting: builder.mutation<ResponseEntity, string>({
       query: (number) => ({
         url: `access/memberSettings/loadScreenSetting/${number}`
       })
     }),
-    loadScreenSettingDefault: builder.query<ResponseEntity, string>({
+    loadScreenSettingDefault: builder.mutation<ResponseEntity, string>({
       query: (number) => ({
         url: `access/memberSettings/loadScreenSettingDefault/${number}`
       })
@@ -229,8 +229,8 @@ export const {
   useDeleteKakaoAccountMutation,
   useLogoutMutation,
   useSaveScreenCompositionMutation,
-  useLazyLoadScreenSettingQuery,
-  useLazyLoadScreenSettingDefaultQuery,
+  useLoadScreenSettingMutation,
+  useLoadScreenSettingDefaultMutation,
   useLazyLoadScreenTitlesQuery,
   useLazyLoadScreenTitlesDefaultQuery
 } = api;

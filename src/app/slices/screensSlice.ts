@@ -5,22 +5,10 @@ import {
   EntityState,
   PayloadAction
 } from '@reduxjs/toolkit';
-import {Panel, PanelCode} from './panelsSlice';
+import {Panel} from './panelsSlice';
 import {keysOfBreakpoints} from '../constants/reactGridLayoutParemeters';
 import {nanoid} from 'nanoid';
-
-type PanelGrids = Record<PanelCode, object>;
-
-const panelGrids: PanelGrids = {
-  panel0000: {i: '', x: 0, y: 0, w: 1, h: 1},
-  panel0001: {i: '', x: 0, y: 0, w: 1, h: 2},
-  panel0002: {i: '', x: 0, y: 0, w: 1, h: 3},
-  panel0003: {i: '', x: 0, y: 0, w: 2, h: 1},
-  panel0004: {i: '', x: 0, y: 0, w: 2, h: 2},
-  panel0005: {i: '', x: 0, y: 0, w: 2, h: 3},
-  panel0006: {i: '', x: 0, y: 0, w: 3, h: 1},
-  panel0007: {i: '', x: 0, y: 0, w: 3, h: 2}
-};
+import {PanelCode, panelGrids} from '../constants/panelInfo';
 
 type RemoveScreenPayload = {
   currentIndex: number;

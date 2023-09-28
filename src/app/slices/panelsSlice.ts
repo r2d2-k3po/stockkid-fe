@@ -6,16 +6,7 @@ import {
   removeScreen,
   removeScreenPanel
 } from './screensSlice';
-
-export type PanelCode =
-  | 'panel0000'
-  | 'panel0001'
-  | 'panel0002'
-  | 'panel0003'
-  | 'panel0004'
-  | 'panel0005'
-  | 'panel0006'
-  | 'panel0007';
+import {PanelCode} from '../constants/panelInfo';
 
 export type Panel = {
   id: string;

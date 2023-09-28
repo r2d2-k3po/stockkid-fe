@@ -5,6 +5,8 @@ import {useAppDispatch} from '../../../../app/hooks';
 import {updateRefreshToken} from '../../../../app/slices/authSlice';
 import GoogleButton from '../../../common/GoogleButton';
 import {useGoogleLogin} from '@react-oauth/google';
+import MaterialSymbolError from '../../../common/MaterialSymbolError';
+import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
 type DeleteAccountProps = {
   hideThisRef: () => void;
@@ -90,8 +92,8 @@ const DeleteGoogleAccount: FC<DeleteAccountProps> = ({
   } else {
     return (
       <>
-        {isSuccess && <div>{t('DeleteAccount.Success')}</div>}
-        {isError && <div>{t('DeleteAccount.Error')}</div>}
+        {isSuccess && <MaterialSymbolSuccess />}
+        {isError && <MaterialSymbolError />}
       </>
     );
   }

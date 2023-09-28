@@ -31,9 +31,9 @@ import {
 } from '../../app/constants/virtualScreenNumbers';
 import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
-import {PanelCode} from '../../app/slices/panelsSlice';
-import {panelTypes} from './PanelBase';
 import {nanoid} from 'nanoid';
+import {panelTypes} from './PanelBase';
+import {PanelCode} from '../../app/constants/panelInfo';
 
 type ContextType = {
   compactType: 'vertical' | 'horizontal' | null;
@@ -236,10 +236,10 @@ const Main: FC<MainProps> = ({mainClassName}) => {
     () =>
       Object.keys(panelTypes).map((key) => (
         <option key={key} value={key}>
-          {key}
+          {t(`Panels.${key}`)}
         </option>
       )),
-    []
+    [t]
   );
 
   const handleChangeCompactType = useCallback(
