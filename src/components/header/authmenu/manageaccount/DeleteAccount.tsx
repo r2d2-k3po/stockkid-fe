@@ -10,6 +10,8 @@ import {useTranslation} from 'react-i18next';
 import {useDeleteAccountMutation} from '../../../../app/api';
 import {useAppDispatch} from '../../../../app/hooks';
 import {updateRefreshToken} from '../../../../app/slices/authSlice';
+import MaterialSymbolError from '../../../common/MaterialSymbolError';
+import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
 type DeleteAccountProps = {
   hideThisRef: () => void;
@@ -96,7 +98,7 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
           placeholder={t('SignupForm.placeholder.password') as string}
           value={password}
           onChange={handleChange}
-          className="w-44 max-w-xs input input-bordered input-sm"
+          className="w-44 max-w-xs input input-bordered input-sm text-accent-content"
         />
         <div className="flex-none w-52">
           <button
@@ -123,8 +125,8 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
   } else {
     return (
       <>
-        {isSuccess && <div>{t('DeleteAccount.Success')}</div>}
-        {isError && <div>{t('DeleteAccount.Error')}</div>}
+        {isSuccess && <MaterialSymbolSuccess />}
+        {isError && <MaterialSymbolError />}
       </>
     );
   }

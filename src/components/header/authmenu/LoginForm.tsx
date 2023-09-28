@@ -11,6 +11,7 @@ import {useLoginMutation} from '../../../app/api';
 import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 import {useAppDispatch} from '../../../app/hooks';
 import {AuthState, updateTokens} from '../../../app/slices/authSlice';
+import MaterialSymbolError from '../../common/MaterialSymbolError';
 
 type LoginFormType = Record<'username' | 'password', string>;
 
@@ -138,7 +139,7 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
           placeholder={t('SignupForm.placeholder.username') as string}
           value={username}
           onChange={handleChange('username')}
-          className="w-full max-w-xs input input-bordered input-sm"
+          className="w-full max-w-xs input input-bordered input-sm text-accent-content"
         />
         <input
           type="password"
@@ -146,7 +147,7 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
           placeholder={t('SignupForm.placeholder.password') as string}
           value={password}
           onChange={handleChange('password')}
-          className="w-full max-w-xs input input-bordered input-sm"
+          className="w-full max-w-xs input input-bordered input-sm text-accent-content"
         />
         <div className="form-control btn btn-ghost btn-sm">
           <label className="label cursor-pointer">
@@ -191,7 +192,7 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
             <button onClick={onClickReset}>
               <MaterialSymbolButton icon="account_circle" />
             </button>
-            <div>{t('LoginForm.LoginError')}</div>
+            <MaterialSymbolError />
           </>
         )}
       </div>

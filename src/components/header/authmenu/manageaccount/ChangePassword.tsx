@@ -8,6 +8,8 @@ import React, {
 } from 'react';
 import {useTranslation} from 'react-i18next';
 import {useChangePasswordMutation} from '../../../../app/api';
+import MaterialSymbolError from '../../../common/MaterialSymbolError';
+import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
 type ChangePasswordFormType = Record<
   'oldPassword' | 'newPassword' | 'confirmNewPassword',
@@ -113,7 +115,7 @@ const ChangePassword: FC<ChangePasswordProps> = ({
           placeholder={t('ManageAccount.placeholder.oldPassword') as string}
           value={oldPassword}
           onChange={handleChange('oldPassword')}
-          className="w-44 max-w-xs input input-bordered input-sm"
+          className="w-44 max-w-xs input input-bordered input-sm text-accent-content"
         />
         <input
           type="password"
@@ -121,7 +123,7 @@ const ChangePassword: FC<ChangePasswordProps> = ({
           placeholder={t('ManageAccount.placeholder.newPassword') as string}
           value={newPassword}
           onChange={handleChange('newPassword')}
-          className="w-44 max-w-xs input input-bordered input-sm"
+          className="w-44 max-w-xs input input-bordered input-sm text-accent-content"
         />
         <input
           type="password"
@@ -131,7 +133,7 @@ const ChangePassword: FC<ChangePasswordProps> = ({
           }
           value={confirmNewPassword}
           onChange={handleChange('confirmNewPassword')}
-          className="w-44 max-w-xs input input-bordered input-sm"
+          className="w-44 max-w-xs input input-bordered input-sm text-accent-content"
         />
         <div className="flex-none w-52">
           <button
@@ -162,8 +164,8 @@ const ChangePassword: FC<ChangePasswordProps> = ({
   } else {
     return (
       <>
-        {isSuccess && <div>{t('ChangePassword.Success')}</div>}
-        {isError && <div>{t('ChangePassword.Error')}</div>}
+        {isSuccess && <MaterialSymbolSuccess />}
+        {isError && <MaterialSymbolError />}
       </>
     );
   }

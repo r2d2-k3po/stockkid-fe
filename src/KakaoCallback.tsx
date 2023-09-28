@@ -30,7 +30,7 @@ const KakaoCallback = () => {
       localStorage.removeItem('code');
       const id = setTimeout(() => {
         window.close();
-      }, 3000);
+      }, 1000);
       return () => clearTimeout(id);
     }
   }, [kakaoResponse.code, checkState]);
@@ -38,8 +38,6 @@ const KakaoCallback = () => {
   return (
     <>
       <div>Kakao Login Callback</div>
-      <div>kakaoResponse.state : {kakaoResponse.state}</div>
-      <div>kakaoState : {kakaoState}</div>
       {(!kakaoResponse.code || !checkState) && (
         <div>{t('AuthMenu.KakaoLoginError')}</div>
       )}

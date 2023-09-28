@@ -1,7 +1,7 @@
 import React, {FC} from 'react';
 import store from '../../../app/store';
 import {panelsSelectors} from '../../../app/hooks';
-import {PanelCode} from '../../../app/slices/panelsSlice';
+import {PanelCode} from '../../../app/constants/panelInfo';
 
 export type CommonPanelProps = {
   panelId: string;

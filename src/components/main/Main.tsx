@@ -31,9 +31,9 @@ import {
 } from '../../app/constants/virtualScreenNumbers';
 import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
-import {PanelCode} from '../../app/slices/panelsSlice';
-import {panelTypes} from './PanelBase';
 import {nanoid} from 'nanoid';
+import {panelTypes} from './PanelBase';
+import {PanelCode} from '../../app/constants/panelInfo';
 
 type ContextType = {
   compactType: 'vertical' | 'horizontal' | null;
@@ -211,21 +211,24 @@ const Main: FC<MainProps> = ({mainClassName}) => {
 
   const screenButtons = useMemo(
     () =>
-      screenIds.map((uuid, index) => (
-        <NavLink
-          key={uuid}
-          to={`/screen/${(index + 1).toString()}`}
-          className={({isActive, isPending}) =>
-            [
-              'btn btn-xs btn-outline btn-primary',
-              isPending ? 'loading' : isActive ? 'btn-active' : ''
-            ].join(' ')
-          }
-          onClick={handleScreenButtonClick}
-        >
-          {index + 1}
-        </NavLink>
-      )),
+      screenIds.map(
+        (uuid, index) =>
+          uuid && (
+            <NavLink
+              key={uuid}
+              to={`/screen/${(index + 1).toString()}`}
+              className={({isActive, isPending}) =>
+                [
+                  'btn btn-xs btn-outline btn-primary',
+                  isPending ? 'loading' : isActive ? 'btn-active' : ''
+                ].join(' ')
+              }
+              onClick={handleScreenButtonClick}
+            >
+              {index + 1}
+            </NavLink>
+          )
+      ),
     [screenIds, handleScreenButtonClick]
   );
 
@@ -233,10 +236,10 @@ const Main: FC<MainProps> = ({mainClassName}) => {
     () =>
       Object.keys(panelTypes).map((key) => (
         <option key={key} value={key}>
-          {key}
+          {t(`Panels.${key}`)}
         </option>
       )),
-    []
+    [t]
   );
 
   const handleChangeCompactType = useCallback(

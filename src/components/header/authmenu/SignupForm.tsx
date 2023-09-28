@@ -9,6 +9,8 @@ import React, {
 import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 import {useTranslation} from 'react-i18next';
 import {useSignupMutation} from '../../../app/api';
+import MaterialSymbolError from '../../common/MaterialSymbolError';
+import MaterialSymbolSuccess from '../../common/MaterialSymbolSuccess';
 
 type SignupFormType = Record<
   'username' | 'password' | 'confirmPassword',
@@ -112,7 +114,7 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
           placeholder={t('SignupForm.placeholder.username') as string}
           value={username}
           onChange={handleChange('username')}
-          className="w-full max-w-xs input input-bordered input-sm"
+          className="w-full max-w-xs input input-bordered input-sm text-accent-content"
         />
         <input
           type="password"
@@ -120,7 +122,7 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
           placeholder={t('SignupForm.placeholder.password') as string}
           value={password}
           onChange={handleChange('password')}
-          className="w-full max-w-xs input input-bordered input-sm"
+          className="w-full max-w-xs input input-bordered input-sm text-accent-content"
         />
         <input
           type="password"
@@ -128,7 +130,7 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
           placeholder={t('SignupForm.placeholder.confirmPassword') as string}
           value={confirmPassword}
           onChange={handleChange('confirmPassword')}
-          className="w-full max-w-xs input input-bordered input-sm"
+          className="w-full max-w-xs input input-bordered input-sm text-accent-content"
         />
         <div className="flex-none">
           <button
@@ -162,8 +164,8 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
         <button onClick={onClickReset}>
           <MaterialSymbolButton icon="person_add" />
         </button>
-        {isSuccess && <div>{t('SignupForm.SignupSuccess')}</div>}
-        {isError && <div>{t('SignupForm.SignupError')}</div>}
+        {isSuccess && <MaterialSymbolSuccess />}
+        {isError && <MaterialSymbolError />}
       </div>
     );
   }

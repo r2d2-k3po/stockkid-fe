@@ -13,6 +13,7 @@ import DeleteAccount from './DeleteAccount';
 import DeleteGoogleAccount from './DeleteGoogleAccount';
 import DeleteNaverAccount from './DeleteNaverAccount';
 import DeleteKakaoAccount from './DeleteKakaoAccount';
+import ScreenComposition from './ScreenComposition';
 
 type ManageAccountProps = {
   loginMethod: string | null;
@@ -23,8 +24,8 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
   const {t} = useTranslation();
 
   const [currentTask, setCurrentTask] = useState<
-    'changePassword' | 'deleteAccount'
-  >('changePassword');
+    'screenComposition' | 'changePassword' | 'deleteAccount'
+  >('screenComposition');
 
   const [isUninitialized, setIsUninitialized] = useState<boolean>(true);
 
@@ -32,7 +33,9 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
 
   const handleChangeTask = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
     e.stopPropagation();
-    setCurrentTask(e.target.value as 'changePassword' | 'deleteAccount');
+    setCurrentTask(
+      e.target.value as 'screenComposition' | 'changePassword' | 'deleteAccount'
+    );
   }, []);
 
   const onClickCancel = useCallback(
@@ -44,8 +47,10 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
   );
 
   useEffect(() => {
-    setCurrentTask(loginMethod == 'UP' ? 'changePassword' : 'deleteAccount');
-  }, [loginMethod]);
+    if (currentTask == 'changePassword' && loginMethod != 'UP') {
+      setCurrentTask('screenComposition');
+    }
+  }, [currentTask, loginMethod]);
 
   return (
     <div className="mx-2 flex items-center gap-1 w-full">
@@ -55,9 +60,12 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
       {(isUninitialized || isLoading) && (
         <select
           onChange={handleChangeTask}
-          className="max-w-xs select select-info select-xs"
+          className="max-w-xs select select-info select-xs text-accent-content"
           value={currentTask}
         >
+          <option value="screenComposition">
+            {t('ManageAccount.select.screenComposition')}
+          </option>
           {loginMethod == 'UP' && (
             <option value="changePassword">
               {t('ManageAccount.select.changePassword')}
@@ -67,6 +75,12 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
             {t('ManageAccount.select.deleteAccount')}
           </option>
         </select>
+      )}
+      {currentTask == 'screenComposition' && (
+        <ScreenComposition
+          hideThisRef={hideThisRef}
+          setIsUninitialized={setIsUninitialized}
+        />
       )}
       {loginMethod == 'UP' && currentTask == 'changePassword' && (
         <ChangePassword

@@ -56,7 +56,24 @@
     },
     "select": {
       "changePassword": "change Password",
-      "deleteAccount": "delete Account"
+      "deleteAccount": "delete Account",
+      "screenComposition": "Screen Composition"
+    }
+  },
+  "ScreenComposition": {
+    "Error": "Task error!",
+    "Success": "Task success!",
+    "placeholder": {
+      "title": "screen title"
+    },
+    "selectTarget": {
+      "localStorage": "localStorage",
+      "server": "server",
+      "serverDefault": "server Default"
+    },
+    "selectTask": {
+      "load": "load",
+      "save": "save"
     }
   },
   "SignupForm": {

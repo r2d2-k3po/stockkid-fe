@@ -5,22 +5,10 @@ import {
   EntityState,
   PayloadAction
 } from '@reduxjs/toolkit';
-import {PanelCode} from './panelsSlice';
+import {Panel} from './panelsSlice';
 import {keysOfBreakpoints} from '../constants/reactGridLayoutParemeters';
 import {nanoid} from 'nanoid';
-
-type PanelGrids = Record<PanelCode, object>;
-
-const panelGrids: PanelGrids = {
-  panel0000: {i: '', x: 0, y: 0, w: 1, h: 1},
-  panel0001: {i: '', x: 0, y: 0, w: 1, h: 2},
-  panel0002: {i: '', x: 0, y: 0, w: 1, h: 3},
-  panel0003: {i: '', x: 0, y: 0, w: 2, h: 1},
-  panel0004: {i: '', x: 0, y: 0, w: 2, h: 2},
-  panel0005: {i: '', x: 0, y: 0, w: 2, h: 3},
-  panel0006: {i: '', x: 0, y: 0, w: 3, h: 1},
-  panel0007: {i: '', x: 0, y: 0, w: 3, h: 2}
-};
+import {PanelCode, panelGrids} from '../constants/panelInfo';
 
 type RemoveScreenPayload = {
   currentIndex: number;
@@ -54,7 +42,12 @@ type RemoveScreenPanelPayload = {
   panelId: string;
 };
 
-type Screen = {
+type LoadScreensPayload = {
+  screens: EntityState<Screen>;
+  panels: EntityState<Panel>;
+};
+
+export type Screen = {
   id: string;
   panelIds: string[];
   layouts: Layouts;
@@ -155,13 +148,14 @@ const screensSlice = createSlice({
       action: PayloadAction<UpdateScreenLayoutsPayload>
     ) => {
       const screenId = state.ids[action.payload.currentIndex] as string;
-      const panelIds = state.entities[screenId]?.panelIds as string[];
-
-      screenAdapter.setOne(state, {
-        id: screenId,
-        panelIds: panelIds,
-        layouts: action.payload.layouts
-      });
+      if (screenId) {
+        const panelIds = state.entities[screenId]?.panelIds as string[];
+        screenAdapter.setOne(state, {
+          id: screenId,
+          panelIds: panelIds,
+          layouts: action.payload.layouts
+        });
+      }
     },
     removeScreenPanel: (
       state: EntityState<Screen>,
@@ -189,6 +183,12 @@ const screensSlice = createSlice({
         panelIds: newPanelIds,
         layouts: newLayouts
       });
+    },
+    loadScreens: (
+      state: EntityState<Screen>,
+      action: PayloadAction<LoadScreensPayload>
+    ) => {
+      return action.payload.screens;
     }
   }
 });
@@ -200,7 +200,8 @@ export const {
   copyScreen,
   addScreenPanel,
   updateScreenLayouts,
-  removeScreenPanel
+  removeScreenPanel,
+  loadScreens
 } = screensSlice.actions;
 
 export default screensSlice.reducer;

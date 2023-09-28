@@ -8,6 +8,8 @@ import {
 import {updateRefreshToken} from '../../../../app/slices/authSlice';
 import KakaoButton from '../../../common/KakaoButton';
 import {nanoid} from 'nanoid';
+import MaterialSymbolError from '../../../common/MaterialSymbolError';
+import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
 type DeleteAccountProps = {
   hideThisRef: () => void;
@@ -74,7 +76,7 @@ const DeleteKakaoAccount: FC<DeleteAccountProps> = ({
 
     if (isClicked) {
       const duration = 500;
-      const id = setInterval(() => {
+      const intervalId = setInterval(() => {
         if (isUninitialized) {
           const authcode = localStorage.getItem('code');
           if (authcode && kakaoState) {
@@ -91,10 +93,17 @@ const DeleteKakaoAccount: FC<DeleteAccountProps> = ({
             }
           }
         } else {
-          clearInterval(id);
+          clearInterval(intervalId);
         }
       }, duration);
-      return () => clearInterval(id);
+      const timeoutId = setTimeout(() => {
+        reset();
+        setIsClicked(false);
+      }, 60000);
+      return () => {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+      };
     }
   }, [
     kakaoState,
@@ -102,7 +111,8 @@ const DeleteKakaoAccount: FC<DeleteAccountProps> = ({
     isClicked,
     isUninitialized,
     requestDeleteKakaoAccount,
-    dispatch
+    dispatch,
+    reset
   ]);
 
   useEffect(() => {
@@ -147,8 +157,8 @@ const DeleteKakaoAccount: FC<DeleteAccountProps> = ({
   } else {
     return (
       <>
-        {isSuccess && <div>{t('DeleteAccount.Success')}</div>}
-        {isError && <div>{t('DeleteAccount.Error')}</div>}
+        {isSuccess && <MaterialSymbolSuccess />}
+        {isError && <MaterialSymbolError />}
       </>
     );
   }

@@ -1,13 +1,13 @@
 import React, {FC} from 'react';
 import store from '../../../app/store';
 import {panelsSelectors} from '../../../app/hooks';
-import {PanelCode} from '../../../app/slices/panelsSlice';
+import {PanelCode} from '../../../app/constants/panelInfo';
 
 type CommonPanelProps = {
   panelId: string;
 };
 
-const Panel0000: FC<CommonPanelProps> = ({panelId}) => {
+const Clock: FC<CommonPanelProps> = ({panelId}) => {
   const panelCode = panelsSelectors.selectById(store.getState(), panelId)
     ?.panelCode as PanelCode;
 
@@ -19,4 +19,4 @@ const Panel0000: FC<CommonPanelProps> = ({panelId}) => {
   );
 };
 
-export default Panel0000;
+export default React.memo(Clock);

@@ -14,6 +14,8 @@ import {
 } from '../../../../app/api';
 import {updateRefreshToken} from '../../../../app/slices/authSlice';
 import NaverButton from '../../../common/NaverButton';
+import MaterialSymbolError from '../../../common/MaterialSymbolError';
+import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
 type DeleteAccountProps = {
   hideThisRef: () => void;
@@ -77,7 +79,7 @@ const DeleteNaverAccount: FC<DeleteAccountProps> = ({
 
     if (isClicked) {
       const duration = 500;
-      const id = setInterval(() => {
+      const intervalId = setInterval(() => {
         if (isUninitialized) {
           const authcode = localStorage.getItem('code');
           const naverState = localStorage.getItem(
@@ -97,12 +99,19 @@ const DeleteNaverAccount: FC<DeleteAccountProps> = ({
             }
           }
         } else {
-          clearInterval(id);
+          clearInterval(intervalId);
         }
       }, duration);
-      return () => clearInterval(id);
+      const timeoutId = setTimeout(() => {
+        reset();
+        setIsClicked(false);
+      }, 60000);
+      return () => {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+      };
     }
-  }, [isClicked, isUninitialized, requestDeleteNaverAccount, dispatch]);
+  }, [isClicked, isUninitialized, requestDeleteNaverAccount, dispatch, reset]);
 
   useEffect(() => {
     setIsUninitialized(isUninitialized);
@@ -147,8 +156,8 @@ const DeleteNaverAccount: FC<DeleteAccountProps> = ({
   } else {
     return (
       <>
-        {isSuccess && <div>{t('DeleteAccount.Success')}</div>}
-        {isError && <div>{t('DeleteAccount.Error')}</div>}
+        {isSuccess && <MaterialSymbolSuccess />}
+        {isError && <MaterialSymbolError />}
       </>
     );
   }

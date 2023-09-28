@@ -56,7 +56,24 @@
     },
     "select": {
       "changePassword": "비밀번호 변경",
-      "deleteAccount": "계정 삭제"
+      "deleteAccount": "계정 삭제",
+      "screenComposition": "화면 구성"
+    }
+  },
+  "ScreenComposition": {
+    "Error": "작업 에러!",
+    "Success": "작업 성공!",
+    "placeholder": {
+      "title": "스크린 타이틀"
+    },
+    "selectTarget": {
+      "localStorage": "로컬 스토리지",
+      "server": "서버",
+      "serverDefault": "서버 기본값"
+    },
+    "selectTask": {
+      "load": "불러오기",
+      "save": "저장"
     }
   },
   "SignupForm": {

@@ -9,10 +9,9 @@ import NaverButton from '../../common/NaverButton';
 import {AuthState, updateTokens} from '../../../app/slices/authSlice';
 import {NaverSigninRequest, useNaverSigninMutation} from '../../../app/api';
 import {useAppDispatch} from '../../../app/hooks';
-import {useTranslation} from 'react-i18next';
+import MaterialSymbolError from '../../common/MaterialSymbolError';
 
 const NaverLogin = () => {
-  const {t} = useTranslation();
   const dispatch = useAppDispatch();
 
   const [isClicked, setIsClicked] = useState<boolean>(false);
@@ -55,7 +54,7 @@ const NaverLogin = () => {
 
     if (isClicked) {
       const duration = 500;
-      const id = setInterval(() => {
+      const intervalId = setInterval(() => {
         if (isUninitialized) {
           const authcode = localStorage.getItem('code');
           const naverState = localStorage.getItem(
@@ -75,12 +74,19 @@ const NaverLogin = () => {
             }
           }
         } else {
-          clearInterval(id);
+          clearInterval(intervalId);
         }
       }, duration);
-      return () => clearInterval(id);
+      const timeoutId = setTimeout(() => {
+        reset();
+        setIsClicked(false);
+      }, 60000);
+      return () => {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+      };
     }
-  }, [isClicked, isUninitialized, requestNaverSignin, dispatch]);
+  }, [isClicked, isUninitialized, requestNaverSignin, dispatch, reset]);
 
   useEffect(() => {
     if (isSuccess || isError) {
@@ -98,7 +104,7 @@ const NaverLogin = () => {
       <div onClick={handleClickNaverIdLogin}>
         <NaverButton />
       </div>
-      {isError && <div>{t('AuthMenu.NaverLoginError')}</div>}
+      {isError && <MaterialSymbolError />}
     </>
   );
 };

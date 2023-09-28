@@ -47,6 +47,12 @@ export interface KakaoSigninRequest {
   nonce: string;
 }
 
+export interface ScreenCompositionSaveRequest {
+  number: string;
+  screenTitle: string;
+  screenSetting: string;
+}
+
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.REACT_APP_apiBaseUrl,
   prepareHeaders: (headers, {getState}) => {
@@ -64,8 +70,12 @@ const baseQueryWithRefresh: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
-  if (result.error && result.error.status === 401) {
-    // try to get a new token
+  if (
+    result.error &&
+    result.error.status === 401 &&
+    (api.getState() as RootState).auth.refreshToken
+  ) {
+    // try to get new tokens
     const refreshResult = await baseQuery(
       {
         url: 'refresh/tokens',
@@ -76,7 +86,7 @@ const baseQueryWithRefresh: BaseQueryFn<
       extraOptions
     );
     if (refreshResult.data) {
-      // store the new token
+      // store the new tokens
       api.dispatch(
         updateTokens((refreshResult.data as ResponseEntity).apiObj as AuthState)
       );
@@ -92,7 +102,7 @@ const baseQueryWithRefresh: BaseQueryFn<
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithRefresh,
-  tagTypes: [],
+  tagTypes: ['ScreenTitles'],
   endpoints: (builder) => ({
     signup: builder.mutation<ResponseEntity, SignupRequest>({
       query: (signupRequest) => ({
@@ -104,7 +114,7 @@ export const api = createApi({
     login: builder.mutation<ResponseEntity, LoginRequest>({
       query: (loginRequest) => ({
         url: 'member/login',
-        method: 'POST',
+        method: 'PATCH',
         body: loginRequest
       })
     }),
@@ -170,6 +180,38 @@ export const api = createApi({
         method: 'PATCH',
         body: logoutRequest
       })
+    }),
+    saveScreenComposition: builder.mutation<
+      ResponseEntity,
+      ScreenCompositionSaveRequest
+    >({
+      query: (screenCompositionSaveRequest) => ({
+        url: 'access/memberSettings/saveScreenComposition',
+        method: 'POST',
+        body: screenCompositionSaveRequest
+      }),
+      invalidatesTags: ['ScreenTitles']
+    }),
+    loadScreenSetting: builder.mutation<ResponseEntity, string>({
+      query: (number) => ({
+        url: `access/memberSettings/loadScreenSetting/${number}`
+      })
+    }),
+    loadScreenSettingDefault: builder.mutation<ResponseEntity, string>({
+      query: (number) => ({
+        url: `access/memberSettings/loadScreenSettingDefault/${number}`
+      })
+    }),
+    loadScreenTitles: builder.query<ResponseEntity, void>({
+      query: () => ({
+        url: `access/memberSettings/loadScreenTitles`
+      }),
+      providesTags: ['ScreenTitles']
+    }),
+    loadScreenTitlesDefault: builder.query<ResponseEntity, void>({
+      query: () => ({
+        url: `access/memberSettings/loadScreenTitlesDefault`
+      })
     })
   })
 });
@@ -185,5 +227,10 @@ export const {
   useDeleteGoogleAccountMutation,
   useDeleteNaverAccountMutation,
   useDeleteKakaoAccountMutation,
-  useLogoutMutation
+  useLogoutMutation,
+  useSaveScreenCompositionMutation,
+  useLoadScreenSettingMutation,
+  useLoadScreenSettingDefaultMutation,
+  useLazyLoadScreenTitlesQuery,
+  useLazyLoadScreenTitlesDefaultQuery
 } = api;
