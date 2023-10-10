@@ -25,6 +25,16 @@
     "Error": "Password change error!",
     "Success": "Password change success!"
   },
+  "Clock": {
+    "EU": "European Union (+1)",
+    "HongKong": "Hong Kong, Shanghai (+8)",
+    "Local": "local time",
+    "London": "London (+0)",
+    "Mumbai": "Mumbai (+5.5)",
+    "NewYork": "New York, Toronto (-5)",
+    "Seoul": "Seoul, Tokyo (+9)",
+    "Sydney": "Sydney (+10)"
+  },
   "Common": {
     "RefreshError": "Refresh error! Logging out!"
   },

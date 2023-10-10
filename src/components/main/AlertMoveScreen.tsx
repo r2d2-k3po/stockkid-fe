@@ -49,7 +49,7 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
   );
 
   return (
-    <div className="fixed top-16 z-50 w-fit alert alert-warning">
+    <div className="fixed top-16 z-50 w-fit alert alert-warning text-sm">
       <div>
         <svg
           xmlns="http://www.w3.org/2000/svg"
