@@ -16,7 +16,7 @@ import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
 import {removeScreenPanel} from '../../app/slices/screensSlice';
 import Clock from './panels/Clock';
-import Panel0001 from './panels/Panel0001';
+import ClockMini from './panels/ClockMini';
 import Panel0002 from './panels/Panel0002';
 import Panel0003 from './panels/Panel0003';
 import Panel0004 from './panels/Panel0004';
@@ -24,6 +24,7 @@ import Panel0005 from './panels/Panel0005';
 import Panel0006 from './panels/Panel0006';
 import Panel0007 from './panels/Panel0007';
 import {PanelCode} from '../../app/constants/panelInfo';
+import {useTranslation} from 'react-i18next';
 
 type CommonPanelProps = {
   panelId: string;
@@ -33,7 +34,7 @@ type PanelTypes = Record<PanelCode, FC<CommonPanelProps>>;
 
 export const panelTypes: PanelTypes = {
   clock: Clock,
-  panel0001: Panel0001,
+  clockMini: ClockMini,
   panel0002: Panel0002,
   panel0003: Panel0003,
   panel0004: Panel0004,
@@ -67,6 +68,7 @@ const PanelBase = forwardRef<HTMLDivElement, DivProps>(function PanelBase(
   },
   ref
 ) {
+  const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const visiblePanelButtonsRef = useRef<HTMLDivElement>(null);
   const visibleAlertRemovePanelRef = useRef<HTMLDivElement>(null);
@@ -117,21 +119,24 @@ const PanelBase = forwardRef<HTMLDivElement, DivProps>(function PanelBase(
       onMouseUp={onMouseUp}
       onTouchEnd={onTouchEnd}
     >
-      <div ref={visiblePanelButtonsRef} className="visible">
-        <div className="flex justify-between gap-1 m-0.5">
-          <button
-            className="btn btn-xs btn-outline btn-warning"
-            onClick={removeCurrentPanel}
-          >
-            -
-          </button>
-          <MaterialSymbol
-            icon="drag_pan"
-            className="drag_pan btn btn-xs btn-outline btn-warning"
-            size={22}
-            grade={-25}
-            weight={200}
-          />
+      <div className="flex justify-between gap-1 m-0.5">
+        <span>{t(`Panels.${panelCode}`)}</span>
+        <div ref={visiblePanelButtonsRef} className="visible">
+          <div className="flex justify-end gap-1 m-0.5">
+            <button
+              className="btn btn-xs btn-outline btn-warning"
+              onClick={removeCurrentPanel}
+            >
+              -
+            </button>
+            <MaterialSymbol
+              icon="drag_pan"
+              className="drag_pan btn btn-xs btn-outline btn-warning"
+              size={22}
+              grade={-25}
+              weight={200}
+            />
+          </div>
         </div>
       </div>
       <div ref={visibleAlertRemovePanelRef} className="hidden">

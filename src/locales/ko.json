@@ -35,6 +35,16 @@
     "Seoul": "서울, 도쿄 (+9)",
     "Sydney": "시드니 (+10)"
   },
+  "ClockMini": {
+    "EU": "유럽 연합",
+    "HongKong": "홍콩, 상하이",
+    "Local": "지역 시각",
+    "London": "런던",
+    "Mumbai": "뭄바이",
+    "NewYork": "뉴욕, 토론토",
+    "Seoul": "서울, 도쿄",
+    "Sydney": "시드니"
+  },
   "Common": {
     "RefreshError": "리프레시 에러! 로그아웃!"
   },
@@ -72,7 +82,7 @@
   },
   "Panels": {
     "clock": "시계",
-    "panel0001": "패널0001",
+    "clockMini": "미니 시계",
     "panel0002": "패널0002",
     "panel0003": "패널0003",
     "panel0004": "패널0004",
