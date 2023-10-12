@@ -4,7 +4,7 @@ type PanelGrids = Record<PanelCode, object>;
 
 export type PanelCode =
   | 'clock'
-  | 'panel0001'
+  | 'clockMini'
   | 'panel0002'
   | 'panel0003'
   | 'panel0004'
@@ -13,8 +13,8 @@ export type PanelCode =
   | 'panel0007';
 
 export const panelGrids: PanelGrids = {
-  clock: {i: '', x: 0, y: 0, w: 1, h: 1},
-  panel0001: {i: '', x: 0, y: 0, w: 1, h: 2},
+  clock: {i: '', x: 0, y: 0, w: 4, h: 3},
+  clockMini: {i: '', x: 0, y: 0, w: 3, h: 2},
   panel0002: {i: '', x: 0, y: 0, w: 1, h: 3},
   panel0003: {i: '', x: 0, y: 0, w: 2, h: 1},
   panel0004: {i: '', x: 0, y: 0, w: 2, h: 2},

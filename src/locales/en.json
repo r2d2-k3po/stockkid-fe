@@ -25,6 +25,26 @@
     "Error": "Password change error!",
     "Success": "Password change success!"
   },
+  "Clock": {
+    "EU": "European Union (+1)",
+    "HongKong": "Hong Kong, Shanghai (+8)",
+    "Local": "local time",
+    "London": "London (+0)",
+    "Mumbai": "Mumbai (+5.5)",
+    "NewYork": "New York, Toronto (-5)",
+    "Seoul": "Seoul, Tokyo (+9)",
+    "Sydney": "Sydney (+10)"
+  },
+  "ClockMini": {
+    "EU": "European Union",
+    "HongKong": "Hong Kong, Shanghai",
+    "Local": "local time",
+    "London": "London",
+    "Mumbai": "Mumbai",
+    "NewYork": "New York, Toronto",
+    "Seoul": "Seoul, Tokyo",
+    "Sydney": "Sydney"
+  },
   "Common": {
     "RefreshError": "Refresh error! Logging out!"
   },
@@ -59,6 +79,16 @@
       "deleteAccount": "delete Account",
       "screenComposition": "Screen Composition"
     }
+  },
+  "Panels": {
+    "clock": "Clock",
+    "clockMini": "mini Clock",
+    "panel0002": "Panel0002",
+    "panel0003": "Panel0003",
+    "panel0004": "Panel0004",
+    "panel0005": "Panel0005",
+    "panel0006": "Panel0006",
+    "panel0007": "Panel0007"
   },
   "ScreenComposition": {
     "Error": "Task error!",

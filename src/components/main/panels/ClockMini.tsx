@@ -6,7 +6,7 @@ type CommonPanelProps = {
   panelId: string;
 };
 
-const Clock: FC<CommonPanelProps> = ({panelId}) => {
+const ClockMini: FC<CommonPanelProps> = ({panelId}) => {
   const {t, i18n} = useTranslation();
 
   const locale =
@@ -59,29 +59,26 @@ const Clock: FC<CommonPanelProps> = ({panelId}) => {
   }, [timeZone]);
 
   return (
-    <div className="m-1 text-sm">
+    <div className="m-1 mt-0.5 text-sm">
       <select
         onChange={handleChangeTimeZone}
         className="max-w-xs select select-info select-xs"
         value={timeZone}
       >
-        <option value="local">{t('Clock.Local')}</option>
-        <option value="seoul">{t('Clock.Seoul')}</option>
-        <option value="newyork">{t('Clock.NewYork')}</option>
-        <option value="hongkong">{t('Clock.HongKong')}</option>
-        <option value="eu">{t('Clock.EU')}</option>
-        <option value="london">{t('Clock.London')}</option>
-        <option value="mumbai">{t('Clock.Mumbai')}</option>
-        <option value="sydney">{t('Clock.Sydney')}</option>
+        <option value="local">{t('ClockMini.Local')}</option>
+        <option value="seoul">{t('ClockMini.Seoul')}</option>
+        <option value="newyork">{t('ClockMini.NewYork')}</option>
+        <option value="hongkong">{t('ClockMini.HongKong')}</option>
+        <option value="eu">{t('ClockMini.EU')}</option>
+        <option value="london">{t('ClockMini.London')}</option>
+        <option value="mumbai">{t('ClockMini.Mumbai')}</option>
+        <option value="sydney">{t('ClockMini.Sydney')}</option>
       </select>
-      <div className="mt-2">
-        {now.setLocale(locale).toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY)}
-      </div>
-      <div>
-        {now.setLocale(locale).toLocaleString(DateTime.TIME_WITH_SHORT_OFFSET)}
+      <div className="mt-0.5">
+        {now.setLocale(locale).toLocaleString(DateTime.TIME_WITH_SECONDS)}
       </div>
     </div>
   );
 };
 
-export default React.memo(Clock);
+export default React.memo(ClockMini);

@@ -25,6 +25,26 @@
     "Error": "비밀번호 변경 에러!",
     "Success": "비밀번호 변경 성공!"
   },
+  "Clock": {
+    "EU": "유럽 연합 (+1)",
+    "HongKong": "홍콩, 상하이 (+8)",
+    "Local": "지역 시각",
+    "London": "런던 (+0)",
+    "Mumbai": "뭄바이 (+5.5)",
+    "NewYork": "뉴욕, 토론토 (-5)",
+    "Seoul": "서울, 도쿄 (+9)",
+    "Sydney": "시드니 (+10)"
+  },
+  "ClockMini": {
+    "EU": "유럽 연합",
+    "HongKong": "홍콩, 상하이",
+    "Local": "지역 시각",
+    "London": "런던",
+    "Mumbai": "뭄바이",
+    "NewYork": "뉴욕, 토론토",
+    "Seoul": "서울, 도쿄",
+    "Sydney": "시드니"
+  },
   "Common": {
     "RefreshError": "리프레시 에러! 로그아웃!"
   },
@@ -59,6 +79,16 @@
       "deleteAccount": "계정 삭제",
       "screenComposition": "화면 구성"
     }
+  },
+  "Panels": {
+    "clock": "시계",
+    "clockMini": "미니 시계",
+    "panel0002": "패널0002",
+    "panel0003": "패널0003",
+    "panel0004": "패널0004",
+    "panel0005": "패널0005",
+    "panel0006": "패널0006",
+    "panel0007": "패널0007"
   },
   "ScreenComposition": {
     "Error": "작업 에러!",
