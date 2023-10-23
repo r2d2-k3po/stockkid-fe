@@ -1,10 +1,12 @@
 type PanelGrids = Record<PanelCode, object>;
 
 // update panelTypes from PanelBase.tsx
+// also update ko.json and en.json
 
 export type PanelCode =
   | 'clock'
   | 'clockMini'
+  | 'board'
   | 'panel0002'
   | 'panel0003'
   | 'panel0004'
@@ -15,6 +17,7 @@ export type PanelCode =
 export const panelGrids: PanelGrids = {
   clock: {i: '', x: 0, y: 0, w: 4, h: 3},
   clockMini: {i: '', x: 0, y: 0, w: 3, h: 2},
+  board: {i: '', x: 0, y: 0, w: 20, h: 20},
   panel0002: {i: '', x: 0, y: 0, w: 1, h: 3},
   panel0003: {i: '', x: 0, y: 0, w: 2, h: 1},
   panel0004: {i: '', x: 0, y: 0, w: 2, h: 2},

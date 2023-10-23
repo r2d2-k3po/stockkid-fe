@@ -81,6 +81,7 @@
     }
   },
   "Panels": {
+    "board": "Board",
     "clock": "Clock",
     "clockMini": "mini Clock",
     "panel0002": "Panel0002",

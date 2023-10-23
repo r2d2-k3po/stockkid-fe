@@ -25,6 +25,7 @@ import Panel0006 from './panels/Panel0006';
 import Panel0007 from './panels/Panel0007';
 import {PanelCode} from '../../app/constants/panelInfo';
 import {useTranslation} from 'react-i18next';
+import Board from './panels/Board';
 
 type CommonPanelProps = {
   panelId: string;
@@ -35,6 +36,7 @@ type PanelTypes = Record<PanelCode, FC<CommonPanelProps>>;
 export const panelTypes: PanelTypes = {
   clock: Clock,
   clockMini: ClockMini,
+  board: Board,
   panel0002: Panel0002,
   panel0003: Panel0003,
   panel0004: Panel0004,

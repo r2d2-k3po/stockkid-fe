@@ -81,6 +81,7 @@
     }
   },
   "Panels": {
+    "board": "게시판",
     "clock": "시계",
     "clockMini": "미니 시계",
     "panel0002": "패널0002",
