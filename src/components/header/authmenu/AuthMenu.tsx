@@ -148,6 +148,9 @@ const AuthMenu = () => {
                 <div onClick={showRef(visibleSignupFormRef)}>
                   <MaterialSymbolButton icon="person_add" />
                 </div>
+                <div onClick={showRef(visibleManageAccountRef)}>
+                  <MaterialSymbolButton icon="manage_accounts" />
+                </div>
                 <GoogleSignin />
                 <NaverLogin />
                 <KakaoLogin />

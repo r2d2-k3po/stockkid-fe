@@ -106,14 +106,14 @@ export const api = createApi({
   endpoints: (builder) => ({
     signup: builder.mutation<ResponseEntity, SignupRequest>({
       query: (signupRequest) => ({
-        url: 'member/signup',
+        url: 'permit/member/signup',
         method: 'POST',
         body: signupRequest
       })
     }),
     login: builder.mutation<ResponseEntity, LoginRequest>({
       query: (loginRequest) => ({
-        url: 'member/login',
+        url: 'login',
         method: 'PATCH',
         body: loginRequest
       })
@@ -199,7 +199,7 @@ export const api = createApi({
     }),
     loadScreenSettingDefault: builder.mutation<ResponseEntity, string>({
       query: (number) => ({
-        url: `access/memberSettings/loadScreenSettingDefault/${number}`
+        url: `permit/memberSettings/loadScreenSettingDefault/${number}`
       })
     }),
     loadScreenTitles: builder.query<ResponseEntity, void>({
@@ -210,7 +210,7 @@ export const api = createApi({
     }),
     loadScreenTitlesDefault: builder.query<ResponseEntity, void>({
       query: () => ({
-        url: `access/memberSettings/loadScreenTitlesDefault`
+        url: `permit/memberSettings/loadScreenTitlesDefault`
       })
     })
   })
