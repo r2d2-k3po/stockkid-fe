@@ -21,6 +21,18 @@
     "NaverLoginError": "Naver login error!",
     "expiresInMinutes": "Logout: in {{expiresInMinutesRefresh}} minutes"
   },
+  "Board": {
+    "Category": {
+      "All": "All",
+      "Life": "Life",
+      "Notice": "Notice",
+      "QA": "Q&A",
+      "Stock": "Stock"
+    },
+    "placeholder": {
+      "tag": "search tag (2~30)"
+    }
+  },
   "ChangePassword": {
     "Error": "Password change error!",
     "Success": "Password change success!"

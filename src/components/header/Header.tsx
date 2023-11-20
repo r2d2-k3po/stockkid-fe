@@ -2,7 +2,6 @@ import React, {FC, useEffect} from 'react';
 import LanguageSelect from './LanguageSelect';
 import LightDarkSwap from './LightDarkSwap';
 import Indicator from './Indicator';
-import Search from './Search';
 import FixedPin from '../common/FixedPin';
 import {useMeasure} from 'react-use';
 import AuthMenu from './authmenu/AuthMenu';
@@ -43,7 +42,6 @@ const Header: FC<HeaderProps> = ({
         </div>
 
         <div className="navbar-end">
-          <Search />
           <Indicator />
           <LightDarkSwap />
           <LanguageSelect />

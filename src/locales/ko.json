@@ -21,6 +21,18 @@
     "NaverLoginError": "네이버 로그인 에러!",
     "expiresInMinutes": "로그아웃: {{expiresInMinutesRefresh}}분 후"
   },
+  "Board": {
+    "Category": {
+      "All": "전체",
+      "Life": "일상",
+      "Notice": "공지",
+      "QA": "질문답변",
+      "Stock": "주식"
+    },
+    "placeholder": {
+      "tag": "검색 태그 (2~30)"
+    }
+  },
   "ChangePassword": {
     "Error": "비밀번호 변경 에러!",
     "Success": "비밀번호 변경 성공!"
