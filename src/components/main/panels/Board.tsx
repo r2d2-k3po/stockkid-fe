@@ -26,6 +26,12 @@ const Board: FC<CommonPanelProps> = ({panelId}) => {
 
   const [searchMode, setSearchMode] = useState<boolean>(false);
 
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const [targetPage, setTargetPage] = useState<number>(1);
+
+  const [totalPage, setTotalPage] = useState<number>(10);
+
   const categoryButtonClassName = 'btn btn-sm btn-outline btn-primary mb-2';
   const categoryButtonClassNameActive =
     'btn btn-sm btn-outline btn-primary btn-active mb-2';
@@ -60,6 +66,47 @@ const Board: FC<CommonPanelProps> = ({panelId}) => {
     e.stopPropagation();
     setSearchMode(true);
   }, []);
+
+  const moveToFirstPage = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setCurrentPage(1);
+  }, []);
+
+  const moveToPrevPage = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setCurrentPage((currentPage) => currentPage - 1);
+  }, []);
+
+  const moveToNextPage = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setCurrentPage((currentPage) => currentPage + 1);
+  }, []);
+
+  const moveToLastPage = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      setCurrentPage(totalPage);
+    },
+    [totalPage]
+  );
+
+  const handleChangePage = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const page = parseInt(e.target.value);
+      if (page < 1) setTargetPage(1);
+      else if (page > totalPage) setTargetPage(totalPage);
+      else setTargetPage(parseInt(e.target.value));
+    },
+    [totalPage]
+  );
+
+  const moveToTargetPage = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      setCurrentPage(targetPage);
+    },
+    [targetPage]
+  );
 
   return (
     <div>
@@ -123,17 +170,60 @@ const Board: FC<CommonPanelProps> = ({panelId}) => {
             placeholder={t('Board.placeholder.tag') as string}
             value={tag}
             onChange={handleChangeTag}
-            className="w-full max-w-xs input input-bordered input-sm text-accent-content"
+            className="w-36 max-w-xs input input-bordered input-sm text-accent-content"
           />
           <div onClick={handleClickSearch}>
             <Search searchMode={searchMode} searchDisabled={searchDisabled} />
           </div>
         </div>
-        <div
-          className="flex justify-end mt-1 gap-2"
-          onClick={handleClickSearch}
-        >
-          <Search searchMode={searchMode} searchDisabled={searchDisabled} />
+        <div className="flex justify-end mt-1 gap-1 text-secondary">
+          <button
+            className="btn btn-sm btn-ghost btn-circle"
+            disabled={currentPage == 1}
+            onClick={moveToFirstPage}
+          >
+            <i className="ri-skip-left-line ri-lg"></i>
+          </button>
+          <button
+            className="btn btn-sm btn-ghost btn-circle"
+            disabled={currentPage == 1}
+            onClick={moveToPrevPage}
+          >
+            <i className="ri-arrow-left-s-line ri-lg"></i>
+          </button>
+          <span className="mt-1">
+            {currentPage}/{totalPage}
+          </span>
+          <button
+            className="btn btn-sm btn-ghost btn-circle"
+            disabled={currentPage == totalPage}
+            onClick={moveToNextPage}
+          >
+            <i className="ri-arrow-right-s-line ri-lg"></i>
+          </button>
+          <button
+            className="btn btn-sm btn-ghost btn-circle"
+            disabled={currentPage == totalPage}
+            onClick={moveToLastPage}
+          >
+            <i className="ri-skip-right-line ri-lg"></i>
+          </button>
+          <input
+            type="number"
+            name="targetPage"
+            value={targetPage}
+            min={1}
+            max={totalPage}
+            onChange={handleChangePage}
+            className="w-20 max-w-xs input input-bordered input-secondary input-sm text-accent-content"
+          />
+          <button
+            className="btn btn-sm btn-ghost btn-circle"
+            disabled={currentPage == targetPage}
+            onClick={moveToTargetPage}
+          >
+            <i className="ri-corner-up-left-double-line ri-lg"></i>
+          </button>
         </div>
       </div>
     </div>
