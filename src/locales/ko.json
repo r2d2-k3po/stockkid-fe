@@ -21,7 +21,7 @@
     "NaverLoginError": "네이버 로그인 에러!",
     "expiresInMinutes": "로그아웃: {{expiresInMinutesRefresh}}분 후"
   },
-  "Board": {
+  "BoardPage": {
     "Category": {
       "All": "전체",
       "Life": "일상",
@@ -93,7 +93,7 @@
     }
   },
   "Panels": {
-    "board": "게시판",
+    "boardPage": "게시판",
     "clock": "시계",
     "clockMini": "미니 시계",
     "panel0002": "패널0002",

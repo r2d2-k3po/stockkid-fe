@@ -21,7 +21,7 @@
     "NaverLoginError": "Naver login error!",
     "expiresInMinutes": "Logout: in {{expiresInMinutesRefresh}} minutes"
   },
-  "Board": {
+  "BoardPage": {
     "Category": {
       "All": "All",
       "Life": "Life",
@@ -93,7 +93,7 @@
     }
   },
   "Panels": {
-    "board": "Board",
+    "boardPage": "Board",
     "clock": "Clock",
     "clockMini": "mini Clock",
     "panel0002": "Panel0002",

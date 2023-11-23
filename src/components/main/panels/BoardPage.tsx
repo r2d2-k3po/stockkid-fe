@@ -8,13 +8,17 @@ import React, {
 } from 'react';
 import {useTranslation} from 'react-i18next';
 import Search from './board/Search';
+import {useAppSelector} from '../../../app/hooks';
 
 type CommonPanelProps = {
   panelId: string;
 };
 
-const Board: FC<CommonPanelProps> = ({panelId}) => {
+const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
   const {t} = useTranslation();
+
+  const tokens = useAppSelector((state) => state.auth);
+  const loggedIn = !(tokens.refreshToken == null);
 
   const [boardCategory, setBoardCategory] = useState<
     'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE'
@@ -120,7 +124,7 @@ const Board: FC<CommonPanelProps> = ({panelId}) => {
             }
             onClick={handleClickCategoryButton('ALL')}
           >
-            {t('Board.Category.All')}
+            {t('BoardPage.Category.All')}
           </button>
           <button
             className={
@@ -130,7 +134,7 @@ const Board: FC<CommonPanelProps> = ({panelId}) => {
             }
             onClick={handleClickCategoryButton('STOCK')}
           >
-            {t('Board.Category.Stock')}
+            {t('BoardPage.Category.Stock')}
           </button>
           <button
             className={
@@ -140,7 +144,7 @@ const Board: FC<CommonPanelProps> = ({panelId}) => {
             }
             onClick={handleClickCategoryButton('LIFE')}
           >
-            {t('Board.Category.Life')}
+            {t('BoardPage.Category.Life')}
           </button>
           <button
             className={
@@ -150,7 +154,7 @@ const Board: FC<CommonPanelProps> = ({panelId}) => {
             }
             onClick={handleClickCategoryButton('QA')}
           >
-            {t('Board.Category.QA')}
+            {t('BoardPage.Category.QA')}
           </button>
           <button
             className={
@@ -160,14 +164,14 @@ const Board: FC<CommonPanelProps> = ({panelId}) => {
             }
             onClick={handleClickCategoryButton('NOTICE')}
           >
-            {t('Board.Category.Notice')}
+            {t('BoardPage.Category.Notice')}
           </button>
         </div>
         <div className="flex justify-center mt-1 gap-2">
           <input
             type="text"
             name="tag"
-            placeholder={t('Board.placeholder.tag') as string}
+            placeholder={t('BoardPage.placeholder.tag') as string}
             value={tag}
             onChange={handleChangeTag}
             className="w-36 max-w-xs input input-bordered input-sm text-accent-content"
@@ -224,10 +228,17 @@ const Board: FC<CommonPanelProps> = ({panelId}) => {
           >
             <i className="ri-corner-up-left-double-line ri-lg"></i>
           </button>
+          <button
+            className="btn btn-sm btn-accent btn-circle ml-3"
+            disabled={!loggedIn}
+            // onClick={moveToTargetPage}
+          >
+            <i className="ri-pencil-line ri-lg"></i>
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default React.memo(Board);
+export default React.memo(BoardPage);
