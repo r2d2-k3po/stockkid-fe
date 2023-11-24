@@ -9,6 +9,7 @@ import React, {
 import {useTranslation} from 'react-i18next';
 import Search from './board/Search';
 import {useAppSelector} from '../../../app/hooks';
+import Board from './board/Board';
 
 type CommonPanelProps = {
   panelId: string;
@@ -30,15 +31,21 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const [searchMode, setSearchMode] = useState<boolean>(false);
 
+  const [sortBy, setSortBy] = useState<
+    'boardId' | 'likeCount' | 'replyCount' | 'readCount'
+  >('boardId');
+
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const [targetPage, setTargetPage] = useState<number>(1);
 
   const [totalPage, setTotalPage] = useState<number>(10);
 
-  const categoryButtonClassName = 'btn btn-sm btn-outline btn-primary mb-2';
+  const [editorMode, setEditorMode] = useState<boolean>(false);
+
+  const categoryButtonClassName = 'btn btn-sm btn-outline btn-primary';
   const categoryButtonClassNameActive =
-    'btn btn-sm btn-outline btn-primary btn-active mb-2';
+    'btn btn-sm btn-outline btn-primary btn-active';
 
   const handleClickCategoryButton = useCallback(
     (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
@@ -70,6 +77,16 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     e.stopPropagation();
     setSearchMode(true);
   }, []);
+
+  const handleChangeSortBy = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      e.stopPropagation();
+      setSortBy(
+        e.target.value as 'boardId' | 'likeCount' | 'replyCount' | 'readCount'
+      );
+    },
+    []
+  );
 
   const moveToFirstPage = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -112,10 +129,15 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     [targetPage]
   );
 
+  const enableEditor = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setEditorMode(true);
+  }, []);
+
   return (
     <div>
-      <div className="flex justify-between border-b border-warning mx-3">
-        <div className="flex justify-start mt-1 gap-2">
+      <div className="flex justify-between border-b border-warning my-2 mx-3">
+        <div className="flex justify-start gap-2 mb-2">
           <button
             className={
               boardCategory == 'ALL'
@@ -167,20 +189,32 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             {t('BoardPage.Category.Notice')}
           </button>
         </div>
-        <div className="flex justify-center mt-1 gap-2">
+        <div className="flex justify-center gap-2 mb-2">
           <input
             type="text"
             name="tag"
             placeholder={t('BoardPage.placeholder.tag') as string}
             value={tag}
             onChange={handleChangeTag}
-            className="w-36 max-w-xs input input-bordered input-sm text-accent-content"
+            className="w-36 max-w-xs input input-bordered input-info input-sm text-accent-content"
           />
           <div onClick={handleClickSearch}>
             <Search searchMode={searchMode} searchDisabled={searchDisabled} />
           </div>
+          <select
+            onChange={handleChangeSortBy}
+            className="max-w-xs select select-info select-sm text-accent-content"
+            value={sortBy}
+          >
+            <option value="boardId">{t('BoardPage.sortBy.boardId')}</option>
+            <option value="likeCount">{t('BoardPage.sortBy.likeCount')}</option>
+            <option value="replyCount">
+              {t('BoardPage.sortBy.replyCount')}
+            </option>
+            <option value="readCount">{t('BoardPage.sortBy.readCount')}</option>
+          </select>
         </div>
-        <div className="flex justify-end mt-1 gap-1 text-secondary">
+        <div className="flex justify-end gap-1 mb-2 text-secondary">
           <button
             className="btn btn-sm btn-ghost btn-circle"
             disabled={currentPage == 1}
@@ -230,13 +264,17 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </button>
           <button
             className="btn btn-sm btn-accent btn-circle ml-3"
-            disabled={!loggedIn}
-            // onClick={moveToTargetPage}
+            disabled={!loggedIn || editorMode}
+            onClick={enableEditor}
           >
             <i className="ri-pencil-line ri-lg"></i>
           </button>
         </div>
       </div>
+      <div className={editorMode ? '' : 'hidden'}>
+        <Board setEditorMode={setEditorMode} />
+      </div>
+      <div className="my-2 mx-3">BoardList</div>
     </div>
   );
 };
