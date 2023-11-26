@@ -1,10 +1,22 @@
-import React from 'react';
+import React, {FC} from 'react';
 import {WysiwygEditor} from '@remirror/react-editors/wysiwyg';
+import {RemirrorJSON} from 'remirror';
+import {OnChangeJSON} from '@remirror/react';
 
-const Editor = () => {
+type EditorProps = {
+  onChange: (json: RemirrorJSON) => void;
+  initialContent?: RemirrorJSON;
+};
+
+const Editor: FC<EditorProps> = ({onChange, initialContent}) => {
   return (
-    <div style={{padding: 16}}>
-      <WysiwygEditor placeholder="Enter text..." />
+    <div className="mb-2">
+      <WysiwygEditor
+        placeholder="Enter text..."
+        initialContent={initialContent}
+      >
+        <OnChangeJSON onChange={onChange} />
+      </WysiwygEditor>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, {ChangeEvent, FC, MouseEvent, useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import Editor from './Editor';
+import {RemirrorJSON} from 'remirror';
 
 type BoardFormType = Record<
   'nickname' | 'title' | 'tag1' | 'tag2' | 'tag3',
@@ -27,6 +28,11 @@ const Board: FC<BoardProps> = ({setEditorMode}) => {
       tag3: ''
     });
 
+  const [initialContent] = useState<RemirrorJSON | undefined>(() => {
+    const content = '';
+    return content ? JSON.parse(content) : undefined;
+  });
+
   const handleChangeBoardForm = useCallback(
     (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
       const regex = /^.{0,30}$/;
@@ -44,6 +50,10 @@ const Board: FC<BoardProps> = ({setEditorMode}) => {
     },
     []
   );
+
+  const handleEditorChange = useCallback((json: RemirrorJSON) => {
+    // window.localStorage.setItem(STORAGE_KEY, JSON.stringify(json));
+  }, []);
 
   const onClickCancel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
@@ -156,7 +166,7 @@ const Board: FC<BoardProps> = ({setEditorMode}) => {
           />
         </div>
       </div>
-      <Editor />
+      <Editor onChange={handleEditorChange} initialContent={initialContent} />
     </div>
   );
 };
