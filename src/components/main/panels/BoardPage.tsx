@@ -196,14 +196,14 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             placeholder={t('BoardPage.placeholder.tag') as string}
             value={tag}
             onChange={handleChangeTag}
-            className="w-36 max-w-xs input input-bordered input-info input-sm text-accent-content"
+            className="w-36 max-w-xs input input-bordered input-info input-xs mt-1 text-accent-content"
           />
-          <div onClick={handleClickSearch}>
+          <div className="mt-1" onClick={handleClickSearch}>
             <Search searchMode={searchMode} searchDisabled={searchDisabled} />
           </div>
           <select
             onChange={handleChangeSortBy}
-            className="max-w-xs select select-info select-sm text-accent-content"
+            className="max-w-xs select select-info select-xs text-accent-content mt-1"
             value={sortBy}
           >
             <option value="boardId">{t('BoardPage.sortBy.boardId')}</option>
@@ -216,31 +216,31 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         </div>
         <div className="flex justify-end gap-1 mb-2 text-secondary">
           <button
-            className="btn btn-sm btn-ghost btn-circle"
+            className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={currentPage == 1}
             onClick={moveToFirstPage}
           >
             <i className="ri-skip-left-line ri-lg"></i>
           </button>
           <button
-            className="btn btn-sm btn-ghost btn-circle"
+            className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={currentPage == 1}
             onClick={moveToPrevPage}
           >
             <i className="ri-arrow-left-s-line ri-lg"></i>
           </button>
-          <span className="mt-1">
+          <span className="mt-1 text-sm">
             {currentPage}/{totalPage}
           </span>
           <button
-            className="btn btn-sm btn-ghost btn-circle"
+            className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={currentPage == totalPage}
             onClick={moveToNextPage}
           >
             <i className="ri-arrow-right-s-line ri-lg"></i>
           </button>
           <button
-            className="btn btn-sm btn-ghost btn-circle"
+            className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={currentPage == totalPage}
             onClick={moveToLastPage}
           >
@@ -253,10 +253,10 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             min={1}
             max={totalPage}
             onChange={handleChangePage}
-            className="w-20 max-w-xs input input-bordered input-secondary input-sm text-accent-content"
+            className="w-20 max-w-xs input input-bordered input-secondary input-xs text-accent-content mt-1"
           />
           <button
-            className="btn btn-sm btn-ghost btn-circle"
+            className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={currentPage == targetPage}
             onClick={moveToTargetPage}
           >

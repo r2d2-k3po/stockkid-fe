@@ -23,7 +23,11 @@
   },
   "Board": {
     "placeholder": {
-      "nickname": "nickname"
+      "nickname": "nickname",
+      "tag1": "tag1",
+      "tag2": "tag2",
+      "tag3": "tag3",
+      "title": "title"
     }
   },
   "BoardPage": {

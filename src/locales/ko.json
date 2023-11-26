@@ -23,7 +23,11 @@
   },
   "Board": {
     "placeholder": {
-      "nickname": "닉네임"
+      "nickname": "닉네임",
+      "tag1": "태그1",
+      "tag2": "태그2",
+      "tag3": "태그3",
+      "title": "제목"
     }
   },
   "BoardPage": {

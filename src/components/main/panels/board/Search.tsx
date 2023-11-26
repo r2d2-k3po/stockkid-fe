@@ -11,8 +11,8 @@ const Search: FC<SearchProps> = ({searchMode, searchDisabled}) => {
       disabled={searchDisabled}
       className={
         searchMode && !searchDisabled
-          ? 'btn btn-sm btn-outline btn-info btn-circle btn-active'
-          : 'btn btn-sm btn-outline btn-info btn-circle'
+          ? 'btn btn-xs btn-outline btn-info btn-circle btn-active'
+          : 'btn btn-xs btn-outline btn-info btn-circle'
       }
     >
       <svg
