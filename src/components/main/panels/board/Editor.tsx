@@ -14,6 +14,7 @@ const Editor: FC<EditorProps> = ({onChange, initialContent}) => {
       <WysiwygEditor
         placeholder="Enter text..."
         initialContent={initialContent}
+        editable={false}
       >
         <OnChangeJSON onChange={onChange} />
       </WysiwygEditor>
