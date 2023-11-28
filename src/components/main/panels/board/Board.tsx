@@ -2,6 +2,7 @@ import React, {ChangeEvent, FC, MouseEvent, useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import Editor from './Editor';
 import {RemirrorJSON} from 'remirror';
+import EditorReadOnly from './EditorReadOnly';
 
 type BoardFormType = Record<
   'nickname' | 'title' | 'tag1' | 'tag2' | 'tag3',
@@ -167,6 +168,7 @@ const Board: FC<BoardProps> = ({setEditorMode}) => {
         </div>
       </div>
       <Editor onChange={handleEditorChange} initialContent={initialContent} />
+      <EditorReadOnly initialContent={initialContent} />
     </div>
   );
 };

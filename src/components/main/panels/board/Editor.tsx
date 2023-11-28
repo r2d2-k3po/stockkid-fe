@@ -14,7 +14,6 @@ const Editor: FC<EditorProps> = ({onChange, initialContent}) => {
       <WysiwygEditor
         placeholder="Enter text..."
         initialContent={initialContent}
-        editable={false}
       >
         <OnChangeJSON onChange={onChange} />
       </WysiwygEditor>
@@ -22,4 +21,4 @@ const Editor: FC<EditorProps> = ({onChange, initialContent}) => {
   );
 };
 
-export default Editor;
+export default React.memo(Editor);

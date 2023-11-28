@@ -16,7 +16,7 @@ import {ReactEditorProps} from './types';
 
 export type WysiwygEditorProps = Partial<ReactEditorProps>;
 
-export const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
+const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
   placeholder,
   stringHandler,
   children,
@@ -48,3 +48,5 @@ export const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
     </AllStyledComponent>
   );
 };
+
+export default React.memo(MyWysiwygEditor);
