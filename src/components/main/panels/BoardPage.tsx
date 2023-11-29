@@ -4,12 +4,14 @@ import React, {
   MouseEvent,
   useCallback,
   useEffect,
+  useMemo,
   useState
 } from 'react';
 import {useTranslation} from 'react-i18next';
 import Search from './board/Search';
 import {useAppSelector} from '../../../app/hooks';
 import Board from './board/Board';
+import {tokenDecoder} from '../../../utils/tokenDecoder';
 
 type CommonPanelProps = {
   panelId: string;
@@ -21,14 +23,27 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
   const tokens = useAppSelector((state) => state.auth);
   const loggedIn = !(tokens.refreshToken == null);
 
+  const decodedAccessToken = useMemo(
+    () => (tokens.accessToken ? tokenDecoder(tokens.accessToken) : null),
+    [tokens.accessToken]
+  );
+
+  const memberId = useMemo(
+    () => (decodedAccessToken ? (decodedAccessToken.sid as string) : null),
+    [decodedAccessToken]
+  );
+
   const [boardCategory, setBoardCategory] = useState<
     'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE'
   >('ALL');
 
+  // search tag
   const [tag, setTag] = useState<string>('');
 
+  // Search button disabled
   const [searchDisabled, setSearchDisabled] = useState<boolean>(true);
 
+  // search is being processed for the current tag, not the usual BoardPage read
   const [searchMode, setSearchMode] = useState<boolean>(false);
 
   const [sortBy, setSortBy] = useState<
@@ -41,7 +56,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const [totalPage, setTotalPage] = useState<number>(10);
 
-  const [editorMode, setEditorMode] = useState<boolean>(false);
+  const [showNewBoard, setShowNewBoard] = useState<boolean>(
+    (localStorage.getItem('showNewBoard') || 'false') === 'true'
+  );
 
   const categoryButtonClassName = 'btn btn-sm btn-outline btn-primary';
   const categoryButtonClassNameActive =
@@ -131,7 +148,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const enableEditor = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    setEditorMode(true);
+    localStorage.setItem('showNewBoard', 'true');
+    setShowNewBoard(true);
   }, []);
 
   return (
@@ -264,15 +282,15 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </button>
           <button
             className="btn btn-sm btn-accent btn-circle ml-3"
-            disabled={!loggedIn || editorMode}
+            disabled={!loggedIn || showNewBoard}
             onClick={enableEditor}
           >
             <i className="ri-pencil-line ri-lg"></i>
           </button>
         </div>
       </div>
-      <div className={editorMode ? '' : 'hidden'}>
-        <Board setEditorMode={setEditorMode} />
+      <div className={showNewBoard ? '' : 'hidden'}>
+        <Board setShowNewBoard={setShowNewBoard} mode="register" />
       </div>
       <div className="my-2 mx-3">BoardList</div>
     </div>

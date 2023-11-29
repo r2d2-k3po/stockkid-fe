@@ -33,6 +33,7 @@
   "BoardPage": {
     "Category": {
       "All": "전체",
+      "Category": "카테고리",
       "Life": "일상",
       "Notice": "공지",
       "QA": "질문답변",
@@ -81,6 +82,9 @@
     "DeleteAccount": "계정 삭제",
     "Error": "계정 삭제 에러!",
     "Success": "계정 삭제 성공!"
+  },
+  "Editor": {
+    "placeholder": "텍스트 입력..."
   },
   "LoginForm": {
     "Login": "로그인",

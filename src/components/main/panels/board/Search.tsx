@@ -10,7 +10,7 @@ const Search: FC<SearchProps> = ({searchMode, searchDisabled}) => {
     <button
       disabled={searchDisabled}
       className={
-        searchMode && !searchDisabled
+        searchMode
           ? 'btn btn-xs btn-outline btn-info btn-circle btn-active'
           : 'btn btn-xs btn-outline btn-info btn-circle'
       }

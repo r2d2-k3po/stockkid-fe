@@ -32,7 +32,6 @@ import {
 import {invisibleRefVisibleRef} from '../../utils/invisibleRefVisibleRef';
 import {visibleRefHiddenRef} from '../../utils/visibleRefHiddenRef';
 import {nanoid} from 'nanoid';
-// import {panelTypes} from './PanelBase';
 import {PanelCode, panelTypes} from '../../app/constants/panelInfo';
 
 type ContextType = {

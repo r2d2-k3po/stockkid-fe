@@ -33,6 +33,7 @@
   "BoardPage": {
     "Category": {
       "All": "All",
+      "Category": "Category",
       "Life": "Life",
       "Notice": "Notice",
       "QA": "Q&A",
@@ -81,6 +82,9 @@
     "DeleteAccount": "Delete Account",
     "Error": "Account delete error!",
     "Success": "Account delete success!"
+  },
+  "Editor": {
+    "placeholder": "Enter text..."
   },
   "LoginForm": {
     "Login": "Login",
