@@ -102,9 +102,14 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
 
   const [currentTitle, setCurrentTitle] = useState<string>('');
 
+  const [loadedTitle, setLoadedTitle] = useState<string>('');
+
+  const [isSuccessLocal, setIsSuccessLocal] = useState<boolean>(false);
+
   const handleChangeTask = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
     e.stopPropagation();
     setCurrentTask(e.target.value as 'save' | 'load');
+    setCurrentTarget('localStorage');
   }, []);
 
   const handleChangeTarget = useCallback(
@@ -154,6 +159,7 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
           if (currentTarget == 'localStorage') {
             localStorage.setItem('screenTitle' + currentNumber, currentTitle);
             localStorage.setItem(key, JSON.stringify(screenSetting));
+            setIsSuccessLocal(true);
           } else if (currentTarget == 'server') {
             const screenCompositionSaveRequest = {
               number: currentNumber,
@@ -208,52 +214,67 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
 
   useEffect(() => {
     async function loadScreenTitles() {
-      await requestScreenTitlesLoad();
+      if (loggedIn) await requestScreenTitlesLoad();
       await requestScreenTitlesDefaultLoad();
     }
 
-    if (loggedIn) {
-      try {
-        loadScreenTitles();
-      } catch (err) {
-        console.log(err);
-      }
+    try {
+      loadScreenTitles();
+    } catch (err) {
+      console.log(err);
     }
   }, [loggedIn, requestScreenTitlesLoad, requestScreenTitlesDefaultLoad]);
 
   useEffect(() => {
-    if (currentTarget == 'localStorage') {
-      setCurrentTitle(
-        localStorage.getItem('screenTitle' + currentNumber)
-          ? (localStorage.getItem('screenTitle' + currentNumber) as string)
-          : ''
-      );
-    } else if (currentTarget == 'server') {
-      if (dataScreenTitles?.apiObj as ScreenTitles) {
-        setCurrentTitle(
+    if (currentTask == 'load') {
+      if (currentTarget == 'localStorage') {
+        setLoadedTitle(
+          localStorage.getItem('screenTitle' + currentNumber)
+            ? (localStorage.getItem('screenTitle' + currentNumber) as string)
+            : ''
+        );
+      } else if (currentTarget == 'server') {
+        setLoadedTitle(
           (dataScreenTitles?.apiObj as ScreenTitles)[
             'screenTitle' + currentNumber
           ]
+            ? (dataScreenTitles?.apiObj as ScreenTitles)[
+                'screenTitle' + currentNumber
+              ]
+            : ''
         );
-      } else {
-        setCurrentTitle('');
-      }
-    } else if (currentTarget == 'serverDefault') {
-      if (dataScreenTitlesDefault?.apiObj as ScreenTitles) {
-        setCurrentTitle(
+      } else if (currentTarget == 'serverDefault') {
+        setLoadedTitle(
           (dataScreenTitlesDefault?.apiObj as ScreenTitles)[
             'screenTitle' + currentNumber
           ]
+            ? (dataScreenTitlesDefault?.apiObj as ScreenTitles)[
+                'screenTitle' + currentNumber
+              ]
+            : ''
         );
-      } else {
-        setCurrentTitle('');
       }
     }
-  }, [currentTarget, currentNumber, dataScreenTitles, dataScreenTitlesDefault]);
+  }, [
+    currentTask,
+    currentTarget,
+    currentNumber,
+    dataScreenTitles,
+    dataScreenTitlesDefault
+  ]);
 
   useEffect(() => {
     setIsUninitialized(true);
   }, [setIsUninitialized]);
+
+  useEffect(() => {
+    if (isSuccessLocal) {
+      const id = setTimeout(() => {
+        setIsSuccessLocal(false);
+      }, 3000);
+      return () => clearTimeout(id);
+    }
+  }, [isSuccessLocal]);
 
   useEffect(() => {
     if (isSuccessSave || isErrorSave) {
@@ -300,9 +321,11 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
         <option value="localStorage">
           {t('ScreenComposition.selectTarget.localStorage')}
         </option>
-        <option value="server">
-          {t('ScreenComposition.selectTarget.server')}
-        </option>
+        {loggedIn && (
+          <option value="server">
+            {t('ScreenComposition.selectTarget.server')}
+          </option>
+        )}
         {currentTask == 'load' && (
           <option value="serverDefault">
             {t('ScreenComposition.selectTarget.serverDefault')}
@@ -328,7 +351,9 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
           className="w-28 max-w-xs input input-bordered input-sm text-accent-content"
         />
       )}
-      {currentTask == 'load' && <div className="ml-1">{currentTitle}</div>}
+      {currentTask == 'load' && (
+        <div className="ml-1">{loadedTitle ? loadedTitle : 'N/A'}</div>
+      )}
       <div className="flex-none w-36">
         <button
           disabled={isLoadingSave || isLoadingLoad || isLoadingDefaultLoad}
@@ -340,7 +365,7 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
         <button
           disabled={
             (currentTask == 'save' && !regexFinal.test(currentTitle)) ||
-            (currentTask == 'load' && currentTitle == '')
+            (currentTask == 'load' && !regexFinal.test(loadedTitle))
           }
           onClick={onClickHandleTask}
           className={
@@ -353,14 +378,14 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
           {currentTask == 'load' && t('ScreenComposition.selectTask.load')}
         </button>
       </div>
-      {(isSuccessSave || isSuccessLoad || isSuccessDefaultLoad) && (
-        <MaterialSymbolSuccess />
-      )}
+      {(isSuccessLocal ||
+        isSuccessSave ||
+        isSuccessLoad ||
+        isSuccessDefaultLoad) && <MaterialSymbolSuccess />}
       {(isErrorSave || isErrorLoad || isErrorDefaultLoad) && (
         <MaterialSymbolError />
       )}
     </div>
   );
 };
-
 export default React.memo(ScreenComposition);

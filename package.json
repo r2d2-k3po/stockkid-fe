@@ -3,8 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@react-oauth/google": "^0.11.1",
     "@reduxjs/toolkit": "^1.9.3",
+    "@remirror/pm": "^2.0.8",
+    "@remirror/react": "^2.0.35",
+    "@remirror/react-editors": "^1.0.39",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -28,6 +33,8 @@
     "react-use": "^17.4.0",
     "redux": "^4.2.1",
     "redux-logger": "^3.0.6",
+    "remirror": "^2.0.37",
+    "remixicon": "^3.5.0",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },

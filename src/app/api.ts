@@ -53,6 +53,31 @@ export interface ScreenCompositionSaveRequest {
   screenSetting: string;
 }
 
+export interface BoardSaveRequest {
+  boardId: string;
+  boardCategory: string;
+  nickname: string;
+  title: string;
+  preview: string;
+  content: string;
+  tag1: string;
+  tag2: string;
+  tag3: string;
+}
+
+export interface ReplySaveRequest {
+  replyId: string;
+  boardId: string;
+  parentId: string;
+  nickname: string;
+  content: string;
+}
+
+export interface LikeRequest {
+  id: string;
+  number: string;
+}
+
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.REACT_APP_apiBaseUrl,
   prepareHeaders: (headers, {getState}) => {
@@ -102,18 +127,18 @@ const baseQueryWithRefresh: BaseQueryFn<
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithRefresh,
-  tagTypes: ['ScreenTitles'],
+  tagTypes: ['ScreenTitles', 'BoardPage'],
   endpoints: (builder) => ({
     signup: builder.mutation<ResponseEntity, SignupRequest>({
       query: (signupRequest) => ({
-        url: 'member/signup',
+        url: 'permit/member/signup',
         method: 'POST',
         body: signupRequest
       })
     }),
     login: builder.mutation<ResponseEntity, LoginRequest>({
       query: (loginRequest) => ({
-        url: 'member/login',
+        url: 'login',
         method: 'PATCH',
         body: loginRequest
       })
@@ -199,7 +224,7 @@ export const api = createApi({
     }),
     loadScreenSettingDefault: builder.mutation<ResponseEntity, string>({
       query: (number) => ({
-        url: `access/memberSettings/loadScreenSettingDefault/${number}`
+        url: `permit/memberSettings/loadScreenSettingDefault/${number}`
       })
     }),
     loadScreenTitles: builder.query<ResponseEntity, void>({
@@ -210,7 +235,84 @@ export const api = createApi({
     }),
     loadScreenTitlesDefault: builder.query<ResponseEntity, void>({
       query: () => ({
-        url: `access/memberSettings/loadScreenTitlesDefault`
+        url: `permit/memberSettings/loadScreenTitlesDefault`
+      })
+    }),
+    registerBoard: builder.mutation<ResponseEntity, BoardSaveRequest>({
+      query: (boardSaveRequest) => ({
+        url: 'access/board/register',
+        method: 'POST',
+        body: boardSaveRequest
+      }),
+      invalidatesTags: ['BoardPage']
+    }),
+    modifyBoard: builder.mutation<ResponseEntity, BoardSaveRequest>({
+      query: (boardSaveRequest) => ({
+        url: 'access/board/modify',
+        method: 'PUT',
+        body: boardSaveRequest
+      }),
+      invalidatesTags: ['BoardPage']
+    }),
+    registerReply: builder.mutation<ResponseEntity, ReplySaveRequest>({
+      query: (replySaveRequest) => ({
+        url: 'access/reply/register',
+        method: 'POST',
+        body: replySaveRequest
+      }),
+      invalidatesTags: ['BoardPage']
+    }),
+    modifyReply: builder.mutation<ResponseEntity, ReplySaveRequest>({
+      query: (replySaveRequest) => ({
+        url: 'access/reply/modify',
+        method: 'PUT',
+        body: replySaveRequest
+      })
+    }),
+    deleteBoard: builder.mutation<ResponseEntity, string>({
+      query: (boardId) => ({
+        url: `access/board/delete/${boardId}`,
+        method: 'PATCH'
+      }),
+      invalidatesTags: ['BoardPage']
+    }),
+    deleteReply: builder.mutation<ResponseEntity, string>({
+      query: (replyId) => ({
+        url: `access/reply/delete/${replyId}`,
+        method: 'PATCH'
+      })
+    }),
+    likeBoard: builder.mutation<ResponseEntity, LikeRequest>({
+      query: (likeRequest) => ({
+        url: 'access/board/like',
+        method: 'PATCH',
+        body: likeRequest
+      }),
+      invalidatesTags: ['BoardPage']
+    }),
+    likeReply: builder.mutation<ResponseEntity, LikeRequest>({
+      query: (likeRequest) => ({
+        url: 'access/reply/like',
+        method: 'PATCH',
+        body: likeRequest
+      })
+    }),
+    readBoardPage: builder.query<ResponseEntity, Record<string, string>>({
+      query: (boardPageSetting) => ({
+        url: `permit/board/readPage`,
+        params: boardPageSetting
+      }),
+      providesTags: ['BoardPage']
+    }),
+    readBoard: builder.query<ResponseEntity, string>({
+      query: (boardId) => ({
+        url: `permit/board/read/${boardId}`
+      })
+    }),
+    searchBoardPage: builder.query<ResponseEntity, Record<string, string>>({
+      query: (searchPageSetting) => ({
+        url: `permit/board/searchPage`,
+        params: searchPageSetting
       })
     })
   })
@@ -232,5 +334,16 @@ export const {
   useLoadScreenSettingMutation,
   useLoadScreenSettingDefaultMutation,
   useLazyLoadScreenTitlesQuery,
-  useLazyLoadScreenTitlesDefaultQuery
+  useLazyLoadScreenTitlesDefaultQuery,
+  useRegisterBoardMutation,
+  useModifyBoardMutation,
+  useRegisterReplyMutation,
+  useModifyReplyMutation,
+  useDeleteBoardMutation,
+  useDeleteReplyMutation,
+  useLikeBoardMutation,
+  useLikeReplyMutation,
+  useReadBoardPageQuery,
+  useLazyReadBoardQuery,
+  useLazySearchBoardPageQuery
 } = api;

@@ -55,10 +55,18 @@ const LogoutForm: FC<LogoutFormProps> = ({hideThisRef}) => {
         <MaterialSymbolButton icon="no_accounts" />
       </button>
       <div className="flex-none">
-        <button onClick={onClickCancel} className="btn btn-xs btn-ghost mr-1">
+        <button
+          disabled={isSuccess || isError}
+          onClick={onClickCancel}
+          className="btn btn-xs btn-ghost mr-1"
+        >
           {t('SignupForm.Cancel')}
         </button>
-        <button onClick={onClickLogout} className="btn btn-xs btn-accent">
+        <button
+          disabled={isSuccess || isError}
+          onClick={onClickLogout}
+          className="btn btn-xs btn-accent"
+        >
           {t('LogoutForm.Logout')}
         </button>
       </div>

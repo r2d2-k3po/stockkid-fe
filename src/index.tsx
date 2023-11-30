@@ -6,6 +6,7 @@ import './css/react-resizable-styles.css';
 import App, {loader as appLoader} from './App';
 import reportWebVitals from './reportWebVitals';
 import 'react-material-symbols/dist/outlined.css';
+import 'remixicon/fonts/remixicon.css';
 import {Provider as ReduxProvider} from 'react-redux';
 import store from './app/store';
 import './i18n';

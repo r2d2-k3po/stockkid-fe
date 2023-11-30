@@ -21,6 +21,34 @@
     "NaverLoginError": "Naver login error!",
     "expiresInMinutes": "Logout: in {{expiresInMinutesRefresh}} minutes"
   },
+  "Board": {
+    "placeholder": {
+      "nickname": "nickname",
+      "tag1": "tag1",
+      "tag2": "tag2",
+      "tag3": "tag3",
+      "title": "title"
+    }
+  },
+  "BoardPage": {
+    "Category": {
+      "All": "All",
+      "Category": "Category",
+      "Life": "Life",
+      "Notice": "Notice",
+      "QA": "Q&A",
+      "Stock": "Stock"
+    },
+    "placeholder": {
+      "tag": "search tag (2~30)"
+    },
+    "sortBy": {
+      "boardId": "latest",
+      "likeCount": "most liked",
+      "readCount": "most read",
+      "replyCount": "most replied"
+    }
+  },
   "ChangePassword": {
     "Error": "Password change error!",
     "Success": "Password change success!"
@@ -46,12 +74,17 @@
     "Sydney": "Sydney"
   },
   "Common": {
-    "RefreshError": "Refresh error! Logging out!"
+    "Cancel": "Cancel",
+    "RefreshError": "Refresh error! Logging out!",
+    "Save": "Save"
   },
   "DeleteAccount": {
     "DeleteAccount": "Delete Account",
     "Error": "Account delete error!",
     "Success": "Account delete success!"
+  },
+  "Editor": {
+    "placeholder": "Enter text..."
   },
   "LoginForm": {
     "Login": "Login",
@@ -81,6 +114,7 @@
     }
   },
   "Panels": {
+    "boardPage": "Board",
     "clock": "Clock",
     "clockMini": "mini Clock",
     "panel0002": "Panel0002",

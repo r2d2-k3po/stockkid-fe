@@ -47,10 +47,10 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
   );
 
   useEffect(() => {
-    if (currentTask == 'changePassword' && loginMethod != 'UP') {
+    if (loginMethod != 'UP') {
       setCurrentTask('screenComposition');
     }
-  }, [currentTask, loginMethod]);
+  }, [loginMethod]);
 
   return (
     <div className="mx-2 flex items-center gap-1 w-full">
@@ -71,9 +71,11 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
               {t('ManageAccount.select.changePassword')}
             </option>
           )}
-          <option value="deleteAccount">
-            {t('ManageAccount.select.deleteAccount')}
-          </option>
+          {loginMethod && (
+            <option value="deleteAccount">
+              {t('ManageAccount.select.deleteAccount')}
+            </option>
+          )}
         </select>
       )}
       {currentTask == 'screenComposition' && (
