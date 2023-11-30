@@ -1,6 +1,12 @@
 import React, {ChangeEvent, FC, useCallback, useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {DateTime} from 'luxon';
+import {useAppDispatch, useAppSelector} from '../../../app/hooks';
+import {updatePanelState} from '../../../app/slices/panelsSlice';
+
+type ClockState = {
+  timeZone: string;
+};
 
 type CommonPanelProps = {
   panelId: string;
@@ -8,25 +14,31 @@ type CommonPanelProps = {
 
 const ClockMini: FC<CommonPanelProps> = ({panelId}) => {
   const {t, i18n} = useTranslation();
+  const dispatch = useAppDispatch();
 
   const locale =
     i18n.language == 'ko' ? 'ko' : i18n.language == 'en' ? 'en-US' : '';
 
-  const [timeZone, setTimeZone] = useState<string>('local');
+  const clockState = useAppSelector((state) => state.panels).entities[panelId]
+    ?.panelState as ClockState;
 
   const [now, setNow] = useState<DateTime>(DateTime.now());
 
   const handleChangeTimeZone = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
       e.stopPropagation();
-      setTimeZone(e.target.value);
+      const payload = {
+        panelId: panelId,
+        panelState: {timeZone: e.target.value}
+      };
+      dispatch(updatePanelState(payload));
     },
-    []
+    [dispatch, panelId]
   );
 
   useEffect(() => {
     const id = setInterval(() => {
-      switch (timeZone) {
+      switch (clockState.timeZone) {
         case 'local':
           setNow(DateTime.now());
           break;
@@ -56,14 +68,14 @@ const ClockMini: FC<CommonPanelProps> = ({panelId}) => {
       }
     }, 1000);
     return () => clearInterval(id);
-  }, [timeZone]);
+  }, [clockState.timeZone]);
 
   return (
     <div className="m-1 mt-0.5 text-sm">
       <select
         onChange={handleChangeTimeZone}
         className="max-w-xs select select-info select-xs"
-        value={timeZone}
+        value={clockState.timeZone}
       >
         <option value="local">{t('ClockMini.Local')}</option>
         <option value="seoul">{t('ClockMini.Seoul')}</option>
