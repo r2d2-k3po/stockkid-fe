@@ -54,15 +54,15 @@ export interface ScreenCompositionSaveRequest {
 }
 
 export interface BoardSaveRequest {
-  boardId: string;
+  boardId: string | null;
   boardCategory: string;
   nickname: string;
   title: string;
   preview: string;
   content: string;
-  tag1: string;
-  tag2: string;
-  tag3: string;
+  tag1: string | null;
+  tag2: string | null;
+  tag3: string | null;
 }
 
 export interface ReplySaveRequest {

@@ -1,109 +1,133 @@
-import React, {ChangeEvent, FC, MouseEvent, useCallback, useState} from 'react';
+import React, {ChangeEvent, FC, MouseEvent, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
 import Editor from './Editor';
 import {RemirrorJSON} from 'remirror';
 import EditorReadOnly from './EditorReadOnly';
-
-type BoardFormType = Record<
-  'nickname' | 'title' | 'tag1' | 'tag2' | 'tag3',
-  string
->;
+import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
+import {updatePanelState} from '../../../../app/slices/panelsSlice';
+import {BoardPageState} from '../BoardPage';
+import {BoardSaveRequest, useRegisterBoardMutation} from '../../../../app/api';
+import {getPreviewFromRemirrorJSON} from '../../../../utils/getPreviewFromRemirrorJSON';
 
 type BoardProps = {
-  setShowNewBoard?: React.Dispatch<React.SetStateAction<boolean>>;
+  memberId: string | null;
+  panelId: string;
   mode: 'register' | 'preview';
 };
 
-const Board: FC<BoardProps> = ({setShowNewBoard, mode}) => {
+const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
   const {t} = useTranslation();
+  const dispatch = useAppDispatch();
   const regexFinal = /^.{2,30}$/;
 
-  const [boardCategory, setBoardCategory] = useState<
-    'STOCK' | 'LIFE' | 'QA' | 'NOTICE' | '0'
-  >(
-    (localStorage.getItem('boardCategory') as
-      | 'STOCK'
-      | 'LIFE'
-      | 'QA'
-      | 'NOTICE') || '0'
-  );
+  const [requestBoardRegister, {isSuccess, isError, reset}] =
+    useRegisterBoardMutation();
 
-  const [{nickname, title, tag1, tag2, tag3}, setBoardForm] =
-    useState<BoardFormType>({
-      nickname: localStorage.getItem('nickname') || '',
-      title: localStorage.getItem('title') || '',
-      tag1: localStorage.getItem('tag1') || '',
-      tag2: localStorage.getItem('tag2') || '',
-      tag3: localStorage.getItem('tag3') || ''
-    });
+  const boardPageState = useAppSelector((state) => state.panels).entities[
+    panelId
+  ]?.panelState as BoardPageState;
 
   const handleChangeBoardForm = useCallback(
     (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
       const regex = /^.{0,30}$/;
       if (regex.test(e.target.value)) {
-        const valueTrim = e.target.value.trim();
-        setBoardForm((obj) => ({...obj, [key]: valueTrim}));
-        localStorage.setItem(key, valueTrim);
+        const payload = {
+          panelId: panelId,
+          panelState: {
+            [key]: key == 'title' ? e.target.value : e.target.value.trim()
+          }
+        };
+        dispatch(updatePanelState(payload));
       }
     },
-    []
+    [dispatch, panelId]
   );
 
   const handleChangeCategory = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
       e.stopPropagation();
-      setBoardCategory(e.target.value as 'STOCK' | 'LIFE' | 'QA' | 'NOTICE');
-      localStorage.setItem('boardCategory', e.target.value);
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          boardCategory: e.target.value as 'STOCK' | 'LIFE' | 'QA' | 'NOTICE'
+        }
+      };
+      dispatch(updatePanelState(payload));
     },
-    []
+    [dispatch, panelId]
   );
 
-  const [initialContent] = useState<RemirrorJSON | undefined>(() => {
-    if (mode == 'register') {
-      const content = localStorage.getItem('initialContent');
-      return content ? JSON.parse(content) : undefined;
-    }
-  });
+  const handleEditorChange = useCallback(
+    (json: RemirrorJSON) => {
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          initialContent: json
+        }
+      };
+      dispatch(updatePanelState(payload));
+    },
+    [dispatch, panelId]
+  );
 
-  const handleEditorChange = useCallback((json: RemirrorJSON) => {
-    window.localStorage.setItem('initialContent', JSON.stringify(json));
-  }, []);
-
-  const reset = useCallback(() => {
-    if (setShowNewBoard) {
-      localStorage.removeItem('boardCategory');
-      localStorage.removeItem('initialContent');
-      localStorage.removeItem('title');
-      localStorage.removeItem('tag1');
-      localStorage.removeItem('tag2');
-      localStorage.removeItem('tag3');
-      localStorage.setItem('showNewBoard', 'false');
-      setBoardCategory('0');
-      setBoardForm((obj) => ({
-        ...obj,
-        ['title']: '',
-        ['tag1']: '',
-        ['tag2']: '',
-        ['tag3']: ''
-      }));
-      setShowNewBoard(false);
-    }
-  }, [setShowNewBoard]);
+  const resetBoardState = useCallback(() => {
+    const payload = {
+      panelId: panelId,
+      panelState: {
+        showNewBoard: false,
+        boardCategory: '0',
+        title: '',
+        tag1: null,
+        tag2: null,
+        tag3: null,
+        preview: undefined,
+        initialContent: undefined
+      }
+    };
+    dispatch(updatePanelState(payload));
+  }, [dispatch, panelId]);
 
   const onClickCancel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      reset();
+      resetBoardState();
     },
-    [reset]
+    [resetBoardState]
   );
 
   const onClickSave = useCallback(
-    (e: MouseEvent<HTMLButtonElement>) => {
+    async (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      reset();
+      try {
+        localStorage.setItem('nickname', boardPageState.nickname);
+        const boardResisterRequest: BoardSaveRequest = {
+          boardId: null,
+          boardCategory: boardPageState.boardCategory,
+          nickname: boardPageState.nickname,
+          title: boardPageState.title,
+          preview: getPreviewFromRemirrorJSON(boardPageState.initialContent),
+          content: JSON.stringify(boardPageState.initialContent),
+          tag1: boardPageState.tag1 || null,
+          tag2: boardPageState.tag2 || null,
+          tag3: boardPageState.tag3 || null
+        };
+        await requestBoardRegister(boardResisterRequest);
+        resetBoardState();
+      } catch (err) {
+        console.log(err);
+      }
     },
-    [reset]
+    [
+      boardPageState.nickname,
+      boardPageState.boardCategory,
+      boardPageState.title,
+      boardPageState.initialContent,
+      boardPageState.tag1,
+      boardPageState.tag2,
+      boardPageState.tag3,
+      requestBoardRegister,
+      resetBoardState
+    ]
   );
 
   return (
@@ -116,7 +140,7 @@ const Board: FC<BoardProps> = ({setShowNewBoard, mode}) => {
               type="text"
               name="nickname"
               placeholder={t('Board.placeholder.nickname') as string}
-              value={nickname}
+              value={boardPageState.nickname}
               onChange={handleChangeBoardForm('nickname')}
               className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
             />
@@ -129,7 +153,7 @@ const Board: FC<BoardProps> = ({setShowNewBoard, mode}) => {
               type="text"
               name="title"
               placeholder={t('Board.placeholder.title') as string}
-              value={title}
+              value={boardPageState.title}
               onChange={handleChangeBoardForm('title')}
               className="w-96 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
             />
@@ -141,7 +165,7 @@ const Board: FC<BoardProps> = ({setShowNewBoard, mode}) => {
             <select
               onChange={handleChangeCategory}
               className="max-w-xs select select-secondary select-xs text-accent-content mx-3"
-              value={boardCategory}
+              value={boardPageState.boardCategory}
             >
               <option disabled value="0">
                 {t('BoardPage.Category.Category')}
@@ -164,9 +188,10 @@ const Board: FC<BoardProps> = ({setShowNewBoard, mode}) => {
           {mode == 'register' && (
             <button
               disabled={
-                boardCategory == '0' ||
-                !regexFinal.test(nickname) ||
-                !regexFinal.test(title)
+                boardPageState.boardCategory == '0' ||
+                !regexFinal.test(boardPageState.nickname) ||
+                !regexFinal.test(boardPageState.title) ||
+                !boardPageState.preview
               }
               onClick={onClickSave}
               className="btn btn-xs btn-accent"
@@ -192,7 +217,7 @@ const Board: FC<BoardProps> = ({setShowNewBoard, mode}) => {
               type="text"
               name="tag1"
               placeholder={t('Board.placeholder.tag1') as string}
-              value={tag1}
+              value={boardPageState.tag1}
               onChange={handleChangeBoardForm('tag1')}
               className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
             />
@@ -202,7 +227,7 @@ const Board: FC<BoardProps> = ({setShowNewBoard, mode}) => {
               type="text"
               name="tag2"
               placeholder={t('Board.placeholder.tag2') as string}
-              value={tag2}
+              value={boardPageState.tag2}
               onChange={handleChangeBoardForm('tag2')}
               className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
             />
@@ -212,14 +237,17 @@ const Board: FC<BoardProps> = ({setShowNewBoard, mode}) => {
               type="text"
               name="tag3"
               placeholder={t('Board.placeholder.tag3') as string}
-              value={tag3}
+              value={boardPageState.tag3}
               onChange={handleChangeBoardForm('tag3')}
               className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
             />
           )}
         </div>
       </div>
-      <Editor onChange={handleEditorChange} initialContent={initialContent} />
+      <Editor
+        onChange={handleEditorChange}
+        initialContent={boardPageState.initialContent}
+      />
       {/*<EditorReadOnly initialContent={initialContent} />*/}
     </div>
   );

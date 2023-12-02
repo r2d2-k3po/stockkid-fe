@@ -40,14 +40,15 @@ export const panelState: PanelState = {
     sortBy: 'boardId',
     currentPage: 1,
     targetPage: 1,
-    totalPage: 10,
+    totalPage: 1,
     showNewBoard: false,
     boardCategory: '0',
     nickname: localStorage.getItem('nickname') || '',
     title: '',
-    tag1: '',
-    tag2: '',
-    tag3: '',
+    tag1: undefined,
+    tag2: undefined,
+    tag3: undefined,
+    preview: undefined,
     initialContent: undefined
   }
 };

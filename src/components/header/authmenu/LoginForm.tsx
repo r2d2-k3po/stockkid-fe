@@ -20,11 +20,9 @@ type LoginFormProps = {
 };
 
 const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
-  const regexFinal = /^.{6,30}$/;
-
   const {t} = useTranslation();
-
   const dispatch = useAppDispatch();
+  const regexFinal = /^.{6,30}$/;
 
   const [
     requestLogin,

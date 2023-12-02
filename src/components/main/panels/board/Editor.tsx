@@ -1,12 +1,12 @@
 import React, {FC} from 'react';
-import {WysiwygEditor} from '@remirror/react-editors/wysiwyg';
-import {RemirrorJSON} from 'remirror';
+import {RemirrorContentType, RemirrorJSON} from 'remirror';
 import {OnChangeJSON} from '@remirror/react';
 import {useTranslation} from 'react-i18next';
+import MyWysiwygEditor from './remirror/MyWysiwygEditor';
 
 type EditorProps = {
   onChange: (json: RemirrorJSON) => void;
-  initialContent?: RemirrorJSON;
+  initialContent?: RemirrorContentType | undefined;
 };
 
 const Editor: FC<EditorProps> = ({onChange, initialContent}) => {
@@ -15,9 +15,12 @@ const Editor: FC<EditorProps> = ({onChange, initialContent}) => {
 
   return (
     <div className="mb-2">
-      <WysiwygEditor placeholder={placeholder} initialContent={initialContent}>
+      <MyWysiwygEditor
+        placeholder={placeholder}
+        initialContent={initialContent}
+      >
         <OnChangeJSON onChange={onChange} />
-      </WysiwygEditor>
+      </MyWysiwygEditor>
     </div>
   );
 };

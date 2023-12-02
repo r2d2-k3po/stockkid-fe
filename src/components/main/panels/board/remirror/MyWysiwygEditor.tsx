@@ -13,6 +13,7 @@ import {AllStyledComponent} from '@remirror/styles/emotion';
 import {BubbleMenu} from './BubbleMenu';
 import {TopToolbar} from './TopToolbar';
 import {ReactEditorProps} from './types';
+import {RemirrorContentType} from 'remirror';
 
 export type WysiwygEditorProps = Partial<ReactEditorProps>;
 
@@ -21,6 +22,7 @@ const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
   stringHandler,
   children,
   theme,
+  initialContent,
   ...rest
 }) => {
   const extensions = useCallback(
@@ -32,12 +34,17 @@ const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
     [placeholder]
   );
 
-  const {manager} = useRemirror({extensions, stringHandler});
+  const {manager, state} = useRemirror({
+    extensions,
+    content: initialContent as RemirrorContentType | undefined,
+    selection: 'start',
+    stringHandler
+  });
 
   return (
     <AllStyledComponent>
       <ThemeProvider theme={theme}>
-        <Remirror manager={manager} {...rest}>
+        <Remirror manager={manager} initialContent={state} {...rest}>
           <TopToolbar />
           <EditorComponent />
           <BubbleMenu />

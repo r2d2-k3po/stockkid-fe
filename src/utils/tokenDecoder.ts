@@ -9,7 +9,7 @@ export function tokenDecoder(jwtToken: string): JWTPayload | null {
     }
     return decodedToken;
   } catch (error) {
-    console.error('Error decoding JWT token:', error);
+    console.error('Error decoding JWT token : ', error);
     return null;
   }
 }
