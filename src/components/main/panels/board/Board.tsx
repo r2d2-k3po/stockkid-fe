@@ -8,6 +8,7 @@ import {updatePanelState} from '../../../../app/slices/panelsSlice';
 import {BoardPageState} from '../BoardPage';
 import {BoardSaveRequest, useRegisterBoardMutation} from '../../../../app/api';
 import {getPreviewFromRemirrorJSON} from '../../../../utils/getPreviewFromRemirrorJSON';
+import {initialContent} from '../../../../app/constants/panelInfo';
 
 type BoardProps = {
   memberId: string | null;
@@ -62,7 +63,8 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
       const payload = {
         panelId: panelId,
         panelState: {
-          initialContent: json
+          preview: getPreviewFromRemirrorJSON(json),
+          content: json
         }
       };
       dispatch(updatePanelState(payload));
@@ -77,11 +79,11 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
         showNewBoard: false,
         boardCategory: '0',
         title: '',
-        tag1: null,
-        tag2: null,
-        tag3: null,
-        preview: undefined,
-        initialContent: undefined
+        tag1: '',
+        tag2: '',
+        tag3: '',
+        preview: null,
+        content: initialContent
       }
     };
     dispatch(updatePanelState(payload));
@@ -105,8 +107,10 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
           boardCategory: boardPageState.boardCategory,
           nickname: boardPageState.nickname,
           title: boardPageState.title,
-          preview: getPreviewFromRemirrorJSON(boardPageState.initialContent),
-          content: JSON.stringify(boardPageState.initialContent),
+          preview: getPreviewFromRemirrorJSON(
+            boardPageState.content as RemirrorJSON
+          ) as string,
+          content: JSON.stringify(boardPageState.content),
           tag1: boardPageState.tag1 || null,
           tag2: boardPageState.tag2 || null,
           tag3: boardPageState.tag3 || null
@@ -121,7 +125,7 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
       boardPageState.nickname,
       boardPageState.boardCategory,
       boardPageState.title,
-      boardPageState.initialContent,
+      boardPageState.content,
       boardPageState.tag1,
       boardPageState.tag2,
       boardPageState.tag3,
@@ -244,10 +248,7 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
           )}
         </div>
       </div>
-      <Editor
-        onChange={handleEditorChange}
-        initialContent={boardPageState.initialContent}
-      />
+      <Editor onChange={handleEditorChange} initialContent={initialContent} />
       {/*<EditorReadOnly initialContent={initialContent} />*/}
     </div>
   );

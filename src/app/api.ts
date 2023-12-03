@@ -243,24 +243,22 @@ export const api = createApi({
         url: 'access/board/register',
         method: 'POST',
         body: boardSaveRequest
-      }),
-      invalidatesTags: ['BoardPage']
+      })
+      // invalidatesTags: ['BoardPage']
     }),
     modifyBoard: builder.mutation<ResponseEntity, BoardSaveRequest>({
       query: (boardSaveRequest) => ({
         url: 'access/board/modify',
         method: 'PUT',
         body: boardSaveRequest
-      }),
-      invalidatesTags: ['BoardPage']
+      })
     }),
     registerReply: builder.mutation<ResponseEntity, ReplySaveRequest>({
       query: (replySaveRequest) => ({
         url: 'access/reply/register',
         method: 'POST',
         body: replySaveRequest
-      }),
-      invalidatesTags: ['BoardPage']
+      })
     }),
     modifyReply: builder.mutation<ResponseEntity, ReplySaveRequest>({
       query: (replySaveRequest) => ({
@@ -273,8 +271,7 @@ export const api = createApi({
       query: (boardId) => ({
         url: `access/board/delete/${boardId}`,
         method: 'PATCH'
-      }),
-      invalidatesTags: ['BoardPage']
+      })
     }),
     deleteReply: builder.mutation<ResponseEntity, string>({
       query: (replyId) => ({
@@ -287,8 +284,7 @@ export const api = createApi({
         url: 'access/board/like',
         method: 'PATCH',
         body: likeRequest
-      }),
-      invalidatesTags: ['BoardPage']
+      })
     }),
     likeReply: builder.mutation<ResponseEntity, LikeRequest>({
       query: (likeRequest) => ({
@@ -301,8 +297,8 @@ export const api = createApi({
       query: (boardPageSetting) => ({
         url: `permit/board/readPage`,
         params: boardPageSetting
-      }),
-      providesTags: ['BoardPage']
+      })
+      // providesTags: ['BoardPage']
     }),
     readBoard: builder.query<ResponseEntity, string>({
       query: (boardId) => ({

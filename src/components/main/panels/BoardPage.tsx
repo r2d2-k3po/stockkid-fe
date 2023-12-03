@@ -31,7 +31,7 @@ export type BoardPageState = {
   tag2: string | undefined;
   tag3: string | undefined;
   preview: string | undefined;
-  initialContent: RemirrorContentType | undefined;
+  content: RemirrorContentType | undefined;
 };
 
 type CommonPanelProps = {
