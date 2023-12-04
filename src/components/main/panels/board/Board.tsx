@@ -1,14 +1,35 @@
-import React, {ChangeEvent, FC, MouseEvent, useCallback} from 'react';
+import React, {
+  ChangeEvent,
+  FC,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useRef
+} from 'react';
 import {useTranslation} from 'react-i18next';
 import Editor from './Editor';
-import {RemirrorJSON} from 'remirror';
-import EditorReadOnly from './EditorReadOnly';
+import {EditorStateProps, RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
 import {BoardPageState} from '../BoardPage';
 import {BoardSaveRequest, useRegisterBoardMutation} from '../../../../app/api';
-import {getPreviewFromRemirrorJSON} from '../../../../utils/getPreviewFromRemirrorJSON';
-import {initialContent} from '../../../../app/constants/panelInfo';
+import MaterialSymbolError from '../../../common/MaterialSymbolError';
+import {updateRefreshToken} from '../../../../app/slices/authSlice';
+import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
+
+interface GetTextHelperOptions extends Partial<EditorStateProps> {
+  /**
+   * The divider used to separate text blocks.
+   *
+   * @defaultValue '\n\n'
+   */
+  lineBreakDivider?: string;
+}
+
+export interface EditorRef {
+  clearContent: () => void;
+  getText: ({lineBreakDivider, state}?: GetTextHelperOptions) => string;
+}
 
 type BoardProps = {
   memberId: string | null;
@@ -20,6 +41,8 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const regexFinal = /^.{2,30}$/;
+
+  const editorRef = useRef<EditorRef | null>(null);
 
   const [requestBoardRegister, {isSuccess, isError, reset}] =
     useRegisterBoardMutation();
@@ -63,7 +86,7 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
       const payload = {
         panelId: panelId,
         panelState: {
-          preview: getPreviewFromRemirrorJSON(json),
+          preview: editorRef.current?.getText({lineBreakDivider: ' '}),
           content: json
         }
       };
@@ -73,6 +96,7 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
   );
 
   const resetBoardState = useCallback(() => {
+    editorRef.current?.clearContent();
     const payload = {
       panelId: panelId,
       panelState: {
@@ -83,7 +107,7 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
         tag2: '',
         tag3: '',
         preview: null,
-        content: initialContent
+        content: undefined
       }
     };
     dispatch(updatePanelState(payload));
@@ -107,16 +131,15 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
           boardCategory: boardPageState.boardCategory,
           nickname: boardPageState.nickname,
           title: boardPageState.title,
-          preview: getPreviewFromRemirrorJSON(
-            boardPageState.content as RemirrorJSON
-          ) as string,
+          preview: editorRef.current?.getText({
+            lineBreakDivider: ' '
+          }) as string,
           content: JSON.stringify(boardPageState.content),
           tag1: boardPageState.tag1 || null,
           tag2: boardPageState.tag2 || null,
           tag3: boardPageState.tag3 || null
         };
         await requestBoardRegister(boardResisterRequest);
-        resetBoardState();
       } catch (err) {
         console.log(err);
       }
@@ -129,10 +152,21 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
       boardPageState.tag1,
       boardPageState.tag2,
       boardPageState.tag3,
-      requestBoardRegister,
-      resetBoardState
+      requestBoardRegister
     ]
   );
+
+  useEffect(() => {
+    if (isSuccess || isError) {
+      const id = setTimeout(() => {
+        if (isSuccess) {
+          resetBoardState();
+        }
+        reset();
+      }, 3000);
+      return () => clearTimeout(id);
+    }
+  }, [isSuccess, isError, resetBoardState, reset]);
 
   return (
     <div className="border-b border-warning my-2 mx-3">
@@ -189,24 +223,36 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
               {t('Common.Cancel')}
             </button>
           )}
-          {mode == 'register' && (
-            <button
-              disabled={
-                boardPageState.boardCategory == '0' ||
-                !regexFinal.test(boardPageState.nickname) ||
-                !regexFinal.test(boardPageState.title) ||
-                !boardPageState.preview
-              }
-              onClick={onClickSave}
-              className="btn btn-xs btn-accent"
-              //   isLoadingSave || isLoadingLoad || isLoadingDefaultLoad
-              //       ? 'btn btn-xs btn-accent loading'
+          {mode == 'register' &&
+            (isError ? (
+              <div className="ml-2.5 mr-3">
+                <MaterialSymbolError size={19} />
+              </div>
+            ) : isSuccess ? (
+              <div className="ml-2.5 mr-3">
+                <MaterialSymbolSuccess size={19} />
+              </div>
+            ) : (
+              <button
+                disabled={
+                  boardPageState.boardCategory == '0' ||
+                  !regexFinal.test(boardPageState.nickname) ||
+                  !regexFinal.test(boardPageState.title) ||
+                  !(
+                    boardPageState.preview &&
+                    regexFinal.test(boardPageState.preview)
+                  )
+                }
+                onClick={onClickSave}
+                className="btn btn-xs btn-accent"
+                //   isLoadingSave || isLoadingLoad || isLoadingDefaultLoad
+                //       ? 'btn btn-xs btn-accent loading'
 
-              //
-            >
-              {t('Common.Save')}
-            </button>
-          )}
+                //
+              >
+                {t('Common.Save')}
+              </button>
+            ))}
         </div>
       </div>
       <div className="flex justify-between">
@@ -248,8 +294,11 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
           )}
         </div>
       </div>
-      <Editor onChange={handleEditorChange} initialContent={initialContent} />
-      {/*<EditorReadOnly initialContent={initialContent} />*/}
+      <Editor
+        onChange={handleEditorChange}
+        initialContent={boardPageState.content}
+        ref={editorRef}
+      />
     </div>
   );
 };

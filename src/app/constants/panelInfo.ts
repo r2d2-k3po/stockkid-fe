@@ -29,19 +29,6 @@ export const panelGrids: PanelGrids = {
   boardPage: {i: '', x: 0, y: 0, w: 20, h: 20}
 };
 
-export const initialContent = {
-  type: 'doc',
-  content: [
-    {
-      type: 'paragraph',
-      attrs: {
-        dir: null,
-        ignoreBidiAutoUpdate: null
-      }
-    }
-  ]
-};
-
 export const panelState: PanelState = {
   clock: {timeZone: 'local'},
   clockMini: {timeZone: 'local'},
@@ -62,6 +49,6 @@ export const panelState: PanelState = {
     tag2: undefined,
     tag3: undefined,
     preview: undefined,
-    content: initialContent
+    content: undefined
   }
 };

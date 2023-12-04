@@ -1,11 +1,4 @@
-import React, {
-  ChangeEvent,
-  FC,
-  MouseEvent,
-  useCallback,
-  useEffect,
-  useMemo
-} from 'react';
+import React, {ChangeEvent, FC, MouseEvent, useCallback, useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
 import Search from './board/Search';
 import {useAppDispatch, useAppSelector} from '../../../app/hooks';

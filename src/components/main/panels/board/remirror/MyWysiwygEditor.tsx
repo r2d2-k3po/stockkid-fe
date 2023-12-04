@@ -1,4 +1,10 @@
-import React, {FC, PropsWithChildren, useCallback} from 'react';
+import React, {
+  forwardRef,
+  PropsWithChildren,
+  Ref,
+  useCallback,
+  useImperativeHandle
+} from 'react';
 import {PlaceholderExtension, wysiwygPreset} from 'remirror/extensions';
 import {TableExtension} from '@remirror/extension-react-tables';
 import {
@@ -6,7 +12,9 @@ import {
   Remirror,
   TableComponents,
   ThemeProvider,
-  useRemirror
+  useHelpers,
+  useRemirror,
+  useRemirrorContext
 } from '@remirror/react';
 import {AllStyledComponent} from '@remirror/styles/emotion';
 
@@ -14,17 +22,34 @@ import {BubbleMenu} from './BubbleMenu';
 import {TopToolbar} from './TopToolbar';
 import {ReactEditorProps} from './types';
 import {RemirrorContentType} from 'remirror';
+import {EditorRef} from '../Board';
+
+const ImperativeHandle = forwardRef(function ImperativeHandle(
+  _: unknown,
+  ref: Ref<EditorRef>
+) {
+  const {clearContent} = useRemirrorContext({
+    autoUpdate: true
+  });
+
+  const {getText} = useHelpers();
+
+  // Expose content handling to outside
+  useImperativeHandle(ref, () => {
+    return {clearContent, getText};
+  });
+  return <></>;
+});
 
 export type WysiwygEditorProps = Partial<ReactEditorProps>;
 
-const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
-  placeholder,
-  stringHandler,
-  children,
-  theme,
-  initialContent,
-  ...rest
-}) => {
+const MyWysiwygEditor = forwardRef<
+  EditorRef,
+  PropsWithChildren<WysiwygEditorProps>
+>(function MyWysiwygEditor(
+  {placeholder, stringHandler, children, theme, initialContent, ...rest},
+  ref
+) {
   const extensions = useCallback(
     () => [
       new PlaceholderExtension({placeholder}),
@@ -37,7 +62,6 @@ const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
   const {manager, state} = useRemirror({
     extensions,
     content: initialContent as RemirrorContentType | undefined,
-    selection: 'start',
     stringHandler
   });
 
@@ -45,6 +69,7 @@ const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
     <AllStyledComponent>
       <ThemeProvider theme={theme}>
         <Remirror manager={manager} initialContent={state} {...rest}>
+          <ImperativeHandle ref={ref} />
           <TopToolbar />
           <EditorComponent />
           <BubbleMenu />
@@ -54,6 +79,6 @@ const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
       </ThemeProvider>
     </AllStyledComponent>
   );
-};
+});
 
 export default React.memo(MyWysiwygEditor);

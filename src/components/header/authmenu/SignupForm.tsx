@@ -164,8 +164,8 @@ const SignupForm: FC<SignupFormProps> = ({hideThisRef}) => {
         <button onClick={onClickReset}>
           <MaterialSymbolButton icon="person_add" />
         </button>
-        {isSuccess && <MaterialSymbolSuccess />}
-        {isError && <MaterialSymbolError />}
+        {isSuccess && <MaterialSymbolSuccess size={36} />}
+        {isError && <MaterialSymbolError size={36} />}
       </div>
     );
   }

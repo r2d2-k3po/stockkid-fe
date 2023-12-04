@@ -70,8 +70,8 @@ const LogoutForm: FC<LogoutFormProps> = ({hideThisRef}) => {
           {t('LogoutForm.Logout')}
         </button>
       </div>
-      {isSuccess && <MaterialSymbolSuccess />}
-      {isError && <MaterialSymbolError />}
+      {isSuccess && <MaterialSymbolSuccess size={36} />}
+      {isError && <MaterialSymbolError size={36} />}
     </div>
   );
 };

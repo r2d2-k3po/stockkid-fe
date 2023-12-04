@@ -3,7 +3,6 @@ import React, {
   forwardRef,
   HTMLAttributes,
   MouseEvent,
-  PropsWithChildren,
   useCallback,
   useRef
 } from 'react';
@@ -27,7 +26,7 @@ type ReactDivProps = DetailedHTMLProps<
   HTMLDivElement
 >;
 
-type DivProps = ReactDivProps & PropsWithChildren<PanelBaseProps>;
+type DivProps = ReactDivProps & PanelBaseProps;
 
 const PanelBase = forwardRef<HTMLDivElement, DivProps>(function PanelBase(
   {

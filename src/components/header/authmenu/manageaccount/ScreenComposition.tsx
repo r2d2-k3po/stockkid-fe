@@ -381,9 +381,9 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
       {(isSuccessLocal ||
         isSuccessSave ||
         isSuccessLoad ||
-        isSuccessDefaultLoad) && <MaterialSymbolSuccess />}
+        isSuccessDefaultLoad) && <MaterialSymbolSuccess size={36} />}
       {(isErrorSave || isErrorLoad || isErrorDefaultLoad) && (
-        <MaterialSymbolError />
+        <MaterialSymbolError size={36} />
       )}
     </div>
   );

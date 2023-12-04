@@ -1,10 +1,14 @@
 import {MaterialSymbol} from 'react-material-symbols';
-import React from 'react';
+import React, {FC} from 'react';
 
-const MaterialSymbolSuccess = () => {
+type MaterialSymbolProps = {
+  size: number;
+};
+
+const MaterialSymbolSuccess: FC<MaterialSymbolProps> = ({size}) => {
   return (
     <div className="text-success animate-bounce">
-      <MaterialSymbol icon="check_circle" size={36} grade={-25} />
+      <MaterialSymbol icon="check_circle" size={size} grade={-25} />
     </div>
   );
 };

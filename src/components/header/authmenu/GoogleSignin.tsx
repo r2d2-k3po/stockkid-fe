@@ -43,7 +43,7 @@ const GoogleSignin = () => {
       <div onClick={() => googleLogin()}>
         <GoogleButton />
       </div>
-      {isError && <MaterialSymbolError />}
+      {isError && <MaterialSymbolError size={36} />}
     </>
   );
 };

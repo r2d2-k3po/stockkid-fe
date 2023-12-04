@@ -190,7 +190,7 @@ const LoginForm: FC<LoginFormProps> = ({hideThisRef}) => {
             <button onClick={onClickReset}>
               <MaterialSymbolButton icon="account_circle" />
             </button>
-            <MaterialSymbolError />
+            <MaterialSymbolError size={36} />
           </>
         )}
       </div>

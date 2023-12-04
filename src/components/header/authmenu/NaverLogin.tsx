@@ -104,7 +104,7 @@ const NaverLogin = () => {
       <div onClick={handleClickNaverIdLogin}>
         <NaverButton />
       </div>
-      {isError && <MaterialSymbolError />}
+      {isError && <MaterialSymbolError size={36} />}
     </>
   );
 };
