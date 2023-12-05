@@ -73,6 +73,16 @@ export interface ReplySaveRequest {
   content: string;
 }
 
+export type BoardPageSettingType = Record<
+  'page' | 'size' | 'boardCategory' | 'sortBy',
+  string
+>;
+
+export type SearchPageSettingType = Record<
+  'page' | 'size' | 'boardCategory' | 'sortBy' | 'tag',
+  string
+>;
+
 export interface LikeRequest {
   id: string;
   number: string;
@@ -293,7 +303,7 @@ export const api = createApi({
         body: likeRequest
       })
     }),
-    readBoardPage: builder.query<ResponseEntity, Record<string, string>>({
+    readBoardPage: builder.query<ResponseEntity, BoardPageSettingType>({
       query: (boardPageSetting) => ({
         url: `permit/board/readPage`,
         params: boardPageSetting
@@ -305,7 +315,7 @@ export const api = createApi({
         url: `permit/board/read/${boardId}`
       })
     }),
-    searchBoardPage: builder.query<ResponseEntity, Record<string, string>>({
+    searchBoardPage: builder.query<ResponseEntity, SearchPageSettingType>({
       query: (searchPageSetting) => ({
         url: `permit/board/searchPage`,
         params: searchPageSetting
@@ -339,7 +349,7 @@ export const {
   useDeleteReplyMutation,
   useLikeBoardMutation,
   useLikeReplyMutation,
-  useReadBoardPageQuery,
+  useLazyReadBoardPageQuery,
   useLazyReadBoardQuery,
   useLazySearchBoardPageQuery
 } = api;

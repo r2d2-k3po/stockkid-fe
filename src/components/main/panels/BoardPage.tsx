@@ -1,4 +1,12 @@
-import React, {ChangeEvent, FC, MouseEvent, useCallback, useMemo} from 'react';
+import React, {
+  ChangeEvent,
+  FC,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
 import {useTranslation} from 'react-i18next';
 import Search from './board/Search';
 import {useAppDispatch, useAppSelector} from '../../../app/hooks';
@@ -6,16 +14,20 @@ import Board from './board/Board';
 import {tokenDecoder} from '../../../utils/tokenDecoder';
 import {updatePanelState} from '../../../app/slices/panelsSlice';
 import {RemirrorContentType} from 'remirror';
+import {
+  useLazyReadBoardPageQuery,
+  useLazySearchBoardPageQuery
+} from '../../../app/api';
 
 export type BoardPageState = {
   boardPageCategory: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE';
   tag: string;
   searchDisabled: boolean;
   searchMode: boolean;
-  sortBy: 'boardId' | 'likeCount' | 'replyCount' | 'readCount';
+  sortBy: 'id' | 'likeCount' | 'replyCount' | 'readCount';
   currentPage: number;
   targetPage: number;
-  totalPage: number;
+  totalPages: number;
   showNewBoard: boolean;
   boardCategory: 'STOCK' | 'LIFE' | 'QA' | 'NOTICE' | '0';
   nickname: string;
@@ -26,6 +38,29 @@ export type BoardPageState = {
   preview: string | undefined;
   content: RemirrorContentType | undefined;
 };
+
+interface BoardDTO {
+  boardId: string;
+  memberId: string;
+  boardCategory: 'STOCK' | 'LIFE' | 'QA' | 'NOTICE';
+  nickname: string;
+  title: string;
+  preview: string;
+  content: string | null;
+  tag1: string | null;
+  tag2: string | null;
+  tag3: string | null;
+  readCount: number;
+  replyCount: number;
+  likeCount: number;
+  regDate: string;
+  modDate: string;
+}
+
+interface BoardPageDTO {
+  boardDTOList: BoardDTO[];
+  totalPages: number;
+}
 
 type CommonPanelProps = {
   panelId: string;
@@ -56,6 +91,14 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
   const categoryButtonClassNameActive =
     'btn btn-sm btn-outline btn-primary btn-active';
 
+  const [requestBoardPageRead, {data: dataBoardPage}] =
+    useLazyReadBoardPageQuery();
+
+  const [requestBoardPageSearch, {data: dataSearchPage}] =
+    useLazySearchBoardPageQuery();
+
+  const [boardList, setBoardList] = useState<BoardDTO[] | null>(null);
+
   const handleClickCategoryButton = useCallback(
     (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
       (e: MouseEvent<HTMLButtonElement>) => {
@@ -66,7 +109,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             boardPageCategory: category,
             tag: '',
             searchDisabled: true,
-            searchMode: false
+            searchMode: false,
+            currentPage: 1
           }
         };
         dispatch(updatePanelState(payload));
@@ -78,31 +122,22 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     (e: ChangeEvent<HTMLInputElement>) => {
       const regex = /^.{0,30}$/;
       const regexFinal = /^.{2,30}$/;
-      if (regex.test(e.target.value)) {
-        const payload = {
-          panelId: panelId,
-          panelState: {tag: e.target.value.trim()}
-        };
-        dispatch(updatePanelState(payload));
+      const tag = e.target.value.trim();
+      if (regex.test(tag)) {
         if (regexFinal.test(e.target.value.trim())) {
           const payload = {
             panelId: panelId,
-            panelState: {searchDisabled: false}
+            panelState: {searchDisabled: false, tag: tag, searchMode: false}
           };
           dispatch(updatePanelState(payload));
         } else {
           const payload = {
             panelId: panelId,
-            panelState: {searchDisabled: true}
+            panelState: {searchDisabled: true, tag: tag, searchMode: false}
           };
           dispatch(updatePanelState(payload));
         }
       }
-      const payload = {
-        panelId: panelId,
-        panelState: {searchMode: false}
-      };
-      dispatch(updatePanelState(payload));
     },
     [dispatch, panelId]
   );
@@ -112,7 +147,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {searchMode: true}
+        panelState: {searchMode: true},
+        currentPage: 1
       };
       dispatch(updatePanelState(payload));
     },
@@ -126,10 +162,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         panelId: panelId,
         panelState: {
           sortBy: e.target.value as
-            | 'boardId'
+            | 'id'
             | 'likeCount'
             | 'replyCount'
-            | 'readCount'
+            | 'readCount',
+          currentPage: 1
         }
       };
       dispatch(updatePanelState(payload));
@@ -178,11 +215,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.totalPage}
+        panelState: {currentPage: boardPageState.totalPages}
       };
       dispatch(updatePanelState(payload));
     },
-    [dispatch, panelId, boardPageState.totalPage]
+    [dispatch, panelId, boardPageState.totalPages]
   );
 
   const handleChangePage = useCallback(
@@ -194,21 +231,21 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           panelState: {targetPage: 1}
         };
         dispatch(updatePanelState(payload));
-      } else if (page > boardPageState.totalPage) {
+      } else if (page > boardPageState.totalPages) {
         const payload = {
           panelId: panelId,
-          panelState: {targetPage: boardPageState.totalPage}
+          panelState: {targetPage: boardPageState.totalPages}
         };
         dispatch(updatePanelState(payload));
       } else {
         const payload = {
           panelId: panelId,
-          panelState: {targetPage: parseInt(e.target.value)}
+          panelState: {targetPage: page}
         };
         dispatch(updatePanelState(payload));
       }
     },
-    [dispatch, panelId, boardPageState.totalPage]
+    [dispatch, panelId, boardPageState.totalPages]
   );
 
   const moveToTargetPage = useCallback(
@@ -234,6 +271,67 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     },
     [dispatch, panelId]
   );
+
+  useEffect(() => {
+    async function loadBoardPage() {
+      if (boardPageState.searchMode) {
+        const searchPageSetting = {
+          page: boardPageState.currentPage.toString(),
+          size: '20',
+          boardCategory: boardPageState.boardPageCategory,
+          sortBy: boardPageState.sortBy,
+          tag: boardPageState.tag
+        };
+        await requestBoardPageSearch(searchPageSetting);
+      } else {
+        const boardPageSetting = {
+          page: boardPageState.currentPage.toString(),
+          size: '20',
+          boardCategory: boardPageState.boardPageCategory,
+          sortBy: boardPageState.sortBy
+        };
+        await requestBoardPageRead(boardPageSetting);
+      }
+    }
+
+    try {
+      loadBoardPage();
+    } catch (err) {
+      console.log(err);
+    }
+  }, [
+    boardPageState.searchMode,
+    boardPageState.currentPage,
+    boardPageState.boardPageCategory,
+    boardPageState.sortBy,
+    boardPageState.tag,
+    requestBoardPageRead,
+    requestBoardPageSearch
+  ]);
+
+  useEffect(() => {
+    let totalPages: number;
+    if (boardPageState.searchMode) {
+      setBoardList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
+      totalPages = (dataSearchPage?.apiObj as BoardPageDTO)?.totalPages || 1;
+    } else {
+      setBoardList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
+      totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
+    }
+    const payload = {
+      panelId: panelId,
+      panelState: {
+        totalPages: totalPages
+      }
+    };
+    dispatch(updatePanelState(payload));
+  }, [
+    boardPageState.searchMode,
+    dataSearchPage?.apiObj,
+    dataBoardPage?.apiObj,
+    dispatch,
+    panelId
+  ]);
 
   return (
     <div>
@@ -310,7 +408,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             className="max-w-xs select select-info select-xs text-accent-content mt-1"
             value={boardPageState.sortBy}
           >
-            <option value="boardId">{t('BoardPage.sortBy.boardId')}</option>
+            <option value="id">{t('BoardPage.sortBy.id')}</option>
             <option value="likeCount">{t('BoardPage.sortBy.likeCount')}</option>
             <option value="replyCount">
               {t('BoardPage.sortBy.replyCount')}
@@ -334,18 +432,18 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             <i className="ri-arrow-left-s-line ri-lg"></i>
           </button>
           <span className="mt-1 text-sm">
-            {boardPageState.currentPage}/{boardPageState.totalPage}
+            {boardPageState.currentPage}/{boardPageState.totalPages}
           </span>
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
-            disabled={boardPageState.currentPage == boardPageState.totalPage}
+            disabled={boardPageState.currentPage == boardPageState.totalPages}
             onClick={moveToNextPage}
           >
             <i className="ri-arrow-right-s-line ri-lg"></i>
           </button>
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
-            disabled={boardPageState.currentPage == boardPageState.totalPage}
+            disabled={boardPageState.currentPage == boardPageState.totalPages}
             onClick={moveToLastPage}
           >
             <i className="ri-skip-right-line ri-lg"></i>
@@ -355,7 +453,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             name="targetPage"
             value={boardPageState.targetPage}
             min={1}
-            max={boardPageState.totalPage}
+            max={boardPageState.totalPages}
             onChange={handleChangePage}
             className="w-20 max-w-xs input input-bordered input-secondary input-xs text-accent-content mt-1"
           />

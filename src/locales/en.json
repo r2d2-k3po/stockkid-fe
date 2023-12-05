@@ -43,7 +43,7 @@
       "tag": "search tag (2~30)"
     },
     "sortBy": {
-      "boardId": "latest",
+      "id": "latest",
       "likeCount": "most liked",
       "readCount": "most read",
       "replyCount": "most replied"

@@ -14,21 +14,15 @@ import {updatePanelState} from '../../../../app/slices/panelsSlice';
 import {BoardPageState} from '../BoardPage';
 import {BoardSaveRequest, useRegisterBoardMutation} from '../../../../app/api';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
-import {updateRefreshToken} from '../../../../app/slices/authSlice';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
 interface GetTextHelperOptions extends Partial<EditorStateProps> {
-  /**
-   * The divider used to separate text blocks.
-   *
-   * @defaultValue '\n\n'
-   */
   lineBreakDivider?: string;
 }
 
 export interface EditorRef {
   clearContent: () => void;
-  getText: ({lineBreakDivider, state}?: GetTextHelperOptions) => string;
+  getText: ({lineBreakDivider}: GetTextHelperOptions) => string;
 }
 
 type BoardProps = {

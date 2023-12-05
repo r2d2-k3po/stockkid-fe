@@ -43,7 +43,7 @@
       "tag": "검색 태그 (2~30)"
     },
     "sortBy": {
-      "boardId": "최신순",
+      "id": "최신순",
       "likeCount": "추천순",
       "readCount": "조회순",
       "replyCount": "댓글순"
