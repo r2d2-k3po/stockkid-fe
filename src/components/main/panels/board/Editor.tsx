@@ -18,15 +18,13 @@ const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
   const placeholder = t('Editor.placeholder') as string;
 
   return (
-    <div className="mb-2">
-      <MyWysiwygEditor
-        placeholder={placeholder}
-        initialContent={initialContent}
-        ref={ref}
-      >
-        <OnChangeJSON onChange={onChange} />
-      </MyWysiwygEditor>
-    </div>
+    <MyWysiwygEditor
+      placeholder={placeholder}
+      initialContent={initialContent}
+      ref={ref}
+    >
+      <OnChangeJSON onChange={onChange} />
+    </MyWysiwygEditor>
   );
 });
 

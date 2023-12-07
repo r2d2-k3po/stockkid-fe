@@ -39,7 +39,7 @@ export type BoardPageState = {
   content: RemirrorContentType | undefined;
 };
 
-interface BoardDTO {
+export interface BoardDTO {
   boardId: string;
   memberId: string;
   boardCategory: 'STOCK' | 'LIFE' | 'QA' | 'NOTICE';
@@ -80,6 +80,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const memberId = useMemo(
     () => (decodedRefreshToken ? (decodedRefreshToken.sid as string) : null),
+    [decodedRefreshToken]
+  );
+
+  const memberRole = useMemo(
+    () => (decodedRefreshToken ? (decodedRefreshToken.rol as string) : null),
     [decodedRefreshToken]
   );
 
@@ -333,6 +338,21 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     panelId
   ]);
 
+  const boardPagePreview = useMemo(
+    () =>
+      boardList?.map((boardDTO) => (
+        <Board
+          key={boardDTO.boardId}
+          panelId={panelId}
+          memberId={memberId}
+          memberRole={memberRole}
+          mode="preview"
+          boardDTO={boardDTO}
+        />
+      )),
+    [boardList, memberRole, memberId, panelId]
+  );
+
   return (
     <div>
       <div className="flex justify-between border-b border-warning my-2 mx-3">
@@ -345,7 +365,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             }
             onClick={handleClickCategoryButton('ALL')}
           >
-            {t('BoardPage.Category.All')}
+            {t('BoardPage.Category.ALL')}
           </button>
           <button
             className={
@@ -355,7 +375,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             }
             onClick={handleClickCategoryButton('STOCK')}
           >
-            {t('BoardPage.Category.Stock')}
+            {t('BoardPage.Category.STOCK')}
           </button>
           <button
             className={
@@ -365,7 +385,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             }
             onClick={handleClickCategoryButton('LIFE')}
           >
-            {t('BoardPage.Category.Life')}
+            {t('BoardPage.Category.LIFE')}
           </button>
           <button
             className={
@@ -385,7 +405,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             }
             onClick={handleClickCategoryButton('NOTICE')}
           >
-            {t('BoardPage.Category.Notice')}
+            {t('BoardPage.Category.NOTICE')}
           </button>
         </div>
         <div className="flex justify-center gap-2 mb-2">
@@ -474,9 +494,17 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         </div>
       </div>
       <div className={boardPageState.showNewBoard ? '' : 'hidden'}>
-        <Board memberId={memberId} panelId={panelId} mode="register" />
+        <Board panelId={panelId} memberRole={memberRole} mode="register" />
       </div>
-      <div className="my-2 mx-3">BoardList</div>
+      <div
+        className={
+          boardPageState.showNewBoard
+            ? 'my-2 mx-3 absolute left-0 right-0 top-[330px] bottom-0 overflow-y-auto'
+            : 'my-2 mx-3 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto'
+        }
+      >
+        {!!boardPagePreview && boardPagePreview}
+      </div>
     </div>
   );
 };

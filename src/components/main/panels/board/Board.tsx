@@ -11,10 +11,12 @@ import Editor from './Editor';
 import {EditorStateProps, RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {BoardPageState} from '../BoardPage';
+import {BoardDTO, BoardPageState} from '../BoardPage';
 import {BoardSaveRequest, useRegisterBoardMutation} from '../../../../app/api';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
+import EditorReadOnly from './EditorReadOnly';
+import {DateTime} from 'luxon';
 
 interface GetTextHelperOptions extends Partial<EditorStateProps> {
   lineBreakDivider?: string;
@@ -26,12 +28,20 @@ export interface EditorRef {
 }
 
 type BoardProps = {
-  memberId: string | null;
+  memberId?: string | null;
+  memberRole: string | null;
   panelId: string;
   mode: 'register' | 'preview';
+  boardDTO?: BoardDTO;
 };
 
-const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
+const Board: FC<BoardProps> = ({
+  memberId,
+  memberRole,
+  panelId,
+  mode,
+  boardDTO
+}) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const regexFinal = /^.{2,30}$/;
@@ -163,7 +173,13 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
   }, [isSuccess, isError, resetBoardState, reset]);
 
   return (
-    <div className="border-b border-warning my-2 mx-3">
+    <div
+      className={
+        mode == 'register'
+          ? 'border-b border-warning my-2 mx-3'
+          : 'border-b border-warning my-2 mr-2'
+      }
+    >
       <div className="flex justify-between">
         <div className="flex justify-start mb-2 gap-2">
           <i className="ri-user-line ri-1x"></i>
@@ -177,7 +193,12 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
               className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
             />
           )}
-          {mode != 'register' && <i className="ri-heart-line ri-1x"></i>}
+          {mode == 'preview' && (
+            <div className="text-sm text-info">{boardDTO?.nickname}</div>
+          )}
+          {mode == 'preview' && (
+            <div className="text-md text-info ml-16">{boardDTO?.title}</div>
+          )}
         </div>
         <div className="flex justify-center">
           {mode == 'register' && (
@@ -192,7 +213,16 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
           )}
         </div>
         <div className="flex justify-end mb-2">
-          {mode != 'register' && <i className="ri-time-line ri-1x"></i>}
+          {mode != 'register' && (
+            <>
+              <i className="ri-time-line ri-1x"></i>
+              <div className="text-sm text-info mx-1">
+                {DateTime.fromISO(
+                  boardDTO?.regDate.split('.')[0] as string
+                ).toFormat('HH:mm yyyy-MM-dd')}
+              </div>
+            </>
+          )}
           {mode == 'register' && (
             <select
               onChange={handleChangeCategory}
@@ -202,11 +232,21 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
               <option disabled value="0">
                 {t('BoardPage.Category.Category')}
               </option>
-              <option value="STOCK">{t('BoardPage.Category.Stock')}</option>
-              <option value="LIFE">{t('BoardPage.Category.Life')}</option>
+              <option value="STOCK">{t('BoardPage.Category.STOCK')}</option>
+              <option value="LIFE">{t('BoardPage.Category.LIFE')}</option>
               <option value="QA">{t('BoardPage.Category.QA')}</option>
-              <option value="NOTICE">{t('BoardPage.Category.Notice')}</option>
+              <option
+                disabled={memberRole != 'ADMIN' && memberRole != 'STAFF'}
+                value="NOTICE"
+              >
+                {t('BoardPage.Category.NOTICE')}
+              </option>
             </select>
+          )}
+          {mode == 'preview' && (
+            <div className="text-xs text-info text-center w-16 mx-2 border-[1px] border-secondary rounded-lg my-0.5">
+              {t(`BoardPage.Category.${boardDTO?.boardCategory}`)}
+            </div>
           )}
           {mode == 'register' && (
             <button
@@ -251,9 +291,24 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
       </div>
       <div className="flex justify-between">
         <div className="flex justify-start mb-2 gap-2">
-          {mode != 'register' && <i className="ri-eye-line ri-1x"></i>}
-          {mode != 'register' && <i className="ri-chat-1-line ri-1x"></i>}
-          {mode != 'register' && <i className="ri-star-line ri-1x"></i>}
+          {mode != 'register' && (
+            <>
+              <i className="ri-eye-line ri-1x"></i>
+              <div className="text-sm text-info">{boardDTO?.readCount}</div>
+            </>
+          )}
+          {mode != 'register' && (
+            <>
+              <i className="ri-chat-1-line ri-1x"></i>
+              <div className="text-sm text-info">{boardDTO?.replyCount}</div>
+            </>
+          )}
+          {mode != 'register' && (
+            <>
+              <i className="ri-star-line ri-1x"></i>
+              <div className="text-sm text-info">{boardDTO?.likeCount}</div>
+            </>
+          )}
         </div>
         <div className="flex justify-end mb-2 mr-24 gap-2">
           {mode == 'register' && (
@@ -288,11 +343,22 @@ const Board: FC<BoardProps> = ({memberId, panelId, mode}) => {
           )}
         </div>
       </div>
-      <Editor
-        onChange={handleEditorChange}
-        initialContent={boardPageState.content}
-        ref={editorRef}
-      />
+      {mode == 'preview' ? (
+        <div className="mb-2 line-clamp-1 text-sm text-info">
+          {boardDTO?.preview}
+          {/*<EditorReadOnly*/}
+          {/*  initialContent={JSON.parse(boardDTO?.preview as string)}*/}
+          {/*/>*/}
+        </div>
+      ) : (
+        <div className={mode == 'register' ? 'mb-2 mr-6' : 'mb-2'}>
+          <Editor
+            onChange={handleEditorChange}
+            initialContent={boardPageState.content}
+            ref={editorRef}
+          />
+        </div>
+      )}
     </div>
   );
 };

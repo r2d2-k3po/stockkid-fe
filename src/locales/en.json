@@ -32,12 +32,12 @@
   },
   "BoardPage": {
     "Category": {
-      "All": "All",
+      "ALL": "All",
       "Category": "Category",
-      "Life": "Life",
-      "Notice": "Notice",
+      "LIFE": "Life",
+      "NOTICE": "Notice",
       "QA": "Q&A",
-      "Stock": "Stock"
+      "STOCK": "Stock"
     },
     "placeholder": {
       "tag": "search tag (2~30)"
