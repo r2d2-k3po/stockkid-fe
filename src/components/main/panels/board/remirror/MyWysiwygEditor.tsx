@@ -22,7 +22,7 @@ import {BubbleMenu} from './BubbleMenu';
 import {TopToolbar} from './TopToolbar';
 import {ReactEditorProps} from './types';
 import {RemirrorContentType} from 'remirror';
-import {EditorRef} from '../Board';
+import {EditorRef} from '../BoardEditor';
 
 const ImperativeHandle = forwardRef(function ImperativeHandle(
   _: unknown,

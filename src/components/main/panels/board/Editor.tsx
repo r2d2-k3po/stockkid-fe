@@ -3,7 +3,7 @@ import {RemirrorContentType, RemirrorJSON} from 'remirror';
 import {OnChangeJSON} from '@remirror/react';
 import {useTranslation} from 'react-i18next';
 import MyWysiwygEditor from './remirror/MyWysiwygEditor';
-import {EditorRef} from './Board';
+import {EditorRef} from './BoardEditor';
 
 type EditorProps = {
   onChange: (json: RemirrorJSON) => void;
@@ -18,13 +18,15 @@ const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
   const placeholder = t('Editor.placeholder') as string;
 
   return (
-    <MyWysiwygEditor
-      placeholder={placeholder}
-      initialContent={initialContent}
-      ref={ref}
-    >
-      <OnChangeJSON onChange={onChange} />
-    </MyWysiwygEditor>
+    <div className="mr-1">
+      <MyWysiwygEditor
+        placeholder={placeholder}
+        initialContent={initialContent}
+        ref={ref}
+      >
+        <OnChangeJSON onChange={onChange} />
+      </MyWysiwygEditor>
+    </div>
   );
 });
 

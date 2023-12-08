@@ -18,6 +18,7 @@ import {
   useLazyReadBoardPageQuery,
   useLazySearchBoardPageQuery
 } from '../../../app/api';
+import BoardEditor from './board/BoardEditor';
 
 export type BoardPageState = {
   boardPageCategory: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE';
@@ -28,7 +29,7 @@ export type BoardPageState = {
   currentPage: number;
   targetPage: number;
   totalPages: number;
-  showNewBoard: boolean;
+  showBoardEditor: boolean;
   boardCategory: 'STOCK' | 'LIFE' | 'QA' | 'NOTICE' | '0';
   nickname: string;
   title: string;
@@ -103,6 +104,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     useLazySearchBoardPageQuery();
 
   const [boardList, setBoardList] = useState<BoardDTO[] | null>(null);
+
+  const [currentBoard, setCurrentBoard] = useState<string | null>(null);
 
   const handleClickCategoryButton = useCallback(
     (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
@@ -270,7 +273,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {showNewBoard: true}
+        panelState: {showBoardEditor: true}
       };
       dispatch(updatePanelState(payload));
     },
@@ -346,11 +349,12 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           panelId={panelId}
           memberId={memberId}
           memberRole={memberRole}
-          mode="preview"
+          mode={currentBoard == boardDTO.boardId ? 'detail' : 'preview'}
           boardDTO={boardDTO}
+          setCurrentBoard={setCurrentBoard}
         />
       )),
-    [boardList, memberRole, memberId, panelId]
+    [currentBoard, boardList, memberRole, memberId, panelId]
   );
 
   return (
@@ -486,25 +490,25 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </button>
           <button
             className="btn btn-sm btn-accent btn-circle ml-3"
-            disabled={!loggedIn || boardPageState.showNewBoard}
+            disabled={!loggedIn || boardPageState.showBoardEditor}
             onClick={enableEditor}
           >
             <i className="ri-pencil-line ri-lg"></i>
           </button>
         </div>
       </div>
-      <div className={boardPageState.showNewBoard ? '' : 'hidden'}>
-        <Board panelId={panelId} memberRole={memberRole} mode="register" />
+      <div className={boardPageState.showBoardEditor ? '' : 'hidden'}>
+        <BoardEditor
+          panelId={panelId}
+          memberRole={memberRole}
+          mode="register"
+        />
       </div>
-      <div
-        className={
-          boardPageState.showNewBoard
-            ? 'my-2 mx-3 absolute left-0 right-0 top-[330px] bottom-0 overflow-y-auto'
-            : 'my-2 mx-3 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto'
-        }
-      >
-        {!!boardPagePreview && boardPagePreview}
-      </div>
+      {!boardPageState.showBoardEditor && (
+        <div className="my-2 ml-3 mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
+          {!!boardPagePreview && boardPagePreview}
+        </div>
+      )}
     </div>
   );
 };
