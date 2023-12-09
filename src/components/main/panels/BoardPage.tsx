@@ -16,6 +16,7 @@ import {updatePanelState} from '../../../app/slices/panelsSlice';
 import {RemirrorContentType} from 'remirror';
 import {
   useLazyReadBoardPageQuery,
+  useLazyReadBoardQuery,
   useLazySearchBoardPageQuery
 } from '../../../app/api';
 import BoardEditor from './board/BoardEditor';
@@ -58,9 +59,25 @@ export interface BoardDTO {
   modDate: string;
 }
 
+export interface ReplyDTO {
+  replyId: string;
+  parentId: string;
+  memberId: string;
+  nickname: string;
+  content: string;
+  likeCount: number;
+  regDate: string;
+  modDate: string;
+}
+
 interface BoardPageDTO {
   boardDTOList: BoardDTO[];
   totalPages: number;
+}
+
+interface BoardReplyDTO {
+  boardDTO: BoardDTO;
+  replyDTOList: ReplyDTO[];
 }
 
 type CommonPanelProps = {
@@ -97,15 +114,23 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
   const categoryButtonClassNameActive =
     'btn btn-sm btn-outline btn-primary btn-active';
 
-  const [requestBoardPageRead, {data: dataBoardPage}] =
-    useLazyReadBoardPageQuery();
+  const [requestBoardPageRead] = useLazyReadBoardPageQuery();
 
-  const [requestBoardPageSearch, {data: dataSearchPage}] =
-    useLazySearchBoardPageQuery();
+  const [requestBoardPageSearch] = useLazySearchBoardPageQuery();
 
-  const [boardList, setBoardList] = useState<BoardDTO[] | null>(null);
+  const [requestBoardRead] = useLazyReadBoardQuery();
 
-  const [currentBoard, setCurrentBoard] = useState<string | null>(null);
+  const [boardList, setBoardList] = useState<BoardDTO[] | null | undefined>(
+    undefined
+  );
+
+  const [replyDTOList, setReplyDTOList] = useState<
+    ReplyDTO[] | null | undefined
+  >(undefined);
+
+  const [currentBoardId, setCurrentBoardId] = useState<
+    string | null | undefined
+  >(undefined);
 
   const handleClickCategoryButton = useCallback(
     (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
@@ -280,8 +305,35 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     [dispatch, panelId]
   );
 
+  const loadBoard = useCallback(
+    async (boardId: string | null) => {
+      try {
+        if (boardId == null) {
+          setCurrentBoardId(null);
+        } else {
+          const dataBoard = await requestBoardRead(boardId as string).unwrap();
+          setBoardList(
+            boardList?.map((board) => {
+              if (board.boardId == boardId) {
+                return (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO;
+              } else {
+                return board;
+              }
+            })
+          );
+          setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
+          setCurrentBoardId(boardId);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [boardList, requestBoardRead]
+  );
+
   useEffect(() => {
     async function loadBoardPage() {
+      let totalPages: number;
       if (boardPageState.searchMode) {
         const searchPageSetting = {
           page: boardPageState.currentPage.toString(),
@@ -290,7 +342,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           sortBy: boardPageState.sortBy,
           tag: boardPageState.tag
         };
-        await requestBoardPageSearch(searchPageSetting);
+        const dataSearchPage = await requestBoardPageSearch(
+          searchPageSetting
+        ).unwrap();
+        setBoardList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
+        totalPages = (dataSearchPage?.apiObj as BoardPageDTO)?.totalPages || 1;
       } else {
         const boardPageSetting = {
           page: boardPageState.currentPage.toString(),
@@ -298,8 +354,19 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           boardCategory: boardPageState.boardPageCategory,
           sortBy: boardPageState.sortBy
         };
-        await requestBoardPageRead(boardPageSetting);
+        const dataBoardPage = await requestBoardPageRead(
+          boardPageSetting
+        ).unwrap();
+        setBoardList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
+        totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
       }
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          totalPages: totalPages
+        }
+      };
+      dispatch(updatePanelState(payload));
     }
 
     try {
@@ -314,47 +381,50 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     boardPageState.sortBy,
     boardPageState.tag,
     requestBoardPageRead,
-    requestBoardPageSearch
-  ]);
-
-  useEffect(() => {
-    let totalPages: number;
-    if (boardPageState.searchMode) {
-      setBoardList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
-      totalPages = (dataSearchPage?.apiObj as BoardPageDTO)?.totalPages || 1;
-    } else {
-      setBoardList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
-      totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
-    }
-    const payload = {
-      panelId: panelId,
-      panelState: {
-        totalPages: totalPages
-      }
-    };
-    dispatch(updatePanelState(payload));
-  }, [
-    boardPageState.searchMode,
-    dataSearchPage?.apiObj,
-    dataBoardPage?.apiObj,
+    requestBoardPageSearch,
     dispatch,
     panelId
   ]);
 
   const boardPagePreview = useMemo(
     () =>
-      boardList?.map((boardDTO) => (
-        <Board
-          key={boardDTO.boardId}
-          panelId={panelId}
-          memberId={memberId}
-          memberRole={memberRole}
-          mode={currentBoard == boardDTO.boardId ? 'detail' : 'preview'}
-          boardDTO={boardDTO}
-          setCurrentBoard={setCurrentBoard}
-        />
-      )),
-    [currentBoard, boardList, memberRole, memberId, panelId]
+      boardList?.map((boardDTO) => {
+        if (currentBoardId == boardDTO.boardId) {
+          return (
+            <Board
+              key={boardDTO.boardId}
+              panelId={panelId}
+              memberId={memberId}
+              memberRole={memberRole}
+              mode="detail"
+              boardDTO={boardDTO}
+              replyDTOList={replyDTOList}
+              loadBoard={loadBoard}
+            />
+          );
+        } else {
+          return (
+            <Board
+              key={boardDTO.boardId}
+              panelId={panelId}
+              memberId={memberId}
+              memberRole={memberRole}
+              mode="preview"
+              boardDTO={boardDTO}
+              loadBoard={loadBoard}
+            />
+          );
+        }
+      }),
+    [
+      currentBoardId,
+      boardList,
+      replyDTOList,
+      loadBoard,
+      memberRole,
+      memberId,
+      panelId
+    ]
   );
 
   return (

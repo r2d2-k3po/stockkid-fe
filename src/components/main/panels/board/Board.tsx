@@ -1,15 +1,17 @@
 import React, {FC, MouseEvent, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
-import {BoardDTO} from '../BoardPage';
+import {BoardDTO, ReplyDTO} from '../BoardPage';
 import {DateTime} from 'luxon';
+import EditorReadOnly from './EditorReadOnly';
 
 type BoardProps = {
-  memberId?: string | null;
+  memberId: string | null;
   memberRole: string | null;
   panelId: string;
   mode: 'preview' | 'detail';
-  boardDTO?: BoardDTO;
-  setCurrentBoard?: React.Dispatch<React.SetStateAction<string | null>>;
+  boardDTO: BoardDTO;
+  replyDTOList?: ReplyDTO[] | null;
+  loadBoard: (boardId: string | null) => void;
 };
 
 const Board: FC<BoardProps> = ({
@@ -18,7 +20,8 @@ const Board: FC<BoardProps> = ({
   panelId,
   mode,
   boardDTO,
-  setCurrentBoard
+  replyDTOList,
+  loadBoard
 }) => {
   const {t} = useTranslation();
 
@@ -26,12 +29,12 @@ const Board: FC<BoardProps> = ({
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       if (mode == 'preview') {
-        setCurrentBoard?.(boardDTO?.boardId as string);
+        loadBoard(boardDTO?.boardId as string);
       } else if (mode == 'detail') {
-        setCurrentBoard?.(null);
+        loadBoard(null);
       }
     },
-    [boardDTO?.boardId, mode, setCurrentBoard]
+    [boardDTO?.boardId, mode, loadBoard]
   );
 
   return (
@@ -57,7 +60,11 @@ const Board: FC<BoardProps> = ({
             ).toFormat('HH:mm yyyy-MM-dd')}
           </div>
           <div className="text-xs text-info text-center w-16 mx-2 border-[1px] border-secondary rounded-lg my-0.5">
-            {t(`BoardPage.Category.${boardDTO?.boardCategory}`)}
+            {t(
+              `BoardPage.Category.${
+                boardDTO?.boardCategory as 'STOCK' | 'LIFE' | 'QA' | 'NOTICE'
+              }`
+            )}
           </div>
         </div>
       </div>
@@ -88,25 +95,20 @@ const Board: FC<BoardProps> = ({
           )}
         </div>
       </div>
-      {mode == 'preview' && (
-        <button
-          onClick={onClickToggleDetail}
-          className="mb-2 line-clamp-1 text-sm text-info hover:text-accent"
-        >
-          {boardDTO?.preview}
-          {/*<EditorReadOnly*/}
-          {/*  initialContent={JSON.parse(boardDTO?.preview as string)}*/}
-          {/*/>*/}
-        </button>
-      )}
-      {mode == 'detail' && (
-        <button
-          onClick={onClickToggleDetail}
-          className="mb-2 line-clamp-1 text-sm text-info hover:text-accent"
-        >
-          {mode}
-        </button>
-      )}
+      <button
+        onClick={onClickToggleDetail}
+        className="mb-2 line-clamp-1 text-sm text-info hover:text-accent"
+      >
+        {mode == 'preview' ? (
+          boardDTO?.preview
+        ) : mode == 'detail' ? (
+          <EditorReadOnly
+            initialContent={JSON.parse(boardDTO?.content as string)}
+          />
+        ) : (
+          'error'
+        )}
+      </button>
     </div>
   );
 };
