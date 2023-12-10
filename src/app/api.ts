@@ -137,7 +137,7 @@ const baseQueryWithRefresh: BaseQueryFn<
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithRefresh,
-  tagTypes: ['ScreenTitles', 'BoardPage'],
+  tagTypes: ['ScreenTitles', 'BoardPage', 'Board'],
   endpoints: (builder) => ({
     signup: builder.mutation<ResponseEntity, SignupRequest>({
       query: (signupRequest) => ({
@@ -253,15 +253,16 @@ export const api = createApi({
         url: 'access/board/register',
         method: 'POST',
         body: boardSaveRequest
-      })
-      // invalidatesTags: ['BoardPage']
+      }),
+      invalidatesTags: ['BoardPage']
     }),
     modifyBoard: builder.mutation<ResponseEntity, BoardSaveRequest>({
       query: (boardSaveRequest) => ({
         url: 'access/board/modify',
         method: 'PUT',
         body: boardSaveRequest
-      })
+      }),
+      invalidatesTags: ['Board']
     }),
     registerReply: builder.mutation<ResponseEntity, ReplySaveRequest>({
       query: (replySaveRequest) => ({
@@ -281,7 +282,8 @@ export const api = createApi({
       query: (boardId) => ({
         url: `access/board/delete/${boardId}`,
         method: 'PATCH'
-      })
+      }),
+      invalidatesTags: ['Board']
     }),
     deleteReply: builder.mutation<ResponseEntity, string>({
       query: (replyId) => ({
@@ -307,13 +309,14 @@ export const api = createApi({
       query: (boardPageSetting) => ({
         url: `permit/board/readPage`,
         params: boardPageSetting
-      })
-      // providesTags: ['BoardPage']
+      }),
+      providesTags: ['BoardPage']
     }),
     readBoard: builder.query<ResponseEntity, string>({
       query: (boardId) => ({
         url: `permit/board/read/${boardId}`
-      })
+      }),
+      providesTags: ['Board']
     }),
     searchBoardPage: builder.query<ResponseEntity, SearchPageSettingType>({
       query: (searchPageSetting) => ({

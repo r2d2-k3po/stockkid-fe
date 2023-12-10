@@ -33,21 +33,22 @@ const LogoutForm: FC<LogoutFormProps> = ({hideThisRef}) => {
         await requestLogout(tokens);
       } catch (err) {
         console.log(err);
+      } finally {
+        dispatch(updateRefreshToken(null));
       }
     },
-    [tokens, requestLogout]
+    [tokens, requestLogout, dispatch]
   );
 
   useEffect(() => {
     if (isSuccess || isError) {
       const id = setTimeout(() => {
         reset();
-        dispatch(updateRefreshToken(null));
         hideThisRef();
       }, 3000);
       return () => clearTimeout(id);
     }
-  }, [isSuccess, isError, reset, hideThisRef, dispatch]);
+  }, [isSuccess, isError, reset, hideThisRef]);
 
   return (
     <div className="mx-2 flex items-center gap-1">

@@ -3,51 +3,50 @@ import React, {
   FC,
   MouseEvent,
   useCallback,
-  useEffect,
-  useRef
+  useEffect
 } from 'react';
 import {useTranslation} from 'react-i18next';
 import Editor from './Editor';
-import {EditorStateProps, RemirrorJSON} from 'remirror';
+import {RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {BoardDTO, BoardPageState} from '../BoardPage';
-import {BoardSaveRequest, useRegisterBoardMutation} from '../../../../app/api';
+import {BoardPageState, EditorRef} from '../BoardPage';
+import {
+  BoardSaveRequest,
+  useModifyBoardMutation,
+  useRegisterBoardMutation
+} from '../../../../app/api';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
-interface GetTextHelperOptions extends Partial<EditorStateProps> {
-  lineBreakDivider?: string;
-}
-
-export interface EditorRef {
-  clearContent: () => void;
-  getText: ({lineBreakDivider}: GetTextHelperOptions) => string;
-}
-
 type BoardEditorProps = {
-  memberId?: string | null;
   memberRole: string | null;
   panelId: string;
-  mode: 'register' | 'modify';
-  boardDTO?: BoardDTO;
+  editorRef: React.MutableRefObject<EditorRef | null>;
 };
 
 const BoardEditor: FC<BoardEditorProps> = ({
-  memberId,
   memberRole,
   panelId,
-  mode,
-  boardDTO
+  editorRef
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const regexFinal = /^.{2,30}$/;
 
-  const editorRef = useRef<EditorRef | null>(null);
+  const [
+    requestBoardRegister,
+    {
+      isSuccess: isSuccessRegister,
+      isError: isErrorRegister,
+      reset: resetRegister
+    }
+  ] = useRegisterBoardMutation();
 
-  const [requestBoardRegister, {isSuccess, isError, reset}] =
-    useRegisterBoardMutation();
+  const [
+    requestBoardModify,
+    {isSuccess: isSuccessModify, isError: isErrorModify, reset: resetModify}
+  ] = useModifyBoardMutation();
 
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
@@ -94,7 +93,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
       };
       dispatch(updatePanelState(payload));
     },
-    [dispatch, panelId]
+    [dispatch, panelId, editorRef]
   );
 
   const resetBoardState = useCallback(() => {
@@ -103,6 +102,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
       panelId: panelId,
       panelState: {
         showBoardEditor: false,
+        boardId: null,
         boardCategory: '0',
         title: '',
         tag1: '',
@@ -113,7 +113,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
       }
     };
     dispatch(updatePanelState(payload));
-  }, [dispatch, panelId]);
+  }, [dispatch, panelId, editorRef]);
 
   const onClickCancel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
@@ -128,47 +128,64 @@ const BoardEditor: FC<BoardEditorProps> = ({
       e.stopPropagation();
       try {
         localStorage.setItem('nickname', boardPageState.nickname);
-        const boardResisterRequest: BoardSaveRequest = {
-          boardId: null,
+        const boardSaveRequest: BoardSaveRequest = {
+          boardId: boardPageState.boardId,
           boardCategory: boardPageState.boardCategory,
           nickname: boardPageState.nickname,
           title: boardPageState.title,
-          preview: editorRef.current?.getText({
-            lineBreakDivider: ' '
-          }) as string,
+          preview: boardPageState.preview as string,
           content: JSON.stringify(boardPageState.content),
           tag1: boardPageState.tag1 || null,
           tag2: boardPageState.tag2 || null,
           tag3: boardPageState.tag3 || null
         };
-        await requestBoardRegister(boardResisterRequest);
+        if (boardPageState.boardId == null) {
+          await requestBoardRegister(boardSaveRequest);
+        } else {
+          await requestBoardModify(boardSaveRequest);
+        }
       } catch (err) {
         console.log(err);
       }
     },
     [
+      boardPageState.boardId,
       boardPageState.nickname,
       boardPageState.boardCategory,
       boardPageState.title,
+      boardPageState.preview,
       boardPageState.content,
       boardPageState.tag1,
       boardPageState.tag2,
       boardPageState.tag3,
-      requestBoardRegister
+      requestBoardRegister,
+      requestBoardModify
     ]
   );
 
   useEffect(() => {
-    if (isSuccess || isError) {
+    if (isSuccessRegister || isErrorRegister) {
       const id = setTimeout(() => {
-        if (isSuccess) {
+        if (isSuccessRegister) {
           resetBoardState();
         }
-        reset();
-      }, 3000);
+        resetRegister();
+      }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccess, isError, resetBoardState, reset]);
+  }, [isSuccessRegister, isErrorRegister, resetBoardState, resetRegister]);
+
+  useEffect(() => {
+    if (isSuccessModify || isErrorModify) {
+      const id = setTimeout(() => {
+        if (isSuccessModify) {
+          resetBoardState();
+        }
+        resetModify();
+      }, 1000);
+      return () => clearTimeout(id);
+    }
+  }, [isSuccessModify, isErrorModify, resetBoardState, resetModify]);
 
   return (
     <div className="my-2 mx-3">
@@ -220,11 +237,11 @@ const BoardEditor: FC<BoardEditorProps> = ({
           >
             {t('Common.Cancel')}
           </button>
-          {isError ? (
+          {isErrorRegister || isErrorModify ? (
             <div className="ml-2.5 mr-3">
               <MaterialSymbolError size={19} />
             </div>
-          ) : isSuccess ? (
+          ) : isSuccessRegister || isSuccessModify ? (
             <div className="ml-2.5 mr-3">
               <MaterialSymbolSuccess size={19} />
             </div>
@@ -251,7 +268,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
             type="text"
             name="tag1"
             placeholder={t('Board.placeholder.tag1') as string}
-            value={boardPageState.tag1}
+            value={boardPageState.tag1 ?? ''}
             onChange={handleChangeBoardForm('tag1')}
             className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
           />
@@ -259,7 +276,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
             type="text"
             name="tag2"
             placeholder={t('Board.placeholder.tag2') as string}
-            value={boardPageState.tag2}
+            value={boardPageState.tag2 ?? ''}
             onChange={handleChangeBoardForm('tag2')}
             className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
           />
@@ -267,7 +284,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
             type="text"
             name="tag3"
             placeholder={t('Board.placeholder.tag3') as string}
-            value={boardPageState.tag3}
+            value={boardPageState.tag3 ?? ''}
             onChange={handleChangeBoardForm('tag3')}
             className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
           />
@@ -277,7 +294,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
         <Editor
           onChange={handleEditorChange}
           initialContent={boardPageState.content}
-          ref={editorRef}
+          editorRef={editorRef}
         />
       </div>
     </div>

@@ -1,4 +1,5 @@
 import React, {
+  FC,
   forwardRef,
   PropsWithChildren,
   Ref,
@@ -22,13 +23,13 @@ import {BubbleMenu} from './BubbleMenu';
 import {TopToolbar} from './TopToolbar';
 import {ReactEditorProps} from './types';
 import {RemirrorContentType} from 'remirror';
-import {EditorRef} from '../BoardEditor';
+import {EditorRef} from '../../BoardPage';
 
 const ImperativeHandle = forwardRef(function ImperativeHandle(
   _: unknown,
   ref: Ref<EditorRef>
 ) {
-  const {clearContent} = useRemirrorContext({
+  const {clearContent, setContent} = useRemirrorContext({
     autoUpdate: true
   });
 
@@ -36,20 +37,26 @@ const ImperativeHandle = forwardRef(function ImperativeHandle(
 
   // Expose content handling to outside
   useImperativeHandle(ref, () => {
-    return {clearContent, getText};
+    return {clearContent, setContent, getText};
   });
   return <></>;
 });
 
-export type WysiwygEditorProps = Partial<ReactEditorProps>;
+type WysiwygEditorProps = Partial<ReactEditorProps>;
 
-const MyWysiwygEditor = forwardRef<
-  EditorRef,
-  PropsWithChildren<WysiwygEditorProps>
->(function MyWysiwygEditor(
-  {placeholder, stringHandler, children, theme, initialContent, ...rest},
-  ref
-) {
+type MyWysiwygEditorProps = WysiwygEditorProps & {
+  editorRef: React.MutableRefObject<EditorRef | null>;
+};
+
+const MyWysiwygEditor: FC<PropsWithChildren<MyWysiwygEditorProps>> = ({
+  placeholder,
+  stringHandler,
+  children,
+  theme,
+  initialContent,
+  editorRef,
+  ...rest
+}) => {
   const extensions = useCallback(
     () => [
       new PlaceholderExtension({placeholder}),
@@ -69,7 +76,7 @@ const MyWysiwygEditor = forwardRef<
     <AllStyledComponent>
       <ThemeProvider theme={theme}>
         <Remirror manager={manager} initialContent={state} {...rest}>
-          <ImperativeHandle ref={ref} />
+          <ImperativeHandle ref={editorRef} />
           <TopToolbar />
           <EditorComponent />
           <BubbleMenu />
@@ -79,6 +86,6 @@ const MyWysiwygEditor = forwardRef<
       </ThemeProvider>
     </AllStyledComponent>
   );
-});
+};
 
 export default React.memo(MyWysiwygEditor);

@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState
 } from 'react';
 import {useTranslation} from 'react-i18next';
@@ -13,7 +14,7 @@ import {useAppDispatch, useAppSelector} from '../../../app/hooks';
 import Board from './board/Board';
 import {tokenDecoder} from '../../../utils/tokenDecoder';
 import {updatePanelState} from '../../../app/slices/panelsSlice';
-import {RemirrorContentType} from 'remirror';
+import {EditorStateProps, RemirrorContentType} from 'remirror';
 import {
   useLazyReadBoardPageQuery,
   useLazyReadBoardQuery,
@@ -31,6 +32,7 @@ export type BoardPageState = {
   targetPage: number;
   totalPages: number;
   showBoardEditor: boolean;
+  boardId: string | null;
   boardCategory: 'STOCK' | 'LIFE' | 'QA' | 'NOTICE' | '0';
   nickname: string;
   title: string;
@@ -80,6 +82,16 @@ interface BoardReplyDTO {
   replyDTOList: ReplyDTO[];
 }
 
+interface GetTextHelperOptions extends Partial<EditorStateProps> {
+  lineBreakDivider?: string;
+}
+
+export interface EditorRef {
+  clearContent: () => void;
+  setContent: (content: RemirrorContentType) => void;
+  getText: ({lineBreakDivider}: GetTextHelperOptions) => string;
+}
+
 type CommonPanelProps = {
   panelId: string;
 };
@@ -105,6 +117,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     () => (decodedRefreshToken ? (decodedRefreshToken.rol as string) : null),
     [decodedRefreshToken]
   );
+
+  const editorRef = useRef<EditorRef | null>(null);
 
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
@@ -388,34 +402,21 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const boardPagePreview = useMemo(
     () =>
-      boardList?.map((boardDTO) => {
-        if (currentBoardId == boardDTO.boardId) {
-          return (
-            <Board
-              key={boardDTO.boardId}
-              panelId={panelId}
-              memberId={memberId}
-              memberRole={memberRole}
-              mode="detail"
-              boardDTO={boardDTO}
-              replyDTOList={replyDTOList}
-              loadBoard={loadBoard}
-            />
-          );
-        } else {
-          return (
-            <Board
-              key={boardDTO.boardId}
-              panelId={panelId}
-              memberId={memberId}
-              memberRole={memberRole}
-              mode="preview"
-              boardDTO={boardDTO}
-              loadBoard={loadBoard}
-            />
-          );
-        }
-      }),
+      boardList?.map((boardDTO) => (
+        <Board
+          key={boardDTO.boardId}
+          panelId={panelId}
+          memberId={memberId}
+          memberRole={memberRole}
+          mode={currentBoardId == boardDTO.boardId ? 'detail' : 'preview'}
+          boardDTO={boardDTO}
+          replyDTOList={
+            currentBoardId == boardDTO.boardId ? replyDTOList : null
+          }
+          loadBoard={loadBoard}
+          editorRef={editorRef}
+        />
+      )),
     [
       currentBoardId,
       boardList,
@@ -559,7 +560,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             <i className="ri-corner-up-left-double-line ri-lg"></i>
           </button>
           <button
-            className="btn btn-sm btn-accent btn-circle ml-3"
+            className="btn btn-sm btn-accent btn-outline btn-circle ml-3"
             disabled={!loggedIn || boardPageState.showBoardEditor}
             onClick={enableEditor}
           >
@@ -571,7 +572,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         <BoardEditor
           panelId={panelId}
           memberRole={memberRole}
-          mode="register"
+          editorRef={editorRef}
         />
       </div>
       {!boardPageState.showBoardEditor && (

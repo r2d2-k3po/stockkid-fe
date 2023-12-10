@@ -42,6 +42,7 @@ export const panelState: PanelState = {
     targetPage: 1,
     totalPages: 1,
     showBoardEditor: false,
+    boardId: null,
     boardCategory: '0',
     nickname: localStorage.getItem('nickname') || '',
     title: '',
