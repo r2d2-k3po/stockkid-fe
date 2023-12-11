@@ -124,9 +124,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     panelId
   ]?.panelState as BoardPageState;
 
-  const categoryButtonClassName = 'btn btn-sm btn-outline btn-primary';
+  const categoryButtonClassName = 'btn btn-xs btn-outline btn-primary';
   const categoryButtonClassNameActive =
-    'btn btn-sm btn-outline btn-primary btn-active';
+    'btn btn-xs btn-outline btn-primary btn-active';
 
   const [requestBoardPageRead] = useLazyReadBoardPageQuery();
 
@@ -157,7 +157,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             tag: '',
             searchDisabled: true,
             searchMode: false,
-            currentPage: 1
+            currentPage: 1,
+            targetPage: 1
           }
         };
         dispatch(updatePanelState(payload));
@@ -194,8 +195,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {searchMode: true},
-        currentPage: 1
+        panelState: {
+          searchMode: true,
+          currentPage: 1,
+          targetPage: 1
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -213,7 +217,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             | 'likeCount'
             | 'replyCount'
             | 'readCount',
-          currentPage: 1
+          currentPage: 1,
+          targetPage: 1
         }
       };
       dispatch(updatePanelState(payload));
@@ -321,84 +326,80 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const loadBoard = useCallback(
     async (boardId: string | null) => {
-      try {
-        if (boardId == null) {
-          setCurrentBoardId(null);
-        } else {
-          const dataBoard = await requestBoardRead(boardId as string).unwrap();
-          setBoardList(
-            boardList?.map((board) => {
-              if (board.boardId == boardId) {
-                return (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO;
-              } else {
-                return board;
-              }
-            })
-          );
-          setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
-          setCurrentBoardId(boardId);
-        }
-      } catch (err) {
-        console.log(err);
+      if (boardId == null) {
+        setCurrentBoardId(null);
+      } else {
+        const dataBoard = await requestBoardRead(boardId as string).unwrap();
+        setBoardList(
+          boardList?.map((board) => {
+            if (board.boardId == boardId) {
+              return (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO;
+            } else {
+              return board;
+            }
+          })
+        );
+        setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
+        setCurrentBoardId(boardId);
       }
     },
     [boardList, requestBoardRead]
   );
 
-  useEffect(() => {
-    async function loadBoardPage() {
-      let totalPages: number;
-      if (boardPageState.searchMode) {
-        const searchPageSetting = {
-          page: boardPageState.currentPage.toString(),
-          size: '20',
-          boardCategory: boardPageState.boardPageCategory,
-          sortBy: boardPageState.sortBy,
-          tag: boardPageState.tag
-        };
-        const dataSearchPage = await requestBoardPageSearch(
-          searchPageSetting
-        ).unwrap();
-        setBoardList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
-        totalPages = (dataSearchPage?.apiObj as BoardPageDTO)?.totalPages || 1;
-      } else {
-        const boardPageSetting = {
-          page: boardPageState.currentPage.toString(),
-          size: '20',
-          boardCategory: boardPageState.boardPageCategory,
-          sortBy: boardPageState.sortBy
-        };
-        const dataBoardPage = await requestBoardPageRead(
-          boardPageSetting
-        ).unwrap();
-        setBoardList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
-        totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
-      }
-      const payload = {
-        panelId: panelId,
-        panelState: {
-          totalPages: totalPages
-        }
+  const loadBoardPage = useCallback(async () => {
+    let totalPages: number;
+    if (boardPageState.searchMode) {
+      const searchPageSetting = {
+        page: boardPageState.currentPage.toString(),
+        size: '20',
+        boardCategory: boardPageState.boardPageCategory,
+        sortBy: boardPageState.sortBy,
+        tag: boardPageState.tag
       };
-      dispatch(updatePanelState(payload));
+      const dataSearchPage = await requestBoardPageSearch(
+        searchPageSetting
+      ).unwrap();
+      setBoardList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
+      totalPages = (dataSearchPage?.apiObj as BoardPageDTO)?.totalPages || 1;
+    } else {
+      const boardPageSetting = {
+        page: boardPageState.currentPage.toString(),
+        size: '20',
+        boardCategory: boardPageState.boardPageCategory,
+        sortBy: boardPageState.sortBy
+      };
+      const dataBoardPage = await requestBoardPageRead(
+        boardPageSetting
+      ).unwrap();
+      setBoardList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
+      totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
     }
-
-    try {
-      loadBoardPage();
-    } catch (err) {
-      console.log(err);
-    }
+    const payload = {
+      panelId: panelId,
+      panelState: {
+        totalPages: totalPages
+      }
+    };
+    dispatch(updatePanelState(payload));
   }, [
     boardPageState.searchMode,
     boardPageState.currentPage,
     boardPageState.boardPageCategory,
     boardPageState.sortBy,
     boardPageState.tag,
-    requestBoardPageRead,
-    requestBoardPageSearch,
     dispatch,
-    panelId
+    panelId,
+    requestBoardPageRead,
+    requestBoardPageSearch
   ]);
+
+  useEffect(() => {
+    try {
+      loadBoardPage();
+    } catch (err) {
+      console.log(err);
+    }
+  }, [loadBoardPage]);
 
   const boardPagePreview = useMemo(
     () =>
@@ -414,6 +415,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             currentBoardId == boardDTO.boardId ? replyDTOList : null
           }
           loadBoard={loadBoard}
+          loadBoardPage={loadBoardPage}
           editorRef={editorRef}
         />
       )),
@@ -422,6 +424,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       boardList,
       replyDTOList,
       loadBoard,
+      loadBoardPage,
       memberRole,
       memberId,
       panelId
@@ -431,7 +434,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
   return (
     <div>
       <div className="flex justify-between border-b border-warning my-2 mx-3">
-        <div className="flex justify-start gap-2 mb-2">
+        <div className="flex justify-start gap-2 mb-2 mt-1">
           <button
             className={
               boardPageState.boardPageCategory == 'ALL'
@@ -573,6 +576,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           panelId={panelId}
           memberRole={memberRole}
           editorRef={editorRef}
+          loadBoardPage={loadBoardPage}
+          loadBoard={loadBoard}
         />
       </div>
       {!boardPageState.showBoardEditor && (

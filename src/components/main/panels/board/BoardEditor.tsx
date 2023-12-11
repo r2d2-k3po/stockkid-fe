@@ -23,12 +23,16 @@ type BoardEditorProps = {
   memberRole: string | null;
   panelId: string;
   editorRef: React.MutableRefObject<EditorRef | null>;
+  loadBoardPage: () => Promise<void>;
+  loadBoard: (boardId: string | null) => Promise<void>;
 };
 
 const BoardEditor: FC<BoardEditorProps> = ({
   memberRole,
   panelId,
-  editorRef
+  editorRef,
+  loadBoardPage,
+  loadBoard
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
@@ -144,6 +148,8 @@ const BoardEditor: FC<BoardEditorProps> = ({
         } else {
           await requestBoardModify(boardSaveRequest);
         }
+        await loadBoardPage();
+        await loadBoard(boardPageState.boardId);
       } catch (err) {
         console.log(err);
       }
@@ -159,7 +165,9 @@ const BoardEditor: FC<BoardEditorProps> = ({
       boardPageState.tag2,
       boardPageState.tag3,
       requestBoardRegister,
-      requestBoardModify
+      requestBoardModify,
+      loadBoardPage,
+      loadBoard
     ]
   );
 
@@ -230,11 +238,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
               {t('BoardPage.Category.NOTICE')}
             </option>
           </select>
-          <button
-            // disabled={isLoadingSave || isLoadingLoad || isLoadingDefaultLoad}
-            onClick={onClickCancel}
-            className="btn btn-xs btn-ghost mr-1"
-          >
+          <button onClick={onClickCancel} className="btn btn-xs btn-ghost mr-1">
             {t('Common.Cancel')}
           </button>
           {isErrorRegister || isErrorModify ? (

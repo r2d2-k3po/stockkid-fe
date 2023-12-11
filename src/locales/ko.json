@@ -76,7 +76,8 @@
   "Common": {
     "Cancel": "취소",
     "RefreshError": "리프레시 에러! 로그아웃!",
-    "Save": "저장"
+    "Save": "저장",
+    "Delete": "삭제"
   },
   "DeleteAccount": {
     "DeleteAccount": "계정 삭제",

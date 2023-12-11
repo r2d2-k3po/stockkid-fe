@@ -76,7 +76,8 @@
   "Common": {
     "Cancel": "Cancel",
     "RefreshError": "Refresh error! Logging out!",
-    "Save": "Save"
+    "Save": "Save",
+    "Delete": "Delete"
   },
   "DeleteAccount": {
     "DeleteAccount": "Delete Account",

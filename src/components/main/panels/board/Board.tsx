@@ -1,10 +1,13 @@
-import React, {FC, MouseEvent, useCallback} from 'react';
+import React, {FC, MouseEvent, useCallback, useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {BoardDTO, EditorRef, ReplyDTO} from '../BoardPage';
 import {DateTime} from 'luxon';
 import EditorReadOnly from './EditorReadOnly';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
 import {useAppDispatch} from '../../../../app/hooks';
+import {useDeleteBoardMutation} from '../../../../app/api';
+import MaterialSymbolError from '../../../common/MaterialSymbolError';
+import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
 type BoardProps = {
   memberId: string | null;
@@ -13,7 +16,8 @@ type BoardProps = {
   mode: 'preview' | 'detail';
   boardDTO: BoardDTO;
   replyDTOList: ReplyDTO[] | null | undefined;
-  loadBoard: (boardId: string | null) => void;
+  loadBoard: (boardId: string | null) => Promise<void>;
+  loadBoardPage: () => Promise<void>;
   editorRef: React.MutableRefObject<EditorRef | null>;
 };
 
@@ -25,18 +29,28 @@ const Board: FC<BoardProps> = ({
   boardDTO,
   replyDTOList,
   loadBoard,
+  loadBoardPage,
   editorRef
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
 
+  const [confirmDeleteBoard, setConfirmDeleteBoard] = useState<boolean>(false);
+
+  const [requestBoardDelete, {isSuccess, isError, reset}] =
+    useDeleteBoardMutation();
+
   const onClickToggleDetail = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      if (mode == 'preview') {
-        loadBoard(boardDTO?.boardId as string);
-      } else if (mode == 'detail') {
-        loadBoard(null);
+      try {
+        if (mode == 'preview') {
+          loadBoard(boardDTO?.boardId as string);
+        } else if (mode == 'detail') {
+          loadBoard(null);
+        }
+      } catch (err) {
+        console.log(err);
       }
     },
     [boardDTO?.boardId, mode, loadBoard]
@@ -78,6 +92,40 @@ const Board: FC<BoardProps> = ({
       editorRef
     ]
   );
+
+  const deleteBoard = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setConfirmDeleteBoard(true);
+  }, []);
+
+  const cancelDeleteBoard = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setConfirmDeleteBoard(false);
+  }, []);
+
+  const reallyDeleteBoard = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      try {
+        await requestBoardDelete(boardDTO.boardId);
+        await loadBoardPage();
+        await loadBoard(null);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [boardDTO.boardId, requestBoardDelete, loadBoard, loadBoardPage]
+  );
+
+  useEffect(() => {
+    if (isSuccess || isError) {
+      const id = setTimeout(() => {
+        setConfirmDeleteBoard(false);
+        reset();
+      }, 1000);
+      return () => clearTimeout(id);
+    }
+  }, [isSuccess, isError, reset]);
 
   return (
     <div className="border-b border-warning my-2 mr-2">
@@ -166,16 +214,43 @@ const Board: FC<BoardProps> = ({
             <i className="ri-reply-line ri-1x"></i>
           </button>
           <div className="justify-end">
-            <div hidden={memberId != boardDTO.memberId}>
+            <div hidden={memberId != boardDTO.memberId || confirmDeleteBoard}>
               <button
                 className="btn btn-xs btn-circle btn-outline btn-accent m-1"
                 onClick={enableEditorToModify}
               >
                 <i className="ri-edit-2-line ri-1x"></i>
               </button>
-              <button className="btn btn-xs btn-circle btn-outline btn-error m-1">
+              <button
+                className="btn btn-xs btn-circle btn-outline btn-error m-1"
+                onClick={deleteBoard}
+              >
                 <i className="ri-delete-bin-line ri-1x"></i>
               </button>
+            </div>
+            <div hidden={memberId != boardDTO.memberId || !confirmDeleteBoard}>
+              <button
+                onClick={cancelDeleteBoard}
+                className="btn btn-xs btn-ghost mr-1"
+              >
+                {t('Common.Cancel')}
+              </button>
+              {isError ? (
+                <div className="ml-2.5 mr-3">
+                  <MaterialSymbolError size={19} />
+                </div>
+              ) : isSuccess ? (
+                <div className="ml-2.5 mr-3">
+                  <MaterialSymbolSuccess size={19} />
+                </div>
+              ) : (
+                <button
+                  onClick={reallyDeleteBoard}
+                  className="btn btn-xs btn-accent"
+                >
+                  {t('Common.Delete')}
+                </button>
+              )}
             </div>
           </div>
         </div>
