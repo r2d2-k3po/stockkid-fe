@@ -72,6 +72,10 @@ export interface ReplyDTO {
   modDate: string;
 }
 
+export interface IdDTO {
+  id: string;
+}
+
 interface BoardPageDTO {
   boardDTOList: BoardDTO[];
   totalPages: number;
@@ -90,6 +94,10 @@ export interface EditorRef {
   clearContent: () => void;
   setContent: (content: RemirrorContentType) => void;
   getText: ({lineBreakDivider}: GetTextHelperOptions) => string;
+}
+
+export interface EditorReadOnlyRef {
+  setContent: (content: RemirrorContentType) => void;
 }
 
 type CommonPanelProps = {
@@ -119,6 +127,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
   );
 
   const editorRef = useRef<EditorRef | null>(null);
+
+  const editorReadOnlyRef = useRef<EditorReadOnlyRef | null>(null);
 
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
@@ -325,12 +335,12 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
   );
 
   const loadBoard = useCallback(
-    async (boardId: string | null) => {
+    async (boardId: string | null, setContent: boolean) => {
       if (boardId == null) {
         setCurrentBoardId(null);
       } else {
         const dataBoard = await requestBoardRead(boardId as string).unwrap();
-        setBoardList(
+        setBoardList((boardList) =>
           boardList?.map((board) => {
             if (board.boardId == boardId) {
               return (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO;
@@ -341,9 +351,16 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         );
         setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
         setCurrentBoardId(boardId);
+        if (setContent) {
+          editorReadOnlyRef.current?.setContent(
+            JSON.parse(
+              (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO.content as string
+            )
+          );
+        }
       }
     },
-    [boardList, requestBoardRead]
+    [requestBoardRead]
   );
 
   const loadBoardPage = useCallback(async () => {
@@ -415,8 +432,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             currentBoardId == boardDTO.boardId ? replyDTOList : null
           }
           loadBoard={loadBoard}
-          loadBoardPage={loadBoardPage}
           editorRef={editorRef}
+          editorReadOnlyRef={editorReadOnlyRef}
         />
       )),
     [
@@ -424,7 +441,6 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       boardList,
       replyDTOList,
       loadBoard,
-      loadBoardPage,
       memberRole,
       memberId,
       panelId

@@ -10,7 +10,7 @@ import Editor from './Editor';
 import {RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {BoardPageState, EditorRef} from '../BoardPage';
+import {BoardPageState, EditorRef, IdDTO} from '../BoardPage';
 import {
   BoardSaveRequest,
   useModifyBoardMutation,
@@ -24,7 +24,7 @@ type BoardEditorProps = {
   panelId: string;
   editorRef: React.MutableRefObject<EditorRef | null>;
   loadBoardPage: () => Promise<void>;
-  loadBoard: (boardId: string | null) => Promise<void>;
+  loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
 };
 
 const BoardEditor: FC<BoardEditorProps> = ({
@@ -144,12 +144,14 @@ const BoardEditor: FC<BoardEditorProps> = ({
           tag3: boardPageState.tag3 || null
         };
         if (boardPageState.boardId == null) {
-          await requestBoardRegister(boardSaveRequest);
+          const data = await requestBoardRegister(boardSaveRequest).unwrap();
+          const boardId = (data?.apiObj as IdDTO)?.id;
+          await loadBoardPage();
+          await loadBoard(boardId, false);
         } else {
           await requestBoardModify(boardSaveRequest);
+          await loadBoard(boardPageState.boardId, true);
         }
-        await loadBoardPage();
-        await loadBoard(boardPageState.boardId);
       } catch (err) {
         console.log(err);
       }

@@ -1,11 +1,14 @@
 import React, {FC, MouseEvent, useCallback, useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {BoardDTO, EditorRef, ReplyDTO} from '../BoardPage';
+import {BoardDTO, EditorReadOnlyRef, EditorRef, ReplyDTO} from '../BoardPage';
 import {DateTime} from 'luxon';
 import EditorReadOnly from './EditorReadOnly';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
 import {useAppDispatch} from '../../../../app/hooks';
-import {useDeleteBoardMutation} from '../../../../app/api';
+import {
+  useDeleteBoardMutation,
+  useLikeBoardMutation
+} from '../../../../app/api';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
@@ -16,9 +19,9 @@ type BoardProps = {
   mode: 'preview' | 'detail';
   boardDTO: BoardDTO;
   replyDTOList: ReplyDTO[] | null | undefined;
-  loadBoard: (boardId: string | null) => Promise<void>;
-  loadBoardPage: () => Promise<void>;
+  loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
   editorRef: React.MutableRefObject<EditorRef | null>;
+  editorReadOnlyRef: React.MutableRefObject<EditorReadOnlyRef | null>;
 };
 
 const Board: FC<BoardProps> = ({
@@ -29,25 +32,59 @@ const Board: FC<BoardProps> = ({
   boardDTO,
   replyDTOList,
   loadBoard,
-  loadBoardPage,
-  editorRef
+  editorRef,
+  editorReadOnlyRef
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
 
   const [confirmDeleteBoard, setConfirmDeleteBoard] = useState<boolean>(false);
 
+  const [like, setLike] = useState<boolean | null>(null);
+
+  const [likeUpdated, setLikeUpdated] = useState<boolean>(false);
+
   const [requestBoardDelete, {isSuccess, isError, reset}] =
     useDeleteBoardMutation();
 
+  const [requestBoardLike, {isSuccess: isSuccessLike, isError: isErrorLike}] =
+    useLikeBoardMutation();
+
+  const onClickLike = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setLike(true);
+  }, []);
+
+  const onClickNotLike = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setLike(false);
+  }, []);
+
+  const updateLike = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      try {
+        const likeRequest = {
+          id: boardDTO.boardId,
+          number: like == true ? 1 : -1
+        };
+        await requestBoardLike(likeRequest);
+        await loadBoard(boardDTO.boardId, false);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [boardDTO.boardId, like, requestBoardLike, loadBoard]
+  );
+
   const onClickToggleDetail = useCallback(
-    (e: MouseEvent<HTMLButtonElement>) => {
+    async (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       try {
         if (mode == 'preview') {
-          loadBoard(boardDTO?.boardId as string);
+          await loadBoard(boardDTO?.boardId as string, false);
         } else if (mode == 'detail') {
-          loadBoard(null);
+          await loadBoard(null, false);
         }
       } catch (err) {
         console.log(err);
@@ -108,13 +145,12 @@ const Board: FC<BoardProps> = ({
       e.stopPropagation();
       try {
         await requestBoardDelete(boardDTO.boardId);
-        await loadBoardPage();
-        await loadBoard(null);
+        await loadBoard(boardDTO.boardId, true);
       } catch (err) {
         console.log(err);
       }
     },
-    [boardDTO.boardId, requestBoardDelete, loadBoard, loadBoardPage]
+    [boardDTO.boardId, requestBoardDelete, loadBoard]
   );
 
   useEffect(() => {
@@ -126,6 +162,15 @@ const Board: FC<BoardProps> = ({
       return () => clearTimeout(id);
     }
   }, [isSuccess, isError, reset]);
+
+  useEffect(() => {
+    if (isSuccessLike) {
+      setLikeUpdated(true);
+    } else if (isErrorLike) {
+      setLike(null);
+      setLikeUpdated(true);
+    }
+  }, [isSuccessLike, isErrorLike]);
 
   return (
     <div className="border-b border-warning my-2 mr-2">
@@ -172,6 +217,45 @@ const Board: FC<BoardProps> = ({
           <div className="text-sm text-info">{boardDTO?.replyCount}</div>
           <i className="ri-star-line ri-1x"></i>
           <div className="text-sm text-info">{boardDTO?.likeCount}</div>
+          <div hidden={mode == 'preview' || memberId == null}>
+            <div className="flex gap-1">
+              <div
+                className={
+                  like == null ? 'invisible -mt-1 mr-1' : 'visible -mt-1 mr-1'
+                }
+              >
+                <button
+                  onClick={updateLike}
+                  disabled={likeUpdated}
+                  className="btn btn-xs btn-circle btn-outline btn-warning"
+                >
+                  <i className="ri-arrow-left-double-line ri-1x"></i>
+                </button>
+              </div>
+              <button
+                disabled={likeUpdated}
+                onClick={onClickLike}
+                className={
+                  like == true
+                    ? 'btn btn-xs btn-circle btn-outline btn-accent btn-active'
+                    : 'btn btn-xs btn-circle btn-outline btn-accent'
+                }
+              >
+                <i className="ri-thumb-up-line ri-1x"></i>
+              </button>
+              <button
+                disabled={likeUpdated}
+                onClick={onClickNotLike}
+                className={
+                  like == false
+                    ? 'btn btn-xs btn-circle btn-outline btn-error btn-active'
+                    : 'btn btn-xs btn-circle btn-outline btn-error'
+                }
+              >
+                <i className="ri-thumb-down-line ri-1x"></i>
+              </button>
+            </div>
+          </div>
         </div>
         <div className="flex mb-2 mr-4 gap-4">
           {boardDTO?.tag1 && (
@@ -197,12 +281,11 @@ const Board: FC<BoardProps> = ({
       >
         {mode == 'preview' ? (
           boardDTO?.preview
-        ) : mode == 'detail' ? (
+        ) : (
           <EditorReadOnly
             initialContent={JSON.parse(boardDTO?.content as string)}
+            editorReadOnlyRef={editorReadOnlyRef}
           />
-        ) : (
-          'error'
         )}
       </button>
       <div hidden={mode == 'preview'}>

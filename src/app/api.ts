@@ -85,7 +85,7 @@ export type SearchPageSettingType = Record<
 
 export interface LikeRequest {
   id: string;
-  number: string;
+  number: number;
 }
 
 const baseQuery = fetchBaseQuery({
@@ -137,7 +137,7 @@ const baseQueryWithRefresh: BaseQueryFn<
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithRefresh,
-  tagTypes: ['ScreenTitles', 'BoardPage', 'Board'],
+  tagTypes: ['ScreenTitles'],
   endpoints: (builder) => ({
     signup: builder.mutation<ResponseEntity, SignupRequest>({
       query: (signupRequest) => ({
@@ -261,7 +261,6 @@ export const api = createApi({
         method: 'PUT',
         body: boardSaveRequest
       })
-      // invalidatesTags: ['Board']
     }),
     registerReply: builder.mutation<ResponseEntity, ReplySaveRequest>({
       query: (replySaveRequest) => ({
@@ -282,7 +281,6 @@ export const api = createApi({
         url: `access/board/delete/${boardId}`,
         method: 'PATCH'
       })
-      // invalidatesTags: ['Board']
     }),
     deleteReply: builder.mutation<ResponseEntity, string>({
       query: (replyId) => ({
@@ -314,7 +312,6 @@ export const api = createApi({
       query: (boardId) => ({
         url: `permit/board/read/${boardId}`
       })
-      // providesTags: ['Board']
     }),
     searchBoardPage: builder.query<ResponseEntity, SearchPageSettingType>({
       query: (searchPageSetting) => ({
