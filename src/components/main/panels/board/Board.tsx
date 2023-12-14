@@ -11,10 +11,10 @@ import {
 } from '../../../../app/api';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
+import ReplyList from './ReplyList';
 
 type BoardProps = {
   memberId: string | null;
-  memberRole: string | null;
   panelId: string;
   mode: 'preview' | 'detail';
   boardDTO: BoardDTO;
@@ -26,7 +26,6 @@ type BoardProps = {
 
 const Board: FC<BoardProps> = ({
   memberId,
-  memberRole,
   panelId,
   mode,
   boardDTO,
@@ -91,6 +90,24 @@ const Board: FC<BoardProps> = ({
       }
     },
     [boardDTO?.boardId, mode, loadBoard]
+  );
+
+  const onClickSearchTag = useCallback(
+    (tag: string) => (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          tag: tag,
+          searchDisabled: false,
+          searchMode: true,
+          currentPage: 1,
+          targetPage: 1
+        }
+      };
+      dispatch(updatePanelState(payload));
+    },
+    [dispatch, panelId]
   );
 
   const enableEditorToModify = useCallback(
@@ -173,7 +190,7 @@ const Board: FC<BoardProps> = ({
   }, [isSuccessLike, isErrorLike]);
 
   return (
-    <div className="border-b border-warning my-2 mr-2">
+    <div className="relative border-b border-warning my-2 mr-2">
       <div className="flex justify-between">
         <div className="flex justify-start mb-2 gap-2">
           <i className="ri-user-line ri-1x"></i>
@@ -259,17 +276,26 @@ const Board: FC<BoardProps> = ({
         </div>
         <div className="flex mb-2 mr-4 gap-4">
           {boardDTO?.tag1 && (
-            <button className="text-xs text-info btn-ghost rounded -mt-1 px-0.5">
+            <button
+              className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+              onClick={onClickSearchTag(boardDTO?.tag1)}
+            >
               {boardDTO?.tag1}
             </button>
           )}
           {boardDTO?.tag2 && (
-            <button className="text-xs text-info btn-ghost rounded -mt-1 px-0.5">
+            <button
+              className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+              onClick={onClickSearchTag(boardDTO?.tag2)}
+            >
               {boardDTO?.tag2}
             </button>
           )}
           {boardDTO?.tag3 && (
-            <button className="text-xs text-info btn-ghost rounded -mt-1 px-0.5">
+            <button
+              className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+              onClick={onClickSearchTag(boardDTO?.tag3)}
+            >
               {boardDTO?.tag3}
             </button>
           )}
@@ -337,6 +363,15 @@ const Board: FC<BoardProps> = ({
             </div>
           </div>
         </div>
+        <ReplyList
+          panelId={panelId}
+          memberId={memberId}
+          boardId={boardDTO.boardId}
+          replyDTOList={replyDTOList}
+          loadBoard={loadBoard}
+          editorRef={editorRef}
+          editorReadOnlyRef={editorReadOnlyRef}
+        />
       </div>
     </div>
   );

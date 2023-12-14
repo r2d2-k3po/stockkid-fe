@@ -425,7 +425,6 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           key={boardDTO.boardId}
           panelId={panelId}
           memberId={memberId}
-          memberRole={memberRole}
           mode={currentBoardId == boardDTO.boardId ? 'detail' : 'preview'}
           boardDTO={boardDTO}
           replyDTOList={
@@ -436,15 +435,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           editorReadOnlyRef={editorReadOnlyRef}
         />
       )),
-    [
-      currentBoardId,
-      boardList,
-      replyDTOList,
-      loadBoard,
-      memberRole,
-      memberId,
-      panelId
-    ]
+    [currentBoardId, boardList, replyDTOList, loadBoard, memberId, panelId]
   );
 
   return (
