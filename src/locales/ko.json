@@ -32,18 +32,18 @@
   },
   "BoardPage": {
     "Category": {
-      "All": "전체",
+      "ALL": "전체",
       "Category": "카테고리",
-      "Life": "일상",
-      "Notice": "공지",
+      "LIFE": "일상",
+      "NOTICE": "공지",
       "QA": "질문답변",
-      "Stock": "주식"
+      "STOCK": "주식"
     },
     "placeholder": {
       "tag": "검색 태그 (2~30)"
     },
     "sortBy": {
-      "boardId": "최신순",
+      "id": "최신순",
       "likeCount": "추천순",
       "readCount": "조회순",
       "replyCount": "댓글순"
@@ -76,7 +76,8 @@
   "Common": {
     "Cancel": "취소",
     "RefreshError": "리프레시 에러! 로그아웃!",
-    "Save": "저장"
+    "Save": "저장",
+    "Delete": "삭제"
   },
   "DeleteAccount": {
     "DeleteAccount": "계정 삭제",

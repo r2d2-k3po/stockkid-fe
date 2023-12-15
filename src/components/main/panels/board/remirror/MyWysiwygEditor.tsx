@@ -1,4 +1,11 @@
-import React, {FC, PropsWithChildren, useCallback} from 'react';
+import React, {
+  FC,
+  forwardRef,
+  PropsWithChildren,
+  Ref,
+  useCallback,
+  useImperativeHandle
+} from 'react';
 import {PlaceholderExtension, wysiwygPreset} from 'remirror/extensions';
 import {TableExtension} from '@remirror/extension-react-tables';
 import {
@@ -6,21 +13,48 @@ import {
   Remirror,
   TableComponents,
   ThemeProvider,
-  useRemirror
+  useHelpers,
+  useRemirror,
+  useRemirrorContext
 } from '@remirror/react';
 import {AllStyledComponent} from '@remirror/styles/emotion';
 
 import {BubbleMenu} from './BubbleMenu';
 import {TopToolbar} from './TopToolbar';
 import {ReactEditorProps} from './types';
+import {RemirrorContentType} from 'remirror';
+import {EditorRef} from '../../BoardPage';
 
-export type WysiwygEditorProps = Partial<ReactEditorProps>;
+const ImperativeHandle = forwardRef(function ImperativeHandle(
+  _: unknown,
+  ref: Ref<EditorRef>
+) {
+  const {clearContent, setContent} = useRemirrorContext({
+    autoUpdate: true
+  });
 
-const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
+  const {getText} = useHelpers();
+
+  // Expose content handling to outside
+  useImperativeHandle(ref, () => {
+    return {clearContent, setContent, getText};
+  });
+  return <></>;
+});
+
+type WysiwygEditorProps = Partial<ReactEditorProps>;
+
+type MyWysiwygEditorProps = WysiwygEditorProps & {
+  editorRef: React.MutableRefObject<EditorRef | null>;
+};
+
+const MyWysiwygEditor: FC<PropsWithChildren<MyWysiwygEditorProps>> = ({
   placeholder,
   stringHandler,
   children,
   theme,
+  initialContent,
+  editorRef,
   ...rest
 }) => {
   const extensions = useCallback(
@@ -32,12 +66,17 @@ const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
     [placeholder]
   );
 
-  const {manager} = useRemirror({extensions, stringHandler});
+  const {manager, state} = useRemirror({
+    extensions,
+    content: initialContent as RemirrorContentType | undefined,
+    stringHandler
+  });
 
   return (
     <AllStyledComponent>
       <ThemeProvider theme={theme}>
-        <Remirror manager={manager} {...rest}>
+        <Remirror manager={manager} initialContent={state} {...rest}>
+          <ImperativeHandle ref={editorRef} />
           <TopToolbar />
           <EditorComponent />
           <BubbleMenu />

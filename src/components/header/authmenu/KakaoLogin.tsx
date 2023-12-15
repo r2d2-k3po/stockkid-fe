@@ -106,7 +106,7 @@ const KakaoLogin = () => {
       <div onClick={handleClickKakaoLogin}>
         <KakaoButton />
       </div>
-      {isError && <MaterialSymbolError />}
+      {isError && <MaterialSymbolError size={36} />}
     </>
   );
 };

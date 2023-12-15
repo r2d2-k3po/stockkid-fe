@@ -1,226 +1,378 @@
-import React, {ChangeEvent, FC, MouseEvent, useCallback, useState} from 'react';
+import React, {FC, MouseEvent, useCallback, useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import Editor from './Editor';
-import {RemirrorJSON} from 'remirror';
+import {BoardDTO, EditorReadOnlyRef, EditorRef, ReplyDTO} from '../BoardPage';
+import {DateTime} from 'luxon';
 import EditorReadOnly from './EditorReadOnly';
-
-type BoardFormType = Record<
-  'nickname' | 'title' | 'tag1' | 'tag2' | 'tag3',
-  string
->;
+import {updatePanelState} from '../../../../app/slices/panelsSlice';
+import {useAppDispatch} from '../../../../app/hooks';
+import {
+  useDeleteBoardMutation,
+  useLikeBoardMutation
+} from '../../../../app/api';
+import MaterialSymbolError from '../../../common/MaterialSymbolError';
+import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
+import ReplyList from './ReplyList';
 
 type BoardProps = {
-  setShowNewBoard?: React.Dispatch<React.SetStateAction<boolean>>;
-  mode: 'register' | 'preview';
+  memberId: string | null;
+  panelId: string;
+  mode: 'preview' | 'detail';
+  boardDTO: BoardDTO;
+  replyDTOList: ReplyDTO[] | null | undefined;
+  loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
+  editorRef: React.MutableRefObject<EditorRef | null>;
+  editorReadOnlyRef: React.MutableRefObject<EditorReadOnlyRef | null>;
 };
 
-const Board: FC<BoardProps> = ({setShowNewBoard, mode}) => {
+const Board: FC<BoardProps> = ({
+  memberId,
+  panelId,
+  mode,
+  boardDTO,
+  replyDTOList,
+  loadBoard,
+  editorRef,
+  editorReadOnlyRef
+}) => {
   const {t} = useTranslation();
-  const regexFinal = /^.{2,30}$/;
+  const dispatch = useAppDispatch();
 
-  const [boardCategory, setBoardCategory] = useState<
-    'STOCK' | 'LIFE' | 'QA' | 'NOTICE' | '0'
-  >(
-    (localStorage.getItem('boardCategory') as
-      | 'STOCK'
-      | 'LIFE'
-      | 'QA'
-      | 'NOTICE') || '0'
-  );
+  const [confirmDeleteBoard, setConfirmDeleteBoard] = useState<boolean>(false);
 
-  const [{nickname, title, tag1, tag2, tag3}, setBoardForm] =
-    useState<BoardFormType>({
-      nickname: localStorage.getItem('nickname') || '',
-      title: localStorage.getItem('title') || '',
-      tag1: localStorage.getItem('tag1') || '',
-      tag2: localStorage.getItem('tag2') || '',
-      tag3: localStorage.getItem('tag3') || ''
-    });
+  const [like, setLike] = useState<boolean | null>(null);
 
-  const handleChangeBoardForm = useCallback(
-    (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
-      const regex = /^.{0,30}$/;
-      if (regex.test(e.target.value)) {
-        const valueTrim = e.target.value.trim();
-        setBoardForm((obj) => ({...obj, [key]: valueTrim}));
-        localStorage.setItem(key, valueTrim);
-      }
-    },
-    []
-  );
+  const [likeUpdated, setLikeUpdated] = useState<boolean>(false);
 
-  const handleChangeCategory = useCallback(
-    (e: ChangeEvent<HTMLSelectElement>) => {
-      e.stopPropagation();
-      setBoardCategory(e.target.value as 'STOCK' | 'LIFE' | 'QA' | 'NOTICE');
-      localStorage.setItem('boardCategory', e.target.value);
-    },
-    []
-  );
+  const [requestBoardDelete, {isSuccess, isError, reset}] =
+    useDeleteBoardMutation();
 
-  const [initialContent] = useState<RemirrorJSON | undefined>(() => {
-    if (mode == 'register') {
-      const content = localStorage.getItem('initialContent');
-      return content ? JSON.parse(content) : undefined;
-    }
-  });
+  const [requestBoardLike, {isSuccess: isSuccessLike, isError: isErrorLike}] =
+    useLikeBoardMutation();
 
-  const handleEditorChange = useCallback((json: RemirrorJSON) => {
-    window.localStorage.setItem('initialContent', JSON.stringify(json));
+  const onClickLike = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setLike(true);
   }, []);
 
-  const reset = useCallback(() => {
-    if (setShowNewBoard) {
-      localStorage.removeItem('boardCategory');
-      localStorage.removeItem('initialContent');
-      localStorage.removeItem('title');
-      localStorage.removeItem('tag1');
-      localStorage.removeItem('tag2');
-      localStorage.removeItem('tag3');
-      localStorage.setItem('showNewBoard', 'false');
-      setBoardCategory('0');
-      setBoardForm((obj) => ({
-        ...obj,
-        ['title']: '',
-        ['tag1']: '',
-        ['tag2']: '',
-        ['tag3']: ''
-      }));
-      setShowNewBoard(false);
+  const onClickNotLike = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setLike(false);
+  }, []);
+
+  const updateLike = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      try {
+        const likeRequest = {
+          id: boardDTO.boardId,
+          number: like == true ? 1 : -1
+        };
+        await requestBoardLike(likeRequest);
+        await loadBoard(boardDTO.boardId, false);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [boardDTO.boardId, like, requestBoardLike, loadBoard]
+  );
+
+  const onClickToggleDetail = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      try {
+        if (mode == 'preview') {
+          await loadBoard(boardDTO?.boardId as string, false);
+        } else if (mode == 'detail') {
+          await loadBoard(null, false);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [boardDTO?.boardId, mode, loadBoard]
+  );
+
+  const onClickSearchTag = useCallback(
+    (tag: string) => (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          tag: tag,
+          searchDisabled: false,
+          searchMode: true,
+          currentPage: 1,
+          targetPage: 1
+        }
+      };
+      dispatch(updatePanelState(payload));
+    },
+    [dispatch, panelId]
+  );
+
+  const enableEditorToModify = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          showBoardEditor: true,
+          boardId: boardDTO.boardId,
+          nickname: boardDTO.nickname,
+          title: boardDTO.title,
+          boardCategory: boardDTO.boardCategory,
+          preview: boardDTO.preview,
+          content: boardDTO.content,
+          tag1: boardDTO.tag1,
+          tag2: boardDTO.tag2,
+          tag3: boardDTO.tag3
+        }
+      };
+      dispatch(updatePanelState(payload));
+      editorRef.current?.setContent(JSON.parse(boardDTO.content as string));
+    },
+    [
+      dispatch,
+      panelId,
+      boardDTO.boardId,
+      boardDTO.nickname,
+      boardDTO.title,
+      boardDTO.boardCategory,
+      boardDTO.preview,
+      boardDTO.content,
+      boardDTO.tag1,
+      boardDTO.tag2,
+      boardDTO.tag3,
+      editorRef
+    ]
+  );
+
+  const deleteBoard = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setConfirmDeleteBoard(true);
+  }, []);
+
+  const cancelDeleteBoard = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setConfirmDeleteBoard(false);
+  }, []);
+
+  const reallyDeleteBoard = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      try {
+        await requestBoardDelete(boardDTO.boardId);
+        await loadBoard(boardDTO.boardId, true);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [boardDTO.boardId, requestBoardDelete, loadBoard]
+  );
+
+  useEffect(() => {
+    if (isSuccess || isError) {
+      const id = setTimeout(() => {
+        setConfirmDeleteBoard(false);
+        reset();
+      }, 1000);
+      return () => clearTimeout(id);
     }
-  }, [setShowNewBoard]);
+  }, [isSuccess, isError, reset]);
 
-  const onClickCancel = useCallback(
-    (e: MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation();
-      reset();
-    },
-    [reset]
-  );
-
-  const onClickSave = useCallback(
-    (e: MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation();
-      reset();
-    },
-    [reset]
-  );
+  useEffect(() => {
+    if (isSuccessLike) {
+      setLikeUpdated(true);
+    } else if (isErrorLike) {
+      setLike(null);
+      setLikeUpdated(true);
+    }
+  }, [isSuccessLike, isErrorLike]);
 
   return (
-    <div className="border-b border-warning my-2 mx-3">
+    <div className="relative border-b border-warning my-2 mr-2">
       <div className="flex justify-between">
         <div className="flex justify-start mb-2 gap-2">
           <i className="ri-user-line ri-1x"></i>
-          {mode == 'register' && (
-            <input
-              type="text"
-              name="nickname"
-              placeholder={t('Board.placeholder.nickname') as string}
-              value={nickname}
-              onChange={handleChangeBoardForm('nickname')}
-              className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
-            />
-          )}
-          {mode != 'register' && <i className="ri-heart-line ri-1x"></i>}
-        </div>
-        <div className="flex justify-center">
-          {mode == 'register' && (
-            <input
-              type="text"
-              name="title"
-              placeholder={t('Board.placeholder.title') as string}
-              value={title}
-              onChange={handleChangeBoardForm('title')}
-              className="w-96 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
-            />
-          )}
+          <button
+            className={
+              memberId == boardDTO.memberId
+                ? 'text-sm text-primary btn-ghost rounded -mt-1 px-0.5'
+                : 'text-sm text-info btn-ghost rounded -mt-1 px-0.5'
+            }
+          >
+            {boardDTO?.nickname}
+          </button>
+          <button
+            onClick={onClickToggleDetail}
+            className="text-md text-info ml-16 hover:text-accent"
+          >
+            {boardDTO?.title}
+          </button>
         </div>
         <div className="flex justify-end mb-2">
-          {mode != 'register' && <i className="ri-time-line ri-1x"></i>}
-          {mode == 'register' && (
-            <select
-              onChange={handleChangeCategory}
-              className="max-w-xs select select-secondary select-xs text-accent-content mx-3"
-              value={boardCategory}
-            >
-              <option disabled value="0">
-                {t('BoardPage.Category.Category')}
-              </option>
-              <option value="STOCK">{t('BoardPage.Category.Stock')}</option>
-              <option value="LIFE">{t('BoardPage.Category.Life')}</option>
-              <option value="QA">{t('BoardPage.Category.QA')}</option>
-              <option value="NOTICE">{t('BoardPage.Category.Notice')}</option>
-            </select>
-          )}
-          {mode == 'register' && (
-            <button
-              // disabled={isLoadingSave || isLoadingLoad || isLoadingDefaultLoad}
-              onClick={onClickCancel}
-              className="btn btn-xs btn-ghost mr-1"
-            >
-              {t('Common.Cancel')}
-            </button>
-          )}
-          {mode == 'register' && (
-            <button
-              disabled={
-                boardCategory == '0' ||
-                !regexFinal.test(nickname) ||
-                !regexFinal.test(title)
-              }
-              onClick={onClickSave}
-              className="btn btn-xs btn-accent"
-              //   isLoadingSave || isLoadingLoad || isLoadingDefaultLoad
-              //       ? 'btn btn-xs btn-accent loading'
-
-              //
-            >
-              {t('Common.Save')}
-            </button>
-          )}
+          <i className="ri-time-line ri-1x"></i>
+          <div className="text-sm text-info mx-1">
+            {DateTime.fromISO(
+              boardDTO?.modDate.split('.')[0] as string
+            ).toFormat('HH:mm yyyy-MM-dd')}
+          </div>
+          <div className="text-xs text-info text-center w-16 mx-2 border-[1px] border-secondary rounded-lg my-0.5">
+            {t(
+              `BoardPage.Category.${
+                boardDTO?.boardCategory as 'STOCK' | 'LIFE' | 'QA' | 'NOTICE'
+              }`
+            )}
+          </div>
         </div>
       </div>
       <div className="flex justify-between">
         <div className="flex justify-start mb-2 gap-2">
-          {mode != 'register' && <i className="ri-eye-line ri-1x"></i>}
-          {mode != 'register' && <i className="ri-chat-1-line ri-1x"></i>}
-          {mode != 'register' && <i className="ri-star-line ri-1x"></i>}
+          <i className="ri-eye-line ri-1x"></i>
+          <div className="text-sm text-info">{boardDTO?.readCount}</div>
+          <i className="ri-chat-1-line ri-1x"></i>
+          <div className="text-sm text-info">{boardDTO?.replyCount}</div>
+          <i className="ri-star-line ri-1x"></i>
+          <div className="text-sm text-info">{boardDTO?.likeCount}</div>
+          <div hidden={mode == 'preview' || memberId == null}>
+            <div className="flex gap-1">
+              <div
+                className={
+                  like == null ? 'invisible -mt-1 mr-1' : 'visible -mt-1 mr-1'
+                }
+              >
+                <button
+                  onClick={updateLike}
+                  disabled={likeUpdated}
+                  className="btn btn-xs btn-circle btn-outline btn-warning"
+                >
+                  <i className="ri-arrow-left-double-line ri-1x"></i>
+                </button>
+              </div>
+              <button
+                disabled={likeUpdated}
+                onClick={onClickLike}
+                className={
+                  like == true
+                    ? 'btn btn-xs btn-circle btn-outline btn-accent btn-active'
+                    : 'btn btn-xs btn-circle btn-outline btn-accent'
+                }
+              >
+                <i className="ri-thumb-up-line ri-1x"></i>
+              </button>
+              <button
+                disabled={likeUpdated}
+                onClick={onClickNotLike}
+                className={
+                  like == false
+                    ? 'btn btn-xs btn-circle btn-outline btn-error btn-active'
+                    : 'btn btn-xs btn-circle btn-outline btn-error'
+                }
+              >
+                <i className="ri-thumb-down-line ri-1x"></i>
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="flex justify-end mb-2 mr-24 gap-2">
-          {mode == 'register' && (
-            <input
-              type="text"
-              name="tag1"
-              placeholder={t('Board.placeholder.tag1') as string}
-              value={tag1}
-              onChange={handleChangeBoardForm('tag1')}
-              className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
-            />
+        <div className="flex mb-2 mr-4 gap-4">
+          {boardDTO?.tag1 && (
+            <button
+              className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+              onClick={onClickSearchTag(boardDTO?.tag1)}
+            >
+              {boardDTO?.tag1}
+            </button>
           )}
-          {mode == 'register' && (
-            <input
-              type="text"
-              name="tag2"
-              placeholder={t('Board.placeholder.tag2') as string}
-              value={tag2}
-              onChange={handleChangeBoardForm('tag2')}
-              className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
-            />
+          {boardDTO?.tag2 && (
+            <button
+              className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+              onClick={onClickSearchTag(boardDTO?.tag2)}
+            >
+              {boardDTO?.tag2}
+            </button>
           )}
-          {mode == 'register' && (
-            <input
-              type="text"
-              name="tag3"
-              placeholder={t('Board.placeholder.tag3') as string}
-              value={tag3}
-              onChange={handleChangeBoardForm('tag3')}
-              className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
-            />
+          {boardDTO?.tag3 && (
+            <button
+              className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+              onClick={onClickSearchTag(boardDTO?.tag3)}
+            >
+              {boardDTO?.tag3}
+            </button>
           )}
         </div>
       </div>
-      <Editor onChange={handleEditorChange} initialContent={initialContent} />
-      {/*<EditorReadOnly initialContent={initialContent} />*/}
+      <button
+        onClick={onClickToggleDetail}
+        className="mb-2 line-clamp-1 text-sm text-info hover:text-accent"
+      >
+        {mode == 'preview' ? (
+          boardDTO?.preview
+        ) : (
+          <EditorReadOnly
+            initialContent={JSON.parse(boardDTO?.content as string)}
+            editorReadOnlyRef={editorReadOnlyRef}
+          />
+        )}
+      </button>
+      <div hidden={mode == 'preview'}>
+        <div className="flex justify-between mb-1">
+          <button
+            disabled={memberId == null}
+            className="btn btn-xs btn-circle btn-outline btn-warning m-1"
+          >
+            <i className="ri-reply-line ri-1x"></i>
+          </button>
+          <div className="justify-end">
+            <div hidden={memberId != boardDTO.memberId || confirmDeleteBoard}>
+              <button
+                className="btn btn-xs btn-circle btn-outline btn-accent m-1"
+                onClick={enableEditorToModify}
+              >
+                <i className="ri-edit-2-line ri-1x"></i>
+              </button>
+              <button
+                className="btn btn-xs btn-circle btn-outline btn-error m-1"
+                onClick={deleteBoard}
+              >
+                <i className="ri-delete-bin-line ri-1x"></i>
+              </button>
+            </div>
+            <div hidden={memberId != boardDTO.memberId || !confirmDeleteBoard}>
+              <button
+                onClick={cancelDeleteBoard}
+                className="btn btn-xs btn-ghost mr-1"
+              >
+                {t('Common.Cancel')}
+              </button>
+              {isError ? (
+                <div className="ml-2.5 mr-3">
+                  <MaterialSymbolError size={19} />
+                </div>
+              ) : isSuccess ? (
+                <div className="ml-2.5 mr-3">
+                  <MaterialSymbolSuccess size={19} />
+                </div>
+              ) : (
+                <button
+                  onClick={reallyDeleteBoard}
+                  className="btn btn-xs btn-accent"
+                >
+                  {t('Common.Delete')}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+        <ReplyList
+          panelId={panelId}
+          memberId={memberId}
+          boardId={boardDTO.boardId}
+          replyDTOList={replyDTOList}
+          loadBoard={loadBoard}
+          editorRef={editorRef}
+          editorReadOnlyRef={editorReadOnlyRef}
+        />
+      </div>
     </div>
   );
 };

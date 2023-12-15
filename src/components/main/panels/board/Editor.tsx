@@ -1,23 +1,29 @@
 import React, {FC} from 'react';
-import {WysiwygEditor} from '@remirror/react-editors/wysiwyg';
-import {RemirrorJSON} from 'remirror';
+import {RemirrorContentType, RemirrorJSON} from 'remirror';
 import {OnChangeJSON} from '@remirror/react';
 import {useTranslation} from 'react-i18next';
+import MyWysiwygEditor from './remirror/MyWysiwygEditor';
+import {EditorRef} from '../BoardPage';
 
 type EditorProps = {
   onChange: (json: RemirrorJSON) => void;
-  initialContent?: RemirrorJSON;
+  initialContent?: RemirrorContentType | undefined;
+  editorRef: React.MutableRefObject<EditorRef | null>;
 };
 
-const Editor: FC<EditorProps> = ({onChange, initialContent}) => {
+const Editor: FC<EditorProps> = ({onChange, initialContent, editorRef}) => {
   const {t} = useTranslation();
   const placeholder = t('Editor.placeholder') as string;
 
   return (
-    <div className="mb-2">
-      <WysiwygEditor placeholder={placeholder} initialContent={initialContent}>
+    <div className="mr-1">
+      <MyWysiwygEditor
+        placeholder={placeholder}
+        initialContent={initialContent}
+        editorRef={editorRef}
+      >
         <OnChangeJSON onChange={onChange} />
-      </WysiwygEditor>
+      </MyWysiwygEditor>
     </div>
   );
 };

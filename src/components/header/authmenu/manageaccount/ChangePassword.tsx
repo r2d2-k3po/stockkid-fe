@@ -164,8 +164,8 @@ const ChangePassword: FC<ChangePasswordProps> = ({
   } else {
     return (
       <>
-        {isSuccess && <MaterialSymbolSuccess />}
-        {isError && <MaterialSymbolError />}
+        {isSuccess && <MaterialSymbolSuccess size={36} />}
+        {isError && <MaterialSymbolError size={36} />}
       </>
     );
   }

@@ -54,15 +54,15 @@ export interface ScreenCompositionSaveRequest {
 }
 
 export interface BoardSaveRequest {
-  boardId: string;
+  boardId: string | null;
   boardCategory: string;
   nickname: string;
   title: string;
   preview: string;
   content: string;
-  tag1: string;
-  tag2: string;
-  tag3: string;
+  tag1: string | null;
+  tag2: string | null;
+  tag3: string | null;
 }
 
 export interface ReplySaveRequest {
@@ -73,9 +73,19 @@ export interface ReplySaveRequest {
   content: string;
 }
 
+export type BoardPageSettingType = Record<
+  'page' | 'size' | 'boardCategory' | 'sortBy',
+  string
+>;
+
+export type SearchPageSettingType = Record<
+  'page' | 'size' | 'boardCategory' | 'sortBy' | 'tag',
+  string
+>;
+
 export interface LikeRequest {
   id: string;
-  number: string;
+  number: number;
 }
 
 const baseQuery = fetchBaseQuery({
@@ -127,7 +137,7 @@ const baseQueryWithRefresh: BaseQueryFn<
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithRefresh,
-  tagTypes: ['ScreenTitles', 'BoardPage'],
+  tagTypes: ['ScreenTitles'],
   endpoints: (builder) => ({
     signup: builder.mutation<ResponseEntity, SignupRequest>({
       query: (signupRequest) => ({
@@ -243,24 +253,21 @@ export const api = createApi({
         url: 'access/board/register',
         method: 'POST',
         body: boardSaveRequest
-      }),
-      invalidatesTags: ['BoardPage']
+      })
     }),
     modifyBoard: builder.mutation<ResponseEntity, BoardSaveRequest>({
       query: (boardSaveRequest) => ({
         url: 'access/board/modify',
         method: 'PUT',
         body: boardSaveRequest
-      }),
-      invalidatesTags: ['BoardPage']
+      })
     }),
     registerReply: builder.mutation<ResponseEntity, ReplySaveRequest>({
       query: (replySaveRequest) => ({
         url: 'access/reply/register',
         method: 'POST',
         body: replySaveRequest
-      }),
-      invalidatesTags: ['BoardPage']
+      })
     }),
     modifyReply: builder.mutation<ResponseEntity, ReplySaveRequest>({
       query: (replySaveRequest) => ({
@@ -273,8 +280,7 @@ export const api = createApi({
       query: (boardId) => ({
         url: `access/board/delete/${boardId}`,
         method: 'PATCH'
-      }),
-      invalidatesTags: ['BoardPage']
+      })
     }),
     deleteReply: builder.mutation<ResponseEntity, string>({
       query: (replyId) => ({
@@ -287,8 +293,7 @@ export const api = createApi({
         url: 'access/board/like',
         method: 'PATCH',
         body: likeRequest
-      }),
-      invalidatesTags: ['BoardPage']
+      })
     }),
     likeReply: builder.mutation<ResponseEntity, LikeRequest>({
       query: (likeRequest) => ({
@@ -297,19 +302,18 @@ export const api = createApi({
         body: likeRequest
       })
     }),
-    readBoardPage: builder.query<ResponseEntity, Record<string, string>>({
+    readBoardPage: builder.query<ResponseEntity, BoardPageSettingType>({
       query: (boardPageSetting) => ({
         url: `permit/board/readPage`,
         params: boardPageSetting
-      }),
-      providesTags: ['BoardPage']
+      })
     }),
     readBoard: builder.query<ResponseEntity, string>({
       query: (boardId) => ({
         url: `permit/board/read/${boardId}`
       })
     }),
-    searchBoardPage: builder.query<ResponseEntity, Record<string, string>>({
+    searchBoardPage: builder.query<ResponseEntity, SearchPageSettingType>({
       query: (searchPageSetting) => ({
         url: `permit/board/searchPage`,
         params: searchPageSetting
@@ -343,7 +347,7 @@ export const {
   useDeleteReplyMutation,
   useLikeBoardMutation,
   useLikeReplyMutation,
-  useReadBoardPageQuery,
+  useLazyReadBoardPageQuery,
   useLazyReadBoardQuery,
   useLazySearchBoardPageQuery
 } = api;

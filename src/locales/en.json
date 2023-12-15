@@ -32,18 +32,18 @@
   },
   "BoardPage": {
     "Category": {
-      "All": "All",
+      "ALL": "All",
       "Category": "Category",
-      "Life": "Life",
-      "Notice": "Notice",
+      "LIFE": "Life",
+      "NOTICE": "Notice",
       "QA": "Q&A",
-      "Stock": "Stock"
+      "STOCK": "Stock"
     },
     "placeholder": {
       "tag": "search tag (2~30)"
     },
     "sortBy": {
-      "boardId": "latest",
+      "id": "latest",
       "likeCount": "most liked",
       "readCount": "most read",
       "replyCount": "most replied"
@@ -76,7 +76,8 @@
   "Common": {
     "Cancel": "Cancel",
     "RefreshError": "Refresh error! Logging out!",
-    "Save": "Save"
+    "Save": "Save",
+    "Delete": "Delete"
   },
   "DeleteAccount": {
     "DeleteAccount": "Delete Account",
