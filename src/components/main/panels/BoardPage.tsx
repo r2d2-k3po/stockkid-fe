@@ -391,6 +391,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       setBoardList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
       totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
     }
+    setCurrentBoardId(null);
     const payload = {
       panelId: panelId,
       panelState: {

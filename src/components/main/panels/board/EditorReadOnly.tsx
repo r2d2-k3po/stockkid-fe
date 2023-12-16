@@ -15,6 +15,7 @@ import {
 import {TableExtension} from '@remirror/extension-react-tables';
 import {wysiwygPreset} from 'remirror/extensions';
 import {EditorReadOnlyRef} from '../BoardPage';
+import 'remirror/styles/all.css';
 
 const ImperativeHandleReadOnly = forwardRef(function ImperativeHandle(
   _: unknown,

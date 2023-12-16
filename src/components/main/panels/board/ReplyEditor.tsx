@@ -64,20 +64,6 @@ const ReplyEditor: FC<ReplyEditorProps> = ({panelId, editorRef, loadBoard}) => {
     [dispatch, panelId]
   );
 
-  const handleChangeCategory = useCallback(
-    (e: ChangeEvent<HTMLSelectElement>) => {
-      e.stopPropagation();
-      const payload = {
-        panelId: panelId,
-        panelState: {
-          boardCategory: e.target.value as 'STOCK' | 'LIFE' | 'QA' | 'NOTICE'
-        }
-      };
-      dispatch(updatePanelState(payload));
-    },
-    [dispatch, panelId]
-  );
-
   const handleEditorChange = useCallback(
     (json: RemirrorJSON) => {
       const payload = {
@@ -239,13 +225,13 @@ const ReplyEditor: FC<ReplyEditorProps> = ({panelId, editorRef, loadBoard}) => {
           )}
         </div>
       </div>
-      <div className="my-2 ml-3 mr-2 absolute left-0 right-0 top-56 bottom-0 overflow-y-auto">
-        <Editor
-          onChange={handleEditorChange}
-          initialContent={boardPageState.content}
-          editorRef={editorRef}
-        />
-      </div>
+      {/*<div className="my-2 ml-3 mr-2 absolute left-0 right-0 top-56 bottom-0 overflow-y-auto">*/}
+      {/*  <Editor*/}
+      {/*    onChange={handleEditorChange}*/}
+      {/*    initialContent={boardPageState.content}*/}
+      {/*    editorRef={editorRef}*/}
+      {/*  />*/}
+      {/*</div>*/}
     </div>
   );
 };

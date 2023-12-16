@@ -122,7 +122,7 @@ const Board: FC<BoardProps> = ({
           title: boardDTO.title,
           boardCategory: boardDTO.boardCategory,
           preview: boardDTO.preview,
-          content: boardDTO.content,
+          content: JSON.parse(boardDTO.content as string),
           tag1: boardDTO.tag1,
           tag2: boardDTO.tag2,
           tag3: boardDTO.tag3

@@ -42,13 +42,17 @@ const ImperativeHandle = forwardRef(function ImperativeHandle(
   return <></>;
 });
 
-type WysiwygEditorProps = Partial<ReactEditorProps>;
-
-type MyWysiwygEditorProps = WysiwygEditorProps & {
+export interface WysiwygEditorProps extends Partial<ReactEditorProps> {
   editorRef: React.MutableRefObject<EditorRef | null>;
-};
+}
 
-const MyWysiwygEditor: FC<PropsWithChildren<MyWysiwygEditorProps>> = ({
+// type WysiwygEditorProps = Partial<ReactEditorProps>;
+//
+// interface MyWysiwygEditorProps extends Partial<ReactEditorProps> {
+//   editorRef: React.MutableRefObject<EditorRef | null>;
+// }
+
+const MyWysiwygEditor: FC<PropsWithChildren<WysiwygEditorProps>> = ({
   placeholder,
   stringHandler,
   children,
