@@ -79,7 +79,7 @@ const Board: FC<BoardProps> = ({
   );
 
   const onClickToggleDetail = useCallback(
-    async (e: MouseEvent<HTMLButtonElement>) => {
+    async (e: MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
       e.stopPropagation();
       try {
         if (mode == 'preview') {
@@ -205,12 +205,12 @@ const Board: FC<BoardProps> = ({
           >
             {boardDTO?.nickname}
           </button>
-          <button
+          <div
             onClick={onClickToggleDetail}
             className="text-md text-info ml-16 hover:text-accent"
           >
             {boardDTO?.title}
-          </button>
+          </div>
         </div>
         <div className="flex justify-end mb-2">
           <i className="ri-time-line ri-1x"></i>
@@ -303,27 +303,35 @@ const Board: FC<BoardProps> = ({
           )}
         </div>
       </div>
-      <button
-        onClick={onClickToggleDetail}
-        className="mb-2 line-clamp-1 text-sm text-info hover:text-accent"
-      >
-        {mode == 'preview' ? (
-          boardDTO?.preview
-        ) : (
-          <EditorReadOnly
-            initialContent={JSON.parse(boardDTO?.content as string)}
-            editorReadOnlyRef={editorReadOnlyRef}
-          />
-        )}
-      </button>
+      {mode == 'preview' ? (
+        <div
+          onClick={onClickToggleDetail}
+          className="mb-2 line-clamp-1 text-sm text-info hover:text-accent"
+        >
+          {boardDTO?.preview}
+        </div>
+      ) : (
+        <EditorReadOnly
+          initialContent={JSON.parse(boardDTO?.content as string)}
+          editorReadOnlyRef={editorReadOnlyRef}
+        />
+      )}
       <div hidden={mode == 'preview'}>
-        <div className="flex justify-between mb-1">
+        <div className="flex justify-between my-1">
           <button
             disabled={memberId == null}
             className="btn btn-xs btn-circle btn-outline btn-warning m-1"
           >
             <i className="ri-reply-line ri-1x"></i>
           </button>
+          <div className="justify-center">
+            <button
+              onClick={onClickToggleDetail}
+              className="btn btn-xs btn-circle btn-outline btn-info hover:btn-accent m-1"
+            >
+              <i className="ri-skip-up-line ri-1x"></i>
+            </button>
+          </div>
           <div className="justify-end">
             <div hidden={memberId != boardDTO.memberId || confirmDeleteBoard}>
               <button

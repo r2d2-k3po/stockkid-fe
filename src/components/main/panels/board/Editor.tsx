@@ -67,7 +67,7 @@ const Editor: FC<EditorProps> = ({onChange, initialContent, editorRef}) => {
   });
 
   return (
-    <div className="remirror-theme mr-1">
+    <div className="remirror-theme">
       <Remirror manager={manager} initialContent={state}>
         <ImperativeHandle ref={editorRef} />
         <TopToolbar />

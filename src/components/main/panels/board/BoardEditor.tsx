@@ -10,7 +10,7 @@ import Editor from './Editor';
 import {RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {BoardPageState, EditorRef} from '../BoardPage';
+import {BoardPageState, EditorRef, IdDTO} from '../BoardPage';
 import {
   BoardSaveRequest,
   useModifyBoardMutation,
@@ -144,8 +144,31 @@ const BoardEditor: FC<BoardEditorProps> = ({
           tag3: boardPageState.tag3 || null
         };
         if (boardPageState.boardId == null) {
-          await requestBoardRegister(boardSaveRequest);
+          const data = await requestBoardRegister(boardSaveRequest).unwrap();
+          const boardId = (data?.apiObj as IdDTO)?.id;
+          if (
+            boardPageState.currentPage != 1 ||
+            (boardPageState.boardPageCategory != 'ALL' &&
+              boardPageState.boardPageCategory !=
+                boardPageState.boardCategory) ||
+            boardPageState.sortBy != 'id'
+          ) {
+            const payload = {
+              panelId: panelId,
+              panelState: {
+                currentPage: 1,
+                sortBy: 'id',
+                boardPageCategory:
+                  boardPageState.boardPageCategory ==
+                  boardPageState.boardCategory
+                    ? boardPageState.boardCategory
+                    : 'ALL'
+              }
+            };
+            dispatch(updatePanelState(payload));
+          }
           await loadBoardPage();
+          await loadBoard(boardId, false);
         } else {
           await requestBoardModify(boardSaveRequest);
           await loadBoard(boardPageState.boardId, true);
@@ -155,6 +178,9 @@ const BoardEditor: FC<BoardEditorProps> = ({
       }
     },
     [
+      boardPageState.boardPageCategory,
+      boardPageState.sortBy,
+      boardPageState.currentPage,
       boardPageState.boardId,
       boardPageState.nickname,
       boardPageState.boardCategory,
@@ -167,7 +193,9 @@ const BoardEditor: FC<BoardEditorProps> = ({
       requestBoardRegister,
       requestBoardModify,
       loadBoardPage,
-      loadBoard
+      loadBoard,
+      panelId,
+      dispatch
     ]
   );
 
@@ -294,7 +322,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
           />
         </div>
       </div>
-      <div className="my-2 ml-3 mr-2 absolute left-0 right-0 top-36 bottom-0 overflow-y-auto">
+      <div className="my-2 mx-3 absolute left-0 right-0 top-36 bottom-0 overflow-y-auto">
         <Editor
           onChange={handleEditorChange}
           initialContent={boardPageState.content}
