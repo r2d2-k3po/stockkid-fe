@@ -43,8 +43,10 @@ const Board: FC<BoardProps> = ({
 
   const [likeUpdated, setLikeUpdated] = useState<boolean>(false);
 
-  const [requestBoardDelete, {isSuccess, isError, reset}] =
-    useDeleteBoardMutation();
+  const [
+    requestBoardDelete,
+    {isSuccess: isSuccessDelete, isError: isErrorDelete, reset: resetDelete}
+  ] = useDeleteBoardMutation();
 
   const [requestBoardLike, {isSuccess: isSuccessLike, isError: isErrorLike}] =
     useLikeBoardMutation();
@@ -110,7 +112,7 @@ const Board: FC<BoardProps> = ({
     [dispatch, panelId]
   );
 
-  const enableEditorToModify = useCallback(
+  const enableBoardEditorToModify = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       const payload = {
@@ -171,14 +173,14 @@ const Board: FC<BoardProps> = ({
   );
 
   useEffect(() => {
-    if (isSuccess || isError) {
+    if (isSuccessDelete || isErrorDelete) {
       const id = setTimeout(() => {
         setConfirmDeleteBoard(false);
-        reset();
+        resetDelete();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccess, isError, reset]);
+  }, [isSuccessDelete, isErrorDelete, resetDelete]);
 
   useEffect(() => {
     if (isSuccessLike) {
@@ -326,7 +328,7 @@ const Board: FC<BoardProps> = ({
             <div hidden={memberId != boardDTO.memberId || confirmDeleteBoard}>
               <button
                 className="btn btn-xs btn-circle btn-outline btn-accent m-1"
-                onClick={enableEditorToModify}
+                onClick={enableBoardEditorToModify}
               >
                 <i className="ri-edit-2-line ri-1x"></i>
               </button>
@@ -344,11 +346,11 @@ const Board: FC<BoardProps> = ({
               >
                 {t('Common.Cancel')}
               </button>
-              {isError ? (
+              {isErrorDelete ? (
                 <div className="ml-2.5 mr-3">
                   <MaterialSymbolError size={19} />
                 </div>
-              ) : isSuccess ? (
+              ) : isSuccessDelete ? (
                 <div className="ml-2.5 mr-3">
                   <MaterialSymbolSuccess size={19} />
                 </div>
@@ -363,15 +365,15 @@ const Board: FC<BoardProps> = ({
             </div>
           </div>
         </div>
-        <ReplyList
-          panelId={panelId}
-          memberId={memberId}
-          boardId={boardDTO.boardId}
-          replyDTOList={replyDTOList}
-          loadBoard={loadBoard}
-          editorRef={editorRef}
-          editorReadOnlyRef={editorReadOnlyRef}
-        />
+        {/*<ReplyList*/}
+        {/*  panelId={panelId}*/}
+        {/*  memberId={memberId}*/}
+        {/*  boardId={boardDTO.boardId}*/}
+        {/*  replyDTOList={replyDTOList}*/}
+        {/*  loadBoard={loadBoard}*/}
+        {/*  editorRef={editorRef}*/}
+        {/*  editorReadOnlyRef={editorReadOnlyRef}*/}
+        {/*/>*/}
       </div>
     </div>
   );

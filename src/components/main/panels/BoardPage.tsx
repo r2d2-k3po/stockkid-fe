@@ -284,7 +284,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     [dispatch, panelId, boardPageState.totalPages]
   );
 
-  const handleChangePage = useCallback(
+  const handleChangeTargetPage = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const page = parseInt(e.target.value);
       if (page < 1) {
@@ -322,7 +322,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     [dispatch, panelId, boardPageState.targetPage]
   );
 
-  const enableEditor = useCallback(
+  const enableBoardEditor = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       const payload = {
@@ -560,7 +560,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             value={boardPageState.targetPage}
             min={1}
             max={boardPageState.totalPages}
-            onChange={handleChangePage}
+            onChange={handleChangeTargetPage}
             className="w-20 max-w-xs input input-bordered input-secondary input-xs text-accent-content mt-1"
           />
           <button
@@ -573,7 +573,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-sm btn-accent btn-outline btn-circle ml-3"
             disabled={!loggedIn || boardPageState.showBoardEditor}
-            onClick={enableEditor}
+            onClick={enableBoardEditor}
           >
             <i className="ri-pencil-line ri-lg"></i>
           </button>

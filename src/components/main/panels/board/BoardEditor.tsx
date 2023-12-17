@@ -10,7 +10,7 @@ import Editor from './Editor';
 import {RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {BoardPageState, EditorRef, IdDTO} from '../BoardPage';
+import {BoardPageState, EditorRef} from '../BoardPage';
 import {
   BoardSaveRequest,
   useModifyBoardMutation,
@@ -144,10 +144,8 @@ const BoardEditor: FC<BoardEditorProps> = ({
           tag3: boardPageState.tag3 || null
         };
         if (boardPageState.boardId == null) {
-          const data = await requestBoardRegister(boardSaveRequest).unwrap();
-          const boardId = (data?.apiObj as IdDTO)?.id;
+          await requestBoardRegister(boardSaveRequest);
           await loadBoardPage();
-          await loadBoard(boardId, false);
         } else {
           await requestBoardModify(boardSaveRequest);
           await loadBoard(boardPageState.boardId, true);

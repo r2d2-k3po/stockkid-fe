@@ -1,5 +1,5 @@
-import type { CreateEditorStateProps } from 'remirror';
-import type { RemirrorProps, UseThemeProps } from '@remirror/react';
+import type {CreateEditorStateProps} from 'remirror';
+import type {RemirrorProps, UseThemeProps} from '@remirror/react';
 
 export interface ReactEditorProps
   extends Pick<CreateEditorStateProps, 'stringHandler'>,

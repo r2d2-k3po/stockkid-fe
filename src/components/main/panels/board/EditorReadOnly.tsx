@@ -48,8 +48,7 @@ const EditorReadOnly: FC<EditorReadOnlyProps> = ({
 
   const {manager, state} = useRemirror({
     extensions,
-    content: initialContent,
-    selection: 'start'
+    content: initialContent
   });
 
   return (
