@@ -20,7 +20,6 @@ import 'remirror/styles/all.css';
 
 import {BubbleMenu} from './remirror/BubbleMenu';
 import {TopToolbar} from './remirror/TopToolbar';
-import {ReactEditorProps} from './remirror/types';
 import {RemirrorContentType, RemirrorJSON} from 'remirror';
 import {EditorRef} from '../BoardPage';
 import {useTranslation} from 'react-i18next';
@@ -42,24 +41,35 @@ const ImperativeHandle = forwardRef(function ImperativeHandle(
   return <></>;
 });
 
-interface EditorProps extends Partial<ReactEditorProps> {
-  onChange: (json: RemirrorJSON) => void;
+type OnChangeType = (json: RemirrorJSON) => void;
+
+type EditorProps = {
+  onChange?: OnChangeType;
   initialContent: RemirrorContentType | undefined;
   editorRef: React.MutableRefObject<EditorRef | null>;
-}
+  editable: boolean;
+};
 
-const Editor: FC<EditorProps> = ({onChange, initialContent, editorRef}) => {
+const Editor: FC<EditorProps> = ({
+  onChange,
+  initialContent,
+  editorRef,
+  editable
+}) => {
   const {t} = useTranslation();
-  const placeholder = t('Editor.placeholder') as string;
 
-  const extensions = useCallback(
-    () => [
-      new PlaceholderExtension({placeholder}),
-      new TableExtension(),
-      ...wysiwygPreset()
-    ],
-    [placeholder]
-  );
+  const extensions = useCallback(() => {
+    if (editable) {
+      const placeholder = t('Editor.placeholder') as string;
+      return [
+        new PlaceholderExtension({placeholder}),
+        new TableExtension(),
+        ...wysiwygPreset()
+      ];
+    } else {
+      return [new TableExtension(), ...wysiwygPreset()];
+    }
+  }, [editable, t]);
 
   const {manager, state} = useRemirror({
     extensions,
@@ -68,13 +78,17 @@ const Editor: FC<EditorProps> = ({onChange, initialContent, editorRef}) => {
 
   return (
     <div className="remirror-theme">
-      <Remirror manager={manager} initialContent={state}>
+      <Remirror manager={manager} initialContent={state} editable={editable}>
         <ImperativeHandle ref={editorRef} />
-        <TopToolbar />
+        {editable && <TopToolbar />}
         <EditorComponent />
-        <BubbleMenu />
-        <TableComponents />
-        <OnChangeJSON onChange={onChange} />
+        {editable && (
+          <>
+            <BubbleMenu />
+            <TableComponents />
+            <OnChangeJSON onChange={onChange as OnChangeType} />
+          </>
+        )}
       </Remirror>
     </div>
   );

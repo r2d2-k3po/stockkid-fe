@@ -1,10 +1,16 @@
-import React, {FC, MouseEvent, useCallback, useEffect, useState} from 'react';
+import React, {
+  FC,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import {useTranslation} from 'react-i18next';
-import {BoardDTO, EditorReadOnlyRef, EditorRef, ReplyDTO} from '../BoardPage';
+import {BoardDTO, EditorRef, ReplyDTO} from '../BoardPage';
 import {DateTime} from 'luxon';
-import EditorReadOnly from './EditorReadOnly';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {useAppDispatch} from '../../../../app/hooks';
+import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {
   useDeleteBoardMutation,
   useLikeBoardMutation
@@ -12,6 +18,9 @@ import {
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 import ReplyList from './ReplyList';
+import Editor from './Editor';
+import ReplyEditor from './ReplyEditor';
+import {BoardPageState} from '../../../../app/constants/panelInfo';
 
 type BoardProps = {
   memberId: string | null;
@@ -21,7 +30,7 @@ type BoardProps = {
   replyDTOList: ReplyDTO[] | null | undefined;
   loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
   editorRef: React.MutableRefObject<EditorRef | null>;
-  editorReadOnlyRef: React.MutableRefObject<EditorReadOnlyRef | null>;
+  editorReadOnlyRef: React.MutableRefObject<EditorRef | null>;
 };
 
 const Board: FC<BoardProps> = ({
@@ -42,6 +51,12 @@ const Board: FC<BoardProps> = ({
   const [like, setLike] = useState<boolean | null>(null);
 
   const [likeUpdated, setLikeUpdated] = useState<boolean>(false);
+
+  const replyEditorRef = useRef<EditorRef | null>(null);
+
+  const boardPageState = useAppSelector((state) => state.panels).entities[
+    panelId
+  ]?.panelState as BoardPageState;
 
   const [
     requestBoardDelete,
@@ -170,6 +185,18 @@ const Board: FC<BoardProps> = ({
       }
     },
     [boardDTO.boardId, requestBoardDelete, loadBoard]
+  );
+
+  const enableReplyEditor = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      const payload = {
+        panelId: panelId,
+        panelState: {showReplyEditor: true}
+      };
+      dispatch(updatePanelState(payload));
+    },
+    [dispatch, panelId]
   );
 
   useEffect(() => {
@@ -311,15 +338,17 @@ const Board: FC<BoardProps> = ({
           {boardDTO?.preview}
         </div>
       ) : (
-        <EditorReadOnly
+        <Editor
           initialContent={JSON.parse(boardDTO?.content as string)}
-          editorReadOnlyRef={editorReadOnlyRef}
+          editorRef={editorReadOnlyRef}
+          editable={false}
         />
       )}
       <div hidden={mode == 'preview'}>
         <div className="flex justify-between my-1">
           <button
-            disabled={memberId == null}
+            disabled={memberId == null || boardPageState.showReplyEditor}
+            onClick={enableReplyEditor}
             className="btn btn-xs btn-circle btn-outline btn-warning m-1"
           >
             <i className="ri-reply-line ri-1x"></i>
@@ -373,15 +402,22 @@ const Board: FC<BoardProps> = ({
             </div>
           </div>
         </div>
-        {/*<ReplyList*/}
-        {/*  panelId={panelId}*/}
-        {/*  memberId={memberId}*/}
-        {/*  boardId={boardDTO.boardId}*/}
-        {/*  replyDTOList={replyDTOList}*/}
-        {/*  loadBoard={loadBoard}*/}
-        {/*  editorRef={editorRef}*/}
-        {/*  editorReadOnlyRef={editorReadOnlyRef}*/}
-        {/*/>*/}
+        {/*<div className={boardPageState.showReplyEditor ? '' : 'hidden'}>*/}
+        {/*  <ReplyEditor*/}
+        {/*    panelId={panelId}*/}
+        {/*    boardId={boardDTO.boardId}*/}
+        {/*    replyEditorRef={replyEditorRef}*/}
+        {/*    loadBoard={loadBoard}*/}
+        {/*  />*/}
+        {/*</div>*/}
+        <ReplyList
+          panelId={panelId}
+          memberId={memberId}
+          boardId={boardDTO.boardId}
+          replyDTOList={replyDTOList}
+          loadBoard={loadBoard}
+          replyEditorRef={replyEditorRef}
+        />
       </div>
     </div>
   );

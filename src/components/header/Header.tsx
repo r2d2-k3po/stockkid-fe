@@ -1,33 +1,21 @@
-import React, {FC, useEffect} from 'react';
+import React, {FC} from 'react';
 import LanguageSelect from './LanguageSelect';
 import LightDarkSwap from './LightDarkSwap';
 import Indicator from './Indicator';
 import FixedPin from '../common/FixedPin';
-import {useMeasure} from 'react-use';
 import AuthMenu from './authmenu/AuthMenu';
 import {GoogleOAuthProvider} from '@react-oauth/google';
 
 export type HeaderProps = {
   fixedHeader: boolean;
   setFixedHeader: React.Dispatch<React.SetStateAction<boolean>>;
-  setHeaderHeight: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const Header: FC<HeaderProps> = ({
-  fixedHeader,
-  setFixedHeader,
-  setHeaderHeight
-}) => {
-  const [measureRef, {height}] = useMeasure<HTMLDivElement>();
-
-  useEffect(() => {
-    setHeaderHeight(height);
-  }, [height, setHeaderHeight]);
-
+const Header: FC<HeaderProps> = ({fixedHeader, setFixedHeader}) => {
   const headerClassName = fixedHeader ? 'fixed top-0 left-0 right-0' : '';
 
   return (
-    <div ref={measureRef} className={headerClassName}>
+    <div className={headerClassName}>
       <div className="navbar bg-neutral text-neutral-content">
         <div className="navbar-start">
           <GoogleOAuthProvider

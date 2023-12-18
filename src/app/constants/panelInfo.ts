@@ -2,6 +2,7 @@ import {FC} from 'react';
 import Clock from '../../components/main/panels/Clock';
 import ClockMini from '../../components/main/panels/ClockMini';
 import BoardPage from '../../components/main/panels/BoardPage';
+import {RemirrorContentType} from 'remirror';
 
 type CommonPanelProps = {
   panelId: string;
@@ -50,6 +51,39 @@ export const panelState: PanelState = {
     tag2: undefined,
     tag3: undefined,
     preview: undefined,
-    content: undefined
+    content: undefined,
+    showReplyEditor: false,
+    replyId: null,
+    parentId: null,
+    currentBoardId: null
   }
+};
+
+export type ClockState = {
+  timeZone: string;
+};
+
+export type BoardPageState = {
+  boardPageCategory: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE';
+  tag: string;
+  searchDisabled: boolean;
+  searchMode: boolean;
+  sortBy: 'id' | 'likeCount' | 'replyCount' | 'readCount';
+  currentPage: number;
+  targetPage: number;
+  totalPages: number;
+  showBoardEditor: boolean;
+  boardId: string | null;
+  boardCategory: 'STOCK' | 'LIFE' | 'QA' | 'NOTICE' | '0';
+  nickname: string;
+  title: string;
+  tag1: string | undefined;
+  tag2: string | undefined;
+  tag3: string | undefined;
+  preview: string | undefined;
+  content: RemirrorContentType | undefined;
+  showReplyEditor: boolean;
+  replyId: string | null;
+  parentId: string | null;
+  currentBoardId: string | null;
 };

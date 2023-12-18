@@ -66,9 +66,9 @@ export interface BoardSaveRequest {
 }
 
 export interface ReplySaveRequest {
-  replyId: string;
+  replyId: string | null;
   boardId: string;
-  parentId: string;
+  parentId: string | null;
   nickname: string;
   content: string;
 }

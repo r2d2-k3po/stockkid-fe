@@ -17,13 +17,9 @@ export default function App() {
     (localStorage.getItem('fixedHeader') || 'true') === 'true'
   );
 
-  const [headerHeight, setHeaderHeight] = useState<number>(64);
-
   const [fixedFooter, setFixedFooter] = useState<boolean>(
     (localStorage.getItem('fixedFooter') || 'true') === 'true'
   );
-
-  const [footerHeight, setFooterHeight] = useState<number>(64);
 
   const classNameFixedHeader = `fixed top-[64px] left-0 right-0 bottom-0 overflow-auto`;
 
@@ -42,18 +38,10 @@ export default function App() {
   if (fixedHeader && !fixedFooter) {
     return (
       <div className="relative">
-        <Header
-          fixedHeader={fixedHeader}
-          setFixedHeader={setFixedHeader}
-          setHeaderHeight={setHeaderHeight}
-        />
+        <Header fixedHeader={fixedHeader} setFixedHeader={setFixedHeader} />
         <div className={classNameFixedHeader}>
           <Main mainClassName="" />
-          <Footer
-            fixedFooter={fixedFooter}
-            setFixedFooter={setFixedFooter}
-            setFooterHeight={setFooterHeight}
-          />
+          <Footer fixedFooter={fixedFooter} setFixedFooter={setFixedFooter} />
         </div>
       </div>
     );
@@ -61,18 +49,10 @@ export default function App() {
     return (
       <div className="relative">
         <div className={classNameFixedFooter}>
-          <Header
-            fixedHeader={fixedHeader}
-            setFixedHeader={setFixedHeader}
-            setHeaderHeight={setHeaderHeight}
-          />
+          <Header fixedHeader={fixedHeader} setFixedHeader={setFixedHeader} />
           <Main mainClassName="" />
         </div>
-        <Footer
-          fixedFooter={fixedFooter}
-          setFixedFooter={setFixedFooter}
-          setFooterHeight={setFooterHeight}
-        />
+        <Footer fixedFooter={fixedFooter} setFixedFooter={setFixedFooter} />
       </div>
     );
   } else {
@@ -82,17 +62,9 @@ export default function App() {
 
     return (
       <div className={appClassName}>
-        <Header
-          fixedHeader={fixedHeader}
-          setFixedHeader={setFixedHeader}
-          setHeaderHeight={setHeaderHeight}
-        />
+        <Header fixedHeader={fixedHeader} setFixedHeader={setFixedHeader} />
         <Main mainClassName={mainClassName} />
-        <Footer
-          fixedFooter={fixedFooter}
-          setFixedFooter={setFixedFooter}
-          setFooterHeight={setFooterHeight}
-        />
+        <Footer fixedFooter={fixedFooter} setFixedFooter={setFixedFooter} />
       </div>
     );
   }

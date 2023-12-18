@@ -10,7 +10,7 @@ import Editor from './Editor';
 import {RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {BoardPageState, EditorRef, IdDTO} from '../BoardPage';
+import {EditorRef, IdDTO} from '../BoardPage';
 import {
   BoardSaveRequest,
   useModifyBoardMutation,
@@ -18,6 +18,7 @@ import {
 } from '../../../../app/api';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
+import {BoardPageState} from '../../../../app/constants/panelInfo';
 
 type BoardEditorProps = {
   memberRole: string | null;
@@ -100,7 +101,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
     [dispatch, panelId, editorRef]
   );
 
-  const resetBoardState = useCallback(() => {
+  const resetBoardPageState = useCallback(() => {
     editorRef.current?.clearContent();
     const payload = {
       panelId: panelId,
@@ -122,9 +123,9 @@ const BoardEditor: FC<BoardEditorProps> = ({
   const onClickCancel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      resetBoardState();
+      resetBoardPageState();
     },
-    [resetBoardState]
+    [resetBoardPageState]
   );
 
   const onClickSave = useCallback(
@@ -203,25 +204,25 @@ const BoardEditor: FC<BoardEditorProps> = ({
     if (isSuccessRegister || isErrorRegister) {
       const id = setTimeout(() => {
         if (isSuccessRegister) {
-          resetBoardState();
+          resetBoardPageState();
         }
         resetRegister();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessRegister, isErrorRegister, resetBoardState, resetRegister]);
+  }, [isSuccessRegister, isErrorRegister, resetBoardPageState, resetRegister]);
 
   useEffect(() => {
     if (isSuccessModify || isErrorModify) {
       const id = setTimeout(() => {
         if (isSuccessModify) {
-          resetBoardState();
+          resetBoardPageState();
         }
         resetModify();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessModify, isErrorModify, resetBoardState, resetModify]);
+  }, [isSuccessModify, isErrorModify, resetBoardPageState, resetModify]);
 
   return (
     <div className="my-2 mx-3">
@@ -327,6 +328,7 @@ const BoardEditor: FC<BoardEditorProps> = ({
           onChange={handleEditorChange}
           initialContent={boardPageState.content}
           editorRef={editorRef}
+          editable={true}
         />
       </div>
     </div>

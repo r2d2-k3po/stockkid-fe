@@ -3,10 +3,7 @@ import {useTranslation} from 'react-i18next';
 import {DateTime} from 'luxon';
 import {useAppDispatch, useAppSelector} from '../../../app/hooks';
 import {updatePanelState} from '../../../app/slices/panelsSlice';
-
-type ClockState = {
-  timeZone: string;
-};
+import {ClockState} from '../../../app/constants/panelInfo';
 
 type CommonPanelProps = {
   panelId: string;

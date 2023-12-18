@@ -21,27 +21,7 @@ import {
   useLazySearchBoardPageQuery
 } from '../../../app/api';
 import BoardEditor from './board/BoardEditor';
-
-export type BoardPageState = {
-  boardPageCategory: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE';
-  tag: string;
-  searchDisabled: boolean;
-  searchMode: boolean;
-  sortBy: 'id' | 'likeCount' | 'replyCount' | 'readCount';
-  currentPage: number;
-  targetPage: number;
-  totalPages: number;
-  showBoardEditor: boolean;
-  boardId: string | null;
-  boardCategory: 'STOCK' | 'LIFE' | 'QA' | 'NOTICE' | '0';
-  nickname: string;
-  title: string;
-  tag1: string | undefined;
-  tag2: string | undefined;
-  tag3: string | undefined;
-  preview: string | undefined;
-  content: RemirrorContentType | undefined;
-};
+import {BoardPageState} from '../../../app/constants/panelInfo';
 
 export interface BoardDTO {
   boardId: string;
@@ -96,10 +76,6 @@ export interface EditorRef {
   getText: ({lineBreakDivider}: GetTextHelperOptions) => string;
 }
 
-export interface EditorReadOnlyRef {
-  setContent: (content: RemirrorContentType) => void;
-}
-
 type CommonPanelProps = {
   panelId: string;
 };
@@ -128,7 +104,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const editorRef = useRef<EditorRef | null>(null);
 
-  const editorReadOnlyRef = useRef<EditorReadOnlyRef | null>(null);
+  const editorReadOnlyRef = useRef<EditorRef | null>(null);
 
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
@@ -154,7 +130,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const [currentBoardId, setCurrentBoardId] = useState<
     string | null | undefined
-  >(undefined);
+  >(boardPageState.currentBoardId);
 
   const handleClickCategoryButton = useCallback(
     (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
@@ -336,9 +312,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const loadBoard = useCallback(
     async (boardId: string | null, setContent: boolean) => {
-      if (boardId == null) {
-        setCurrentBoardId(null);
-      } else {
+      if (boardId != null) {
         const dataBoard = await requestBoardRead(boardId as string).unwrap();
         setBoardList((boardList) =>
           boardList?.map((board) => {
@@ -350,7 +324,6 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           })
         );
         setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
-        setCurrentBoardId(boardId);
         if (setContent) {
           editorReadOnlyRef.current?.setContent(
             JSON.parse(
@@ -359,8 +332,16 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           );
         }
       }
+      if (currentBoardId != boardId) {
+        setCurrentBoardId(boardId);
+        const payload = {
+          panelId: panelId,
+          panelState: {currentBoardId: boardId}
+        };
+        dispatch(updatePanelState(payload));
+      }
     },
-    [requestBoardRead]
+    [requestBoardRead, panelId, currentBoardId, dispatch]
   );
 
   const loadBoardPage = useCallback(async () => {
@@ -391,7 +372,6 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       setBoardList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
       totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
     }
-    setCurrentBoardId(null);
     const payload = {
       panelId: panelId,
       panelState: {
@@ -418,6 +398,21 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       console.log(err);
     }
   }, [loadBoardPage]);
+
+  useEffect(() => {
+    if (currentBoardId) {
+      try {
+        const currentBoard = boardList?.find(
+          (board) => board.boardId == currentBoardId
+        );
+        if (currentBoard && currentBoard?.content == null) {
+          loadBoard(currentBoardId, true);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }, [loadBoard, boardList, currentBoardId]);
 
   const boardPagePreview = useMemo(
     () =>
@@ -572,7 +567,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </button>
           <button
             className="btn btn-sm btn-accent btn-outline btn-circle ml-3"
-            disabled={!loggedIn || boardPageState.showBoardEditor}
+            disabled={
+              !loggedIn ||
+              boardPageState.showBoardEditor ||
+              boardPageState.showReplyEditor
+            }
             onClick={enableBoardEditor}
           >
             <i className="ri-pencil-line ri-lg"></i>
