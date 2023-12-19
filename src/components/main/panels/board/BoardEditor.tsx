@@ -26,6 +26,7 @@ type BoardEditorProps = {
   editorRef: React.MutableRefObject<EditorRef | null>;
   loadBoardPage: () => Promise<void>;
   loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
+  resetBoardPageState: () => void;
 };
 
 const BoardEditor: FC<BoardEditorProps> = ({
@@ -33,7 +34,8 @@ const BoardEditor: FC<BoardEditorProps> = ({
   panelId,
   editorRef,
   loadBoardPage,
-  loadBoard
+  loadBoard,
+  resetBoardPageState
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
@@ -100,25 +102,6 @@ const BoardEditor: FC<BoardEditorProps> = ({
     },
     [dispatch, panelId, editorRef]
   );
-
-  const resetBoardPageState = useCallback(() => {
-    editorRef.current?.clearContent();
-    const payload = {
-      panelId: panelId,
-      panelState: {
-        showBoardEditor: false,
-        boardId: null,
-        boardCategory: '0',
-        title: '',
-        tag1: '',
-        tag2: '',
-        tag3: '',
-        preview: null,
-        content: undefined
-      }
-    };
-    dispatch(updatePanelState(payload));
-  }, [dispatch, panelId, editorRef]);
 
   const onClickCancel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {

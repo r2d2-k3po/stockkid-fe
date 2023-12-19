@@ -1,11 +1,4 @@
-import React, {
-  FC,
-  MouseEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react';
+import React, {FC, MouseEvent, useCallback, useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {BoardDTO, EditorRef, ReplyDTO} from '../BoardPage';
 import {DateTime} from 'luxon';
@@ -31,6 +24,8 @@ type BoardProps = {
   loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
   editorRef: React.MutableRefObject<EditorRef | null>;
   editorReadOnlyRef: React.MutableRefObject<EditorRef | null>;
+  replyEditorRef: React.MutableRefObject<EditorRef | null>;
+  resetReplyState: () => void;
 };
 
 const Board: FC<BoardProps> = ({
@@ -41,7 +36,9 @@ const Board: FC<BoardProps> = ({
   replyDTOList,
   loadBoard,
   editorRef,
-  editorReadOnlyRef
+  editorReadOnlyRef,
+  replyEditorRef,
+  resetReplyState
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
@@ -52,11 +49,13 @@ const Board: FC<BoardProps> = ({
 
   const [likeUpdated, setLikeUpdated] = useState<boolean>(false);
 
-  const replyEditorRef = useRef<EditorRef | null>(null);
-
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
   ]?.panelState as BoardPageState;
+
+  const [parentId, setParentId] = useState<string | null | undefined>(
+    boardPageState.parentId
+  );
 
   const [
     requestBoardDelete,
@@ -188,16 +187,26 @@ const Board: FC<BoardProps> = ({
   );
 
   const enableReplyEditor = useCallback(
-    (e: MouseEvent<HTMLButtonElement>) => {
+    (parentId: string | null) => (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {showReplyEditor: true}
+        panelState: {
+          showReplyEditor: true,
+          boardId: boardDTO.boardId,
+          parentId: parentId
+        }
       };
       dispatch(updatePanelState(payload));
     },
-    [dispatch, panelId]
+    [dispatch, panelId, boardDTO.boardId]
   );
+
+  useEffect(() => {
+    if (!memberId) {
+      resetReplyState();
+    }
+  }, [memberId, resetReplyState]);
 
   useEffect(() => {
     if (isSuccessDelete || isErrorDelete) {
@@ -348,7 +357,7 @@ const Board: FC<BoardProps> = ({
         <div className="flex justify-between my-1">
           <button
             disabled={memberId == null || boardPageState.showReplyEditor}
-            onClick={enableReplyEditor}
+            onClick={enableReplyEditor(null)}
             className="btn btn-xs btn-circle btn-outline btn-warning m-1"
           >
             <i className="ri-reply-line ri-1x"></i>
@@ -402,14 +411,22 @@ const Board: FC<BoardProps> = ({
             </div>
           </div>
         </div>
-        {/*<div className={boardPageState.showReplyEditor ? '' : 'hidden'}>*/}
-        {/*  <ReplyEditor*/}
-        {/*    panelId={panelId}*/}
-        {/*    boardId={boardDTO.boardId}*/}
-        {/*    replyEditorRef={replyEditorRef}*/}
-        {/*    loadBoard={loadBoard}*/}
-        {/*  />*/}
-        {/*</div>*/}
+        <div
+          hidden={
+            !(
+              boardPageState.showReplyEditor &&
+              boardDTO.boardId == boardPageState.boardId
+            )
+          }
+        >
+          <ReplyEditor
+            panelId={panelId}
+            boardId={boardDTO.boardId}
+            replyEditorRef={replyEditorRef}
+            loadBoard={loadBoard}
+            resetReplyState={resetReplyState}
+          />
+        </div>
         <ReplyList
           panelId={panelId}
           memberId={memberId}

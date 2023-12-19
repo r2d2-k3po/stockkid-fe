@@ -10,52 +10,61 @@ import Editor from './Editor';
 import {RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {BoardPageState, EditorRef, IdDTO} from '../BoardPage';
+import {EditorRef, IdDTO} from '../BoardPage';
 import {
-  BoardSaveRequest,
-  useModifyBoardMutation,
-  useRegisterBoardMutation
+  ReplySaveRequest,
+  useModifyReplyMutation,
+  useRegisterReplyMutation
 } from '../../../../app/api';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
+import {BoardPageState} from '../../../../app/constants/panelInfo';
 
 type ReplyEditorProps = {
   panelId: string;
-  editorRef: React.MutableRefObject<EditorRef | null>;
+  boardId: string;
+  replyEditorRef: React.MutableRefObject<EditorRef | null>;
   loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
+  resetReplyState: () => void;
 };
 
-const ReplyEditor: FC<ReplyEditorProps> = ({panelId, editorRef, loadBoard}) => {
+const ReplyEditor: FC<ReplyEditorProps> = ({
+  panelId,
+  boardId,
+  replyEditorRef,
+  loadBoard,
+  resetReplyState
+}) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const regexFinal = /^.{2,30}$/;
 
   const [
-    requestBoardRegister,
+    requestReplyRegister,
     {
       isSuccess: isSuccessRegister,
       isError: isErrorRegister,
       reset: resetRegister
     }
-  ] = useRegisterBoardMutation();
+  ] = useRegisterReplyMutation();
 
   const [
-    requestBoardModify,
+    requestReplyModify,
     {isSuccess: isSuccessModify, isError: isErrorModify, reset: resetModify}
-  ] = useModifyBoardMutation();
+  ] = useModifyReplyMutation();
 
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
   ]?.panelState as BoardPageState;
 
-  const handleChangeBoardForm = useCallback(
-    (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChangeNickname = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
       const regex = /^.{0,30}$/;
       if (regex.test(e.target.value)) {
         const payload = {
           panelId: panelId,
           panelState: {
-            [key]: key == 'title' ? e.target.value : e.target.value.trim()
+            nickname: e.target.value.trim()
           }
         };
         dispatch(updatePanelState(payload));
@@ -69,40 +78,21 @@ const ReplyEditor: FC<ReplyEditorProps> = ({panelId, editorRef, loadBoard}) => {
       const payload = {
         panelId: panelId,
         panelState: {
-          preview: editorRef.current?.getText({lineBreakDivider: ' '}),
+          preview: replyEditorRef.current?.getText({lineBreakDivider: ' '}),
           content: json
         }
       };
       dispatch(updatePanelState(payload));
     },
-    [dispatch, panelId, editorRef]
+    [dispatch, panelId, replyEditorRef]
   );
-
-  const resetBoardState = useCallback(() => {
-    editorRef.current?.clearContent();
-    const payload = {
-      panelId: panelId,
-      panelState: {
-        showBoardEditor: false,
-        boardId: null,
-        boardCategory: '0',
-        title: '',
-        tag1: '',
-        tag2: '',
-        tag3: '',
-        preview: null,
-        content: undefined
-      }
-    };
-    dispatch(updatePanelState(payload));
-  }, [dispatch, panelId, editorRef]);
 
   const onClickCancel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      resetBoardState();
+      resetReplyState();
     },
-    [resetBoardState]
+    [resetReplyState]
   );
 
   const onClickSave = useCallback(
@@ -110,41 +100,33 @@ const ReplyEditor: FC<ReplyEditorProps> = ({panelId, editorRef, loadBoard}) => {
       e.stopPropagation();
       try {
         localStorage.setItem('nickname', boardPageState.nickname);
-        const boardSaveRequest: BoardSaveRequest = {
-          boardId: boardPageState.boardId,
-          boardCategory: boardPageState.boardCategory,
+        const replySaveRequest: ReplySaveRequest = {
+          boardId: boardId,
+          replyId: boardPageState.replyId,
+          parentId: boardPageState.parentId,
           nickname: boardPageState.nickname,
-          title: boardPageState.title,
-          preview: boardPageState.preview as string,
-          content: JSON.stringify(boardPageState.content),
-          tag1: boardPageState.tag1 || null,
-          tag2: boardPageState.tag2 || null,
-          tag3: boardPageState.tag3 || null
+          content: JSON.stringify(boardPageState.content)
         };
-        if (boardPageState.boardId == null) {
-          const data = await requestBoardRegister(boardSaveRequest).unwrap();
-          const boardId = (data?.apiObj as IdDTO)?.id;
-          await loadBoard(boardId, false);
+        if (boardPageState.replyId == null) {
+          const data = await requestReplyRegister(replySaveRequest).unwrap();
+          const replyId = (data?.apiObj as IdDTO)?.id;
+          await loadBoard(boardId, true);
         } else {
-          await requestBoardModify(boardSaveRequest);
-          await loadBoard(boardPageState.boardId, true);
+          await requestReplyModify(replySaveRequest);
+          await loadBoard(boardId, true);
         }
       } catch (err) {
         console.log(err);
       }
     },
     [
-      boardPageState.boardId,
+      boardId,
+      boardPageState.parentId,
       boardPageState.nickname,
-      boardPageState.boardCategory,
-      boardPageState.title,
-      boardPageState.preview,
+      boardPageState.replyId,
       boardPageState.content,
-      boardPageState.tag1,
-      boardPageState.tag2,
-      boardPageState.tag3,
-      requestBoardRegister,
-      requestBoardModify,
+      requestReplyRegister,
+      requestReplyModify,
       loadBoard
     ]
   );
@@ -153,28 +135,28 @@ const ReplyEditor: FC<ReplyEditorProps> = ({panelId, editorRef, loadBoard}) => {
     if (isSuccessRegister || isErrorRegister) {
       const id = setTimeout(() => {
         if (isSuccessRegister) {
-          resetBoardState();
+          resetReplyState();
         }
         resetRegister();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessRegister, isErrorRegister, resetBoardState, resetRegister]);
+  }, [isSuccessRegister, isErrorRegister, resetReplyState, resetRegister]);
 
   useEffect(() => {
     if (isSuccessModify || isErrorModify) {
       const id = setTimeout(() => {
         if (isSuccessModify) {
-          resetBoardState();
+          resetReplyState();
         }
         resetModify();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessModify, isErrorModify, resetBoardState, resetModify]);
+  }, [isSuccessModify, isErrorModify, resetReplyState, resetModify]);
 
   return (
-    <div className="my-2 mx-3 h-32 overflow-y-auto min-h-full">
+    <div className="pt-1 ml-7">
       <div className="flex justify-between">
         <div className="flex justify-start mb-2 gap-2">
           <i className="ri-user-line ri-1x"></i>
@@ -183,18 +165,8 @@ const ReplyEditor: FC<ReplyEditorProps> = ({panelId, editorRef, loadBoard}) => {
             name="nickname"
             placeholder={t('Board.placeholder.nickname') as string}
             value={boardPageState.nickname}
-            onChange={handleChangeBoardForm('nickname')}
+            onChange={handleChangeNickname}
             className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
-          />
-        </div>
-        <div className="flex justify-center">
-          <input
-            type="text"
-            name="title"
-            placeholder={t('Board.placeholder.title') as string}
-            value={boardPageState.title}
-            onChange={handleChangeBoardForm('title')}
-            className="w-96 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
           />
         </div>
         <div className="flex justify-end mb-2">
@@ -212,9 +184,7 @@ const ReplyEditor: FC<ReplyEditorProps> = ({panelId, editorRef, loadBoard}) => {
           ) : (
             <button
               disabled={
-                boardPageState.boardCategory == '0' ||
                 !regexFinal.test(boardPageState.nickname) ||
-                !regexFinal.test(boardPageState.title) ||
                 !boardPageState.preview
               }
               onClick={onClickSave}
@@ -225,13 +195,14 @@ const ReplyEditor: FC<ReplyEditorProps> = ({panelId, editorRef, loadBoard}) => {
           )}
         </div>
       </div>
-      {/*<div className="my-2 ml-3 mr-2 absolute left-0 right-0 top-56 bottom-0 overflow-y-auto">*/}
-      {/*  <Editor*/}
-      {/*    onChange={handleEditorChange}*/}
-      {/*    initialContent={boardPageState.content}*/}
-      {/*    editorRef={editorRef}*/}
-      {/*  />*/}
-      {/*</div>*/}
+      <div className="my-0">
+        <Editor
+          onChange={handleEditorChange}
+          initialContent={boardPageState.content}
+          editorRef={replyEditorRef}
+          editable={true}
+        />
+      </div>
     </div>
   );
 };

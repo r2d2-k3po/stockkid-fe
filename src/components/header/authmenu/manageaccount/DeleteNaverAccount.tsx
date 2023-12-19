@@ -12,7 +12,7 @@ import {
   NaverSigninRequest,
   useDeleteNaverAccountMutation
 } from '../../../../app/api';
-import {updateRefreshToken} from '../../../../app/slices/authSlice';
+import {updateTokens} from '../../../../app/slices/authSlice';
 import NaverButton from '../../../common/NaverButton';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
@@ -126,7 +126,7 @@ const DeleteNaverAccount: FC<DeleteAccountProps> = ({
       const id = setTimeout(() => {
         hideThisRef();
         if (isSuccess) {
-          dispatch(updateRefreshToken(null));
+          dispatch(updateTokens({accessToken: null, refreshToken: null}));
         }
         reset();
         setIsClicked(false);

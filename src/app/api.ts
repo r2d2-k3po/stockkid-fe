@@ -6,7 +6,7 @@ import {
   FetchBaseQueryError
 } from '@reduxjs/toolkit/query/react';
 import {RootState} from './store';
-import {AuthState, updateRefreshToken, updateTokens} from './slices/authSlice';
+import {AuthState, updateTokens} from './slices/authSlice';
 
 export interface ResponseEntity {
   apiStatus: string;
@@ -128,7 +128,7 @@ const baseQueryWithRefresh: BaseQueryFn<
       // retry the initial query
       result = await baseQuery(args, api, extraOptions);
     } else {
-      api.dispatch(updateRefreshToken(null));
+      api.dispatch(updateTokens({accessToken: null, refreshToken: null}));
     }
   }
   return result;

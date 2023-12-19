@@ -1,7 +1,7 @@
 import React, {FC, MouseEvent, useCallback, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useAppDispatch, useAppSelector} from '../../../app/hooks';
-import {updateRefreshToken} from '../../../app/slices/authSlice';
+import {updateTokens} from '../../../app/slices/authSlice';
 import MaterialSymbolButton from '../../common/MaterialSymbolButton';
 import {useLogoutMutation} from '../../../app/api';
 import MaterialSymbolSuccess from '../../common/MaterialSymbolSuccess';
@@ -34,7 +34,7 @@ const LogoutForm: FC<LogoutFormProps> = ({hideThisRef}) => {
       } catch (err) {
         console.log(err);
       } finally {
-        dispatch(updateRefreshToken(null));
+        dispatch(updateTokens({accessToken: null, refreshToken: null}));
       }
     },
     [tokens, requestLogout, dispatch]

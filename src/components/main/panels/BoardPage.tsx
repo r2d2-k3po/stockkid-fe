@@ -106,6 +106,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const editorReadOnlyRef = useRef<EditorRef | null>(null);
 
+  const replyEditorRef = useRef<EditorRef | null>(null);
+
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
   ]?.panelState as BoardPageState;
@@ -310,6 +312,40 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     [dispatch, panelId]
   );
 
+  const resetBoardPageState = useCallback(() => {
+    editorRef.current?.clearContent();
+    const payload = {
+      panelId: panelId,
+      panelState: {
+        showBoardEditor: false,
+        boardId: null,
+        boardCategory: '0',
+        title: '',
+        tag1: '',
+        tag2: '',
+        tag3: '',
+        preview: null,
+        content: undefined
+      }
+    };
+    dispatch(updatePanelState(payload));
+  }, [dispatch, panelId, editorRef]);
+
+  const resetReplyState = useCallback(() => {
+    replyEditorRef.current?.clearContent();
+    const payload = {
+      panelId: panelId,
+      panelState: {
+        showReplyEditor: false,
+        replyId: null,
+        parentId: null,
+        content: undefined,
+        boardId: null
+      }
+    };
+    dispatch(updatePanelState(payload));
+  }, [dispatch, panelId, replyEditorRef]);
+
   const loadBoard = useCallback(
     async (boardId: string | null, setContent: boolean) => {
       if (boardId != null) {
@@ -339,9 +375,22 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           panelState: {currentBoardId: boardId}
         };
         dispatch(updatePanelState(payload));
+        if (
+          boardPageState.showReplyEditor &&
+          currentBoardId != null &&
+          boardId != null
+        )
+          resetReplyState();
       }
     },
-    [requestBoardRead, panelId, currentBoardId, dispatch]
+    [
+      requestBoardRead,
+      panelId,
+      currentBoardId,
+      dispatch,
+      boardPageState.showReplyEditor,
+      resetReplyState
+    ]
   );
 
   const loadBoardPage = useCallback(async () => {
@@ -414,6 +463,12 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     }
   }, [loadBoard, boardList, currentBoardId]);
 
+  useEffect(() => {
+    if (!loggedIn) {
+      resetBoardPageState();
+    }
+  }, [loggedIn, resetBoardPageState]);
+
   const boardPagePreview = useMemo(
     () =>
       boardList?.map((boardDTO) => (
@@ -429,9 +484,19 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           loadBoard={loadBoard}
           editorRef={editorRef}
           editorReadOnlyRef={editorReadOnlyRef}
+          replyEditorRef={replyEditorRef}
+          resetReplyState={resetReplyState}
         />
       )),
-    [currentBoardId, boardList, replyDTOList, loadBoard, memberId, panelId]
+    [
+      currentBoardId,
+      boardList,
+      replyDTOList,
+      loadBoard,
+      memberId,
+      panelId,
+      resetReplyState
+    ]
   );
 
   return (
@@ -578,13 +643,14 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </button>
         </div>
       </div>
-      <div className={boardPageState.showBoardEditor ? '' : 'hidden'}>
+      <div hidden={!boardPageState.showBoardEditor}>
         <BoardEditor
           panelId={panelId}
           memberRole={memberRole}
           editorRef={editorRef}
           loadBoardPage={loadBoardPage}
           loadBoard={loadBoard}
+          resetBoardPageState={resetBoardPageState}
         />
       </div>
       {!boardPageState.showBoardEditor && (
