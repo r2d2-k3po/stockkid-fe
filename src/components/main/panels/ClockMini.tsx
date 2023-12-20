@@ -3,11 +3,7 @@ import {useTranslation} from 'react-i18next';
 import {DateTime} from 'luxon';
 import {useAppDispatch, useAppSelector} from '../../../app/hooks';
 import {updatePanelState} from '../../../app/slices/panelsSlice';
-import {ClockState} from '../../../app/constants/panelInfo';
-
-type CommonPanelProps = {
-  panelId: string;
-};
+import {ClockState, CommonPanelProps} from '../../../app/constants/panelInfo';
 
 const ClockMini: FC<CommonPanelProps> = ({panelId}) => {
   const {t, i18n} = useTranslation();

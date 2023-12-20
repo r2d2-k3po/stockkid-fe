@@ -4,7 +4,7 @@ import ClockMini from '../../components/main/panels/ClockMini';
 import BoardPage from '../../components/main/panels/BoardPage';
 import {RemirrorContentType} from 'remirror';
 
-type CommonPanelProps = {
+export type CommonPanelProps = {
   panelId: string;
 };
 

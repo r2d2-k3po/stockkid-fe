@@ -10,7 +10,7 @@ import Editor from './Editor';
 import {RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {EditorRef, IdDTO} from '../BoardPage';
+import {EditorRef} from '../BoardPage';
 import {
   ReplySaveRequest,
   useModifyReplyMutation,
@@ -25,7 +25,7 @@ type ReplyEditorProps = {
   boardId: string;
   replyEditorRef: React.MutableRefObject<EditorRef | null>;
   loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
-  resetReplyState: () => void;
+  resetReplyEditorState: () => void;
 };
 
 const ReplyEditor: FC<ReplyEditorProps> = ({
@@ -33,7 +33,7 @@ const ReplyEditor: FC<ReplyEditorProps> = ({
   boardId,
   replyEditorRef,
   loadBoard,
-  resetReplyState
+  resetReplyEditorState
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
@@ -90,9 +90,9 @@ const ReplyEditor: FC<ReplyEditorProps> = ({
   const onClickCancel = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      resetReplyState();
+      resetReplyEditorState();
     },
-    [resetReplyState]
+    [resetReplyEditorState]
   );
 
   const onClickSave = useCallback(
@@ -108,13 +108,11 @@ const ReplyEditor: FC<ReplyEditorProps> = ({
           content: JSON.stringify(boardPageState.content)
         };
         if (boardPageState.replyId == null) {
-          const data = await requestReplyRegister(replySaveRequest).unwrap();
-          const replyId = (data?.apiObj as IdDTO)?.id;
-          await loadBoard(boardId, true);
+          await requestReplyRegister(replySaveRequest);
         } else {
           await requestReplyModify(replySaveRequest);
-          await loadBoard(boardId, true);
         }
+        await loadBoard(boardId, false);
       } catch (err) {
         console.log(err);
       }
@@ -135,25 +133,30 @@ const ReplyEditor: FC<ReplyEditorProps> = ({
     if (isSuccessRegister || isErrorRegister) {
       const id = setTimeout(() => {
         if (isSuccessRegister) {
-          resetReplyState();
+          resetReplyEditorState();
         }
         resetRegister();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessRegister, isErrorRegister, resetReplyState, resetRegister]);
+  }, [
+    isSuccessRegister,
+    isErrorRegister,
+    resetReplyEditorState,
+    resetRegister
+  ]);
 
   useEffect(() => {
     if (isSuccessModify || isErrorModify) {
       const id = setTimeout(() => {
         if (isSuccessModify) {
-          resetReplyState();
+          resetReplyEditorState();
         }
         resetModify();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessModify, isErrorModify, resetReplyState, resetModify]);
+  }, [isSuccessModify, isErrorModify, resetReplyEditorState, resetModify]);
 
   return (
     <div className="pt-1 ml-7">

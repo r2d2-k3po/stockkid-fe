@@ -15,30 +15,28 @@ import Editor from './Editor';
 import ReplyEditor from './ReplyEditor';
 import {BoardPageState} from '../../../../app/constants/panelInfo';
 
-type BoardProps = {
+type BoardDetailProps = {
   memberId: string | null;
   panelId: string;
-  mode: 'preview' | 'detail';
   boardDTO: BoardDTO;
   replyDTOList: ReplyDTO[] | null | undefined;
   loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
-  editorRef: React.MutableRefObject<EditorRef | null>;
-  editorReadOnlyRef: React.MutableRefObject<EditorRef | null>;
+  boardEditorRef: React.MutableRefObject<EditorRef | null>;
+  boardEditorReadOnlyRef: React.MutableRefObject<EditorRef | null>;
   replyEditorRef: React.MutableRefObject<EditorRef | null>;
-  resetReplyState: () => void;
+  resetReplyEditorState: () => void;
 };
 
-const Board: FC<BoardProps> = ({
+const BoardDetail: FC<BoardDetailProps> = ({
   memberId,
   panelId,
-  mode,
   boardDTO,
   replyDTOList,
   loadBoard,
-  editorRef,
-  editorReadOnlyRef,
+  boardEditorRef,
+  boardEditorReadOnlyRef,
   replyEditorRef,
-  resetReplyState
+  resetReplyEditorState
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
@@ -53,7 +51,7 @@ const Board: FC<BoardProps> = ({
     panelId
   ]?.panelState as BoardPageState;
 
-  const [parentId, setParentId] = useState<string | null | undefined>(
+  const [parentId, setParentId] = useState<string | null>(
     boardPageState.parentId
   );
 
@@ -92,20 +90,16 @@ const Board: FC<BoardProps> = ({
     [boardDTO.boardId, like, requestBoardLike, loadBoard]
   );
 
-  const onClickToggleDetail = useCallback(
+  const onClickToPreview = useCallback(
     async (e: MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
       e.stopPropagation();
       try {
-        if (mode == 'preview') {
-          await loadBoard(boardDTO?.boardId as string, false);
-        } else if (mode == 'detail') {
-          await loadBoard(null, false);
-        }
+        await loadBoard(null, false);
       } catch (err) {
         console.log(err);
       }
     },
-    [boardDTO?.boardId, mode, loadBoard]
+    [loadBoard]
   );
 
   const onClickSearchTag = useCallback(
@@ -145,7 +139,9 @@ const Board: FC<BoardProps> = ({
         }
       };
       dispatch(updatePanelState(payload));
-      editorRef.current?.setContent(JSON.parse(boardDTO.content as string));
+      boardEditorRef.current?.setContent(
+        JSON.parse(boardDTO.content as string)
+      );
     },
     [
       dispatch,
@@ -159,7 +155,7 @@ const Board: FC<BoardProps> = ({
       boardDTO.tag1,
       boardDTO.tag2,
       boardDTO.tag3,
-      editorRef
+      boardEditorRef
     ]
   );
 
@@ -193,20 +189,19 @@ const Board: FC<BoardProps> = ({
         panelId: panelId,
         panelState: {
           showReplyEditor: true,
-          boardId: boardDTO.boardId,
           parentId: parentId
         }
       };
       dispatch(updatePanelState(payload));
     },
-    [dispatch, panelId, boardDTO.boardId]
+    [dispatch, panelId]
   );
 
   useEffect(() => {
-    if (!memberId) {
-      resetReplyState();
+    if (memberId == null && boardPageState.showReplyEditor) {
+      resetReplyEditorState();
     }
-  }, [memberId, resetReplyState]);
+  }, [memberId, resetReplyEditorState, boardPageState.showReplyEditor]);
 
   useEffect(() => {
     if (isSuccessDelete || isErrorDelete) {
@@ -242,7 +237,7 @@ const Board: FC<BoardProps> = ({
             {boardDTO?.nickname}
           </button>
           <div
-            onClick={onClickToggleDetail}
+            onClick={onClickToPreview}
             className="text-md text-info ml-16 hover:text-accent"
           >
             {boardDTO?.title}
@@ -272,7 +267,7 @@ const Board: FC<BoardProps> = ({
           <div className="text-sm text-info">{boardDTO?.replyCount}</div>
           <i className="ri-star-line ri-1x"></i>
           <div className="text-sm text-info">{boardDTO?.likeCount}</div>
-          <div hidden={mode == 'preview' || memberId == null}>
+          <div hidden={memberId == null}>
             <div className="flex gap-1">
               <div
                 className={
@@ -339,105 +334,89 @@ const Board: FC<BoardProps> = ({
           )}
         </div>
       </div>
-      {mode == 'preview' ? (
-        <div
-          onClick={onClickToggleDetail}
-          className="mb-2 line-clamp-1 text-sm text-info hover:text-accent"
+      <Editor
+        initialContent={JSON.parse(boardDTO?.content as string)}
+        editorRef={boardEditorReadOnlyRef}
+        editable={false}
+      />
+      <div className="flex justify-between my-1">
+        <button
+          disabled={memberId == null || boardPageState.showReplyEditor}
+          onClick={enableReplyEditor(null)}
+          className="btn btn-xs btn-circle btn-outline btn-warning m-1"
         >
-          {boardDTO?.preview}
-        </div>
-      ) : (
-        <Editor
-          initialContent={JSON.parse(boardDTO?.content as string)}
-          editorRef={editorReadOnlyRef}
-          editable={false}
-        />
-      )}
-      <div hidden={mode == 'preview'}>
-        <div className="flex justify-between my-1">
+          <i className="ri-reply-line ri-1x"></i>
+        </button>
+        <div className="justify-center">
           <button
-            disabled={memberId == null || boardPageState.showReplyEditor}
-            onClick={enableReplyEditor(null)}
-            className="btn btn-xs btn-circle btn-outline btn-warning m-1"
+            onClick={onClickToPreview}
+            className="btn btn-xs btn-circle btn-outline btn-info hover:btn-accent m-1"
           >
-            <i className="ri-reply-line ri-1x"></i>
+            <i className="ri-skip-up-line ri-1x"></i>
           </button>
-          <div className="justify-center">
+        </div>
+        <div className="justify-end">
+          <div hidden={memberId != boardDTO.memberId || confirmDeleteBoard}>
             <button
-              onClick={onClickToggleDetail}
-              className="btn btn-xs btn-circle btn-outline btn-info hover:btn-accent m-1"
+              disabled={boardPageState.showReplyEditor}
+              className="btn btn-xs btn-circle btn-outline btn-accent m-1"
+              onClick={enableBoardEditorToModify}
             >
-              <i className="ri-skip-up-line ri-1x"></i>
+              <i className="ri-edit-2-line ri-1x"></i>
+            </button>
+            <button
+              disabled={boardPageState.showReplyEditor}
+              className="btn btn-xs btn-circle btn-outline btn-error m-1"
+              onClick={deleteBoard}
+            >
+              <i className="ri-delete-bin-line ri-1x"></i>
             </button>
           </div>
-          <div className="justify-end">
-            <div hidden={memberId != boardDTO.memberId || confirmDeleteBoard}>
+          <div hidden={memberId != boardDTO.memberId || !confirmDeleteBoard}>
+            <button
+              onClick={cancelDeleteBoard}
+              className="btn btn-xs btn-ghost mr-1"
+            >
+              {t('Common.Cancel')}
+            </button>
+            {isErrorDelete ? (
+              <div className="ml-2.5 mr-3">
+                <MaterialSymbolError size={19} />
+              </div>
+            ) : isSuccessDelete ? (
+              <div className="ml-2.5 mr-3">
+                <MaterialSymbolSuccess size={19} />
+              </div>
+            ) : (
               <button
-                className="btn btn-xs btn-circle btn-outline btn-accent m-1"
-                onClick={enableBoardEditorToModify}
+                onClick={reallyDeleteBoard}
+                className="btn btn-xs btn-accent"
               >
-                <i className="ri-edit-2-line ri-1x"></i>
+                {t('Common.Delete')}
               </button>
-              <button
-                className="btn btn-xs btn-circle btn-outline btn-error m-1"
-                onClick={deleteBoard}
-              >
-                <i className="ri-delete-bin-line ri-1x"></i>
-              </button>
-            </div>
-            <div hidden={memberId != boardDTO.memberId || !confirmDeleteBoard}>
-              <button
-                onClick={cancelDeleteBoard}
-                className="btn btn-xs btn-ghost mr-1"
-              >
-                {t('Common.Cancel')}
-              </button>
-              {isErrorDelete ? (
-                <div className="ml-2.5 mr-3">
-                  <MaterialSymbolError size={19} />
-                </div>
-              ) : isSuccessDelete ? (
-                <div className="ml-2.5 mr-3">
-                  <MaterialSymbolSuccess size={19} />
-                </div>
-              ) : (
-                <button
-                  onClick={reallyDeleteBoard}
-                  className="btn btn-xs btn-accent"
-                >
-                  {t('Common.Delete')}
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
-        <div
-          hidden={
-            !(
-              boardPageState.showReplyEditor &&
-              boardDTO.boardId == boardPageState.boardId
-            )
-          }
-        >
-          <ReplyEditor
-            panelId={panelId}
-            boardId={boardDTO.boardId}
-            replyEditorRef={replyEditorRef}
-            loadBoard={loadBoard}
-            resetReplyState={resetReplyState}
-          />
-        </div>
-        <ReplyList
+      </div>
+      <div hidden={!boardPageState.showReplyEditor}>
+        <ReplyEditor
           panelId={panelId}
-          memberId={memberId}
           boardId={boardDTO.boardId}
-          replyDTOList={replyDTOList}
-          loadBoard={loadBoard}
           replyEditorRef={replyEditorRef}
+          loadBoard={loadBoard}
+          resetReplyEditorState={resetReplyEditorState}
         />
       </div>
+      <ReplyList
+        panelId={panelId}
+        memberId={memberId}
+        boardId={boardDTO.boardId}
+        replyDTOList={replyDTOList}
+        loadBoard={loadBoard}
+        replyEditorRef={replyEditorRef}
+      />
     </div>
   );
 };
 
-export default React.memo(Board);
+export default React.memo(BoardDetail);

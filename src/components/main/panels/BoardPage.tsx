@@ -11,7 +11,7 @@ import React, {
 import {useTranslation} from 'react-i18next';
 import Search from './board/Search';
 import {useAppDispatch, useAppSelector} from '../../../app/hooks';
-import Board from './board/Board';
+import BoardPreview from './board/BoardPreview';
 import {tokenDecoder} from '../../../utils/tokenDecoder';
 import {updatePanelState} from '../../../app/slices/panelsSlice';
 import {EditorStateProps, RemirrorContentType} from 'remirror';
@@ -21,7 +21,11 @@ import {
   useLazySearchBoardPageQuery
 } from '../../../app/api';
 import BoardEditor from './board/BoardEditor';
-import {BoardPageState} from '../../../app/constants/panelInfo';
+import {
+  BoardPageState,
+  CommonPanelProps
+} from '../../../app/constants/panelInfo';
+import BoardDetail from './board/BoardDetail';
 
 export interface BoardDTO {
   boardId: string;
@@ -76,10 +80,6 @@ export interface EditorRef {
   getText: ({lineBreakDivider}: GetTextHelperOptions) => string;
 }
 
-type CommonPanelProps = {
-  panelId: string;
-};
-
 const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
@@ -102,9 +102,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     [decodedRefreshToken]
   );
 
-  const editorRef = useRef<EditorRef | null>(null);
+  const boardEditorRef = useRef<EditorRef | null>(null);
 
-  const editorReadOnlyRef = useRef<EditorRef | null>(null);
+  const boardEditorReadOnlyRef = useRef<EditorRef | null>(null);
 
   const replyEditorRef = useRef<EditorRef | null>(null);
 
@@ -122,17 +122,17 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const [requestBoardRead] = useLazyReadBoardQuery();
 
-  const [boardList, setBoardList] = useState<BoardDTO[] | null | undefined>(
-    undefined
-  );
+  const [boardDTOList, setBoardDTOList] = useState<
+    BoardDTO[] | null | undefined
+  >(null);
 
   const [replyDTOList, setReplyDTOList] = useState<
     ReplyDTO[] | null | undefined
-  >(undefined);
+  >(null);
 
-  const [currentBoardId, setCurrentBoardId] = useState<
-    string | null | undefined
-  >(boardPageState.currentBoardId);
+  const [currentBoardId, setCurrentBoardId] = useState<string | null>(
+    boardPageState.currentBoardId
+  );
 
   const handleClickCategoryButton = useCallback(
     (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
@@ -312,8 +312,8 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     [dispatch, panelId]
   );
 
-  const resetBoardPageState = useCallback(() => {
-    editorRef.current?.clearContent();
+  const resetBoardEditorState = useCallback(() => {
+    boardEditorRef.current?.clearContent();
     const payload = {
       panelId: panelId,
       panelState: {
@@ -329,9 +329,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       }
     };
     dispatch(updatePanelState(payload));
-  }, [dispatch, panelId, editorRef]);
+  }, [dispatch, panelId, boardEditorRef]);
 
-  const resetReplyState = useCallback(() => {
+  const resetReplyEditorState = useCallback(() => {
     replyEditorRef.current?.clearContent();
     const payload = {
       panelId: panelId,
@@ -339,8 +339,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         showReplyEditor: false,
         replyId: null,
         parentId: null,
-        content: undefined,
-        boardId: null
+        content: undefined
       }
     };
     dispatch(updatePanelState(payload));
@@ -350,18 +349,18 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     async (boardId: string | null, setContent: boolean) => {
       if (boardId != null) {
         const dataBoard = await requestBoardRead(boardId as string).unwrap();
-        setBoardList((boardList) =>
-          boardList?.map((board) => {
-            if (board.boardId == boardId) {
+        setBoardDTOList((boardDTOList) =>
+          boardDTOList?.map((boardDTO) => {
+            if (boardDTO.boardId == boardId) {
               return (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO;
             } else {
-              return board;
+              return boardDTO;
             }
           })
         );
         setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
         if (setContent) {
-          editorReadOnlyRef.current?.setContent(
+          boardEditorReadOnlyRef.current?.setContent(
             JSON.parse(
               (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO.content as string
             )
@@ -380,7 +379,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           currentBoardId != null &&
           boardId != null
         )
-          resetReplyState();
+          resetReplyEditorState();
       }
     },
     [
@@ -389,7 +388,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       currentBoardId,
       dispatch,
       boardPageState.showReplyEditor,
-      resetReplyState
+      resetReplyEditorState
     ]
   );
 
@@ -406,7 +405,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       const dataSearchPage = await requestBoardPageSearch(
         searchPageSetting
       ).unwrap();
-      setBoardList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
+      setBoardDTOList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
       totalPages = (dataSearchPage?.apiObj as BoardPageDTO)?.totalPages || 1;
     } else {
       const boardPageSetting = {
@@ -418,7 +417,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       const dataBoardPage = await requestBoardPageRead(
         boardPageSetting
       ).unwrap();
-      setBoardList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
+      setBoardDTOList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
       totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
     }
     const payload = {
@@ -449,53 +448,60 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
   }, [loadBoardPage]);
 
   useEffect(() => {
-    if (currentBoardId) {
+    if (currentBoardId != null) {
       try {
-        const currentBoard = boardList?.find(
-          (board) => board.boardId == currentBoardId
+        const currentBoard = boardDTOList?.find(
+          (boardDTO) => boardDTO.boardId == currentBoardId
         );
-        if (currentBoard && currentBoard?.content == null) {
+        if (currentBoard && currentBoard.content == null) {
           loadBoard(currentBoardId, true);
         }
       } catch (err) {
         console.log(err);
       }
     }
-  }, [loadBoard, boardList, currentBoardId]);
+  }, [loadBoard, boardDTOList, currentBoardId]);
 
   useEffect(() => {
-    if (!loggedIn) {
-      resetBoardPageState();
+    if (!loggedIn && boardPageState.showBoardEditor) {
+      resetBoardEditorState();
     }
-  }, [loggedIn, resetBoardPageState]);
+  }, [loggedIn, resetBoardEditorState, boardPageState.showBoardEditor]);
 
-  const boardPagePreview = useMemo(
+  const boardPageView = useMemo(
     () =>
-      boardList?.map((boardDTO) => (
-        <Board
-          key={boardDTO.boardId}
-          panelId={panelId}
-          memberId={memberId}
-          mode={currentBoardId == boardDTO.boardId ? 'detail' : 'preview'}
-          boardDTO={boardDTO}
-          replyDTOList={
-            currentBoardId == boardDTO.boardId ? replyDTOList : null
-          }
-          loadBoard={loadBoard}
-          editorRef={editorRef}
-          editorReadOnlyRef={editorReadOnlyRef}
-          replyEditorRef={replyEditorRef}
-          resetReplyState={resetReplyState}
-        />
-      )),
+      boardDTOList?.map((boardDTO) =>
+        boardDTO.boardId == currentBoardId ? (
+          <BoardDetail
+            key={boardDTO.boardId}
+            panelId={panelId}
+            memberId={memberId}
+            boardDTO={boardDTO}
+            replyDTOList={replyDTOList}
+            loadBoard={loadBoard}
+            boardEditorRef={boardEditorRef}
+            boardEditorReadOnlyRef={boardEditorReadOnlyRef}
+            replyEditorRef={replyEditorRef}
+            resetReplyEditorState={resetReplyEditorState}
+          />
+        ) : (
+          <BoardPreview
+            key={boardDTO.boardId}
+            panelId={panelId}
+            memberId={memberId}
+            boardDTO={boardDTO}
+            loadBoard={loadBoard}
+          />
+        )
+      ),
     [
       currentBoardId,
-      boardList,
+      boardDTOList,
       replyDTOList,
       loadBoard,
       memberId,
       panelId,
-      resetReplyState
+      resetReplyEditorState
     ]
   );
 
@@ -647,15 +653,15 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         <BoardEditor
           panelId={panelId}
           memberRole={memberRole}
-          editorRef={editorRef}
+          boardEditorRef={boardEditorRef}
           loadBoardPage={loadBoardPage}
           loadBoard={loadBoard}
-          resetBoardPageState={resetBoardPageState}
+          resetBoardEditorState={resetBoardEditorState}
         />
       </div>
       {!boardPageState.showBoardEditor && (
         <div className="my-2 ml-3 mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
-          {!!boardPagePreview && boardPagePreview}
+          {!!boardPageView && boardPageView}
         </div>
       )}
     </div>
