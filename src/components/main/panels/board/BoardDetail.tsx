@@ -51,10 +51,6 @@ const BoardDetail: FC<BoardDetailProps> = ({
     panelId
   ]?.panelState as BoardPageState;
 
-  const [parentId, setParentId] = useState<string | null>(
-    boardPageState.parentId
-  );
-
   const [
     requestBoardDelete,
     {isSuccess: isSuccessDelete, isError: isErrorDelete, reset: resetDelete}
