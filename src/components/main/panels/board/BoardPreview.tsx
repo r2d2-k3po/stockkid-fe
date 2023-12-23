@@ -52,7 +52,7 @@ const BoardPreview: FC<BoardPreviewProps> = ({
   );
 
   return (
-    <div className="relative border-b border-warning my-2 mr-2">
+    <div className="border-b border-warning my-2 mr-2">
       <div className="flex justify-between">
         <div className="flex justify-start mb-2 gap-2">
           <i className="ri-user-line ri-1x"></i>

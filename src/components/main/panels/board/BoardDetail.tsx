@@ -12,7 +12,6 @@ import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 import ReplyList from './ReplyList';
 import Editor from './Editor';
-import ReplyEditor from './ReplyEditor';
 import {BoardPageState} from '../../../../app/constants/panelInfo';
 
 type BoardDetailProps = {
@@ -219,7 +218,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
   }, [isSuccessLike, isErrorLike]);
 
   return (
-    <div className="relative border-b border-warning my-2 mr-2">
+    <div className="border-b border-warning my-2 mr-2">
       <div className="flex justify-between">
         <div className="flex justify-start mb-2 gap-2">
           <i className="ri-user-line ri-1x"></i>
@@ -394,15 +393,15 @@ const BoardDetail: FC<BoardDetailProps> = ({
           </div>
         </div>
       </div>
-      <div hidden={!boardPageState.showReplyEditor}>
-        <ReplyEditor
-          panelId={panelId}
-          boardId={boardDTO.boardId}
-          replyEditorRef={replyEditorRef}
-          loadBoard={loadBoard}
-          resetReplyEditorState={resetReplyEditorState}
-        />
-      </div>
+      {/*<div hidden={!boardPageState.showReplyEditor}>*/}
+      {/*  <ReplyEditor*/}
+      {/*    panelId={panelId}*/}
+      {/*    boardId={boardDTO.boardId}*/}
+      {/*    replyEditorRef={replyEditorRef}*/}
+      {/*    loadBoard={loadBoard}*/}
+      {/*    resetReplyEditorState={resetReplyEditorState}*/}
+      {/*  />*/}
+      {/*</div>*/}
       <ReplyList
         panelId={panelId}
         memberId={memberId}
@@ -410,6 +409,8 @@ const BoardDetail: FC<BoardDetailProps> = ({
         replyDTOList={replyDTOList}
         loadBoard={loadBoard}
         replyEditorRef={replyEditorRef}
+        enableReplyEditor={enableReplyEditor}
+        resetReplyEditorState={resetReplyEditorState}
       />
     </div>
   );
