@@ -393,15 +393,6 @@ const BoardDetail: FC<BoardDetailProps> = ({
           </div>
         </div>
       </div>
-      {/*<div hidden={!boardPageState.showReplyEditor}>*/}
-      {/*  <ReplyEditor*/}
-      {/*    panelId={panelId}*/}
-      {/*    boardId={boardDTO.boardId}*/}
-      {/*    replyEditorRef={replyEditorRef}*/}
-      {/*    loadBoard={loadBoard}*/}
-      {/*    resetReplyEditorState={resetReplyEditorState}*/}
-      {/*  />*/}
-      {/*</div>*/}
       <ReplyList
         panelId={panelId}
         memberId={memberId}

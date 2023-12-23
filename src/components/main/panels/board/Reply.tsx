@@ -5,9 +5,7 @@ import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 import {EditorRef, ReplyDTO} from '../BoardPage';
 import {
-  useDeleteBoardMutation,
   useDeleteReplyMutation,
-  useLikeBoardMutation,
   useLikeReplyMutation
 } from '../../../../app/api';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
@@ -18,21 +16,25 @@ import {useTranslation} from 'react-i18next';
 type ReplyProps = {
   memberId: string | null;
   panelId: string;
+  boardId: string;
+  loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
   parentNickname: string | null;
   replyDTO: ReplyDTO;
   replyEditorRef: React.MutableRefObject<EditorRef | null>;
-  enableReplyEditor: (parentId: string | null) => (e: any) => void;
-  resetReplyEditorState: () => void;
+  enableReplyEditor: (
+    parentId: string | null
+  ) => (e: MouseEvent<HTMLButtonElement>) => void;
 };
 
 const Reply: FC<ReplyProps> = ({
   memberId,
   panelId,
+  boardId,
+  loadBoard,
   parentNickname,
   replyDTO,
   replyEditorRef,
-  enableReplyEditor,
-  resetReplyEditorState
+  enableReplyEditor
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
@@ -88,60 +90,50 @@ const Reply: FC<ReplyProps> = ({
       const payload = {
         panelId: panelId,
         panelState: {
-          showBoardEditor: true,
-          boardId: boardDTO.boardId,
-          nickname: boardDTO.nickname,
-          title: boardDTO.title,
-          boardCategory: boardDTO.boardCategory,
-          preview: boardDTO.preview,
-          content: JSON.parse(boardDTO.content as string),
-          tag1: boardDTO.tag1,
-          tag2: boardDTO.tag2,
-          tag3: boardDTO.tag3
+          showReplyEditor: true,
+          parentId: replyDTO.parentId,
+          replyId: replyDTO.replyId,
+          nickname: replyDTO.nickname,
+          content: JSON.parse(replyDTO.content as string)
         }
       };
       dispatch(updatePanelState(payload));
-      boardEditorRef.current?.setContent(
-        JSON.parse(boardDTO.content as string)
+      replyEditorRef.current?.setContent(
+        JSON.parse(replyDTO.content as string)
       );
     },
     [
       dispatch,
       panelId,
-      boardDTO.boardId,
-      boardDTO.nickname,
-      boardDTO.title,
-      boardDTO.boardCategory,
-      boardDTO.preview,
-      boardDTO.content,
-      boardDTO.tag1,
-      boardDTO.tag2,
-      boardDTO.tag3,
-      boardEditorRef
+      replyDTO.parentId,
+      replyDTO.replyId,
+      replyDTO.nickname,
+      replyDTO.content,
+      replyEditorRef
     ]
   );
 
   const deleteReply = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    setConfirmDeleteBoard(true);
+    setConfirmDeleteReply(true);
   }, []);
 
   const cancelDeleteReply = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    setConfirmDeleteBoard(false);
+    setConfirmDeleteReply(false);
   }, []);
 
   const reallyDeleteReply = useCallback(
     async (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       try {
-        await requestBoardDelete(boardDTO.boardId);
-        await loadBoard(boardDTO.boardId, true);
+        await requestReplyDelete(replyDTO.replyId);
+        await loadBoard(boardId, false);
       } catch (err) {
         console.log(err);
       }
     },
-    [boardDTO.boardId, requestBoardDelete, loadBoard]
+    [boardId, requestReplyDelete, loadBoard, replyDTO.replyId]
   );
 
   useEffect(() => {
@@ -164,27 +156,25 @@ const Reply: FC<ReplyProps> = ({
   }, [isSuccessLike, isErrorLike]);
 
   return (
-    <div className="border-b border-info my-2 mr-2">
+    <div className="border-t border-info mb-2 mr-2 pt-2">
       <div className="flex justify-between">
         <div className="flex justify-start mb-2 gap-2">
           {parentNickname && (
             <>
               <i className="ri-reply-line ri-1x"></i>
-              <span>parentNickname</span>
+              <span>{parentNickname}</span>
             </>
           )}
           <i className="ri-user-line ri-1x"></i>
           <button
             className={
               memberId == replyDTO.memberId
-                ? 'text-sm text-primary btn-ghost rounded -mt-1 px-0.5'
-                : 'text-sm text-info btn-ghost rounded -mt-1 px-0.5'
+                ? 'text-sm text-primary btn-ghost rounded -mt-1 px-0.5 mr-3'
+                : 'text-sm text-info btn-ghost rounded -mt-1 px-0.5 mr-3'
             }
           >
             {replyDTO?.nickname}
           </button>
-        </div>
-        <div className="flex justify-center mb-2 gap-2">
           <i className="ri-star-line ri-1x"></i>
           <div className="text-sm text-info">{replyDTO?.likeCount}</div>
           <div hidden={memberId == null}>
@@ -244,7 +234,7 @@ const Reply: FC<ReplyProps> = ({
       <div className="flex justify-between my-1">
         <button
           disabled={memberId == null || boardPageState.showReplyEditor}
-          onClick={enableReplyEditor(replyDTO.parentId)}
+          onClick={enableReplyEditor(replyDTO.replyId)}
           className="btn btn-xs btn-circle btn-outline btn-warning m-1"
         >
           <i className="ri-reply-line ri-1x"></i>

@@ -339,6 +339,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         showReplyEditor: false,
         replyId: null,
         parentId: null,
+        preview: null,
         content: undefined
       }
     };

@@ -1,9 +1,9 @@
-import React, {FC, MouseEvent, useMemo, useState} from 'react';
+import React, {FC, MouseEvent, useMemo} from 'react';
 import {EditorRef, ReplyDTO} from '../BoardPage';
-import {useTranslation} from 'react-i18next';
-import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
+import {useAppSelector} from '../../../../app/hooks';
 import {BoardPageState} from '../../../../app/constants/panelInfo';
 import Reply from './Reply';
+import ReplyEditor from './ReplyEditor';
 
 type ReplyEntity = {
   replyDTO: ReplyDTO | null;
@@ -39,16 +39,9 @@ const ReplyList: FC<ReplyListProps> = ({
   enableReplyEditor,
   resetReplyEditorState
 }) => {
-  const {t} = useTranslation();
-  const dispatch = useAppDispatch();
-
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
   ]?.panelState as BoardPageState;
-
-  const [parentIdForEditor, setParentIdForEditor] = useState<string | null>(
-    boardPageState.parentId
-  );
 
   const replyEntities: ReplyEntitiesType = useMemo(() => {
     const entities: ReplyEntitiesType = {};
@@ -82,24 +75,40 @@ const ReplyList: FC<ReplyListProps> = ({
         {replies.length > 0 &&
           replies.map((replyId) => {
             return (
-              <>
-                <Reply
-                  key={replyId}
-                  memberId={memberId}
-                  panelId={panelId}
-                  parentNickname={parentNickname}
-                  replyDTO={replyEntities[replyId].replyDTO as ReplyDTO}
-                  replyEditorRef={replyEditorRef}
-                  enableReplyEditor={enableReplyEditor}
-                  resetReplyEditorState={resetReplyEditorState}
-                />
+              <div key={replyId}>
+                {!(
+                  boardPageState.showReplyEditor &&
+                  boardPageState.replyId == replyId
+                ) && (
+                  <Reply
+                    key={replyId}
+                    memberId={memberId}
+                    panelId={panelId}
+                    boardId={boardId}
+                    loadBoard={loadBoard}
+                    parentNickname={parentNickname}
+                    replyDTO={replyEntities[replyId].replyDTO as ReplyDTO}
+                    replyEditorRef={replyEditorRef}
+                    enableReplyEditor={enableReplyEditor}
+                  />
+                )}
+                {boardPageState.showReplyEditor &&
+                  boardPageState.parentId == replyId && (
+                    <ReplyEditor
+                      panelId={panelId}
+                      boardId={boardId}
+                      replyEditorRef={replyEditorRef}
+                      loadBoard={loadBoard}
+                      resetReplyEditorState={resetReplyEditorState}
+                    />
+                  )}
                 <RecursiveReplies
                   parentNickname={
                     replyEntities[replyId].replyDTO?.nickname as string
                   }
                   replies={replyEntities[replyId].replies}
                 />
-              </>
+              </div>
             );
           })}
       </div>
@@ -107,7 +116,16 @@ const ReplyList: FC<ReplyListProps> = ({
   };
 
   return (
-    <div className="m-2 border-2">
+    <div className="m-2">
+      {boardPageState.showReplyEditor && boardPageState.parentId == null && (
+        <ReplyEditor
+          panelId={panelId}
+          boardId={boardId}
+          replyEditorRef={replyEditorRef}
+          loadBoard={loadBoard}
+          resetReplyEditorState={resetReplyEditorState}
+        />
+      )}
       <RecursiveReplies
         parentNickname={null}
         replies={replyEntities['board'].replies}
