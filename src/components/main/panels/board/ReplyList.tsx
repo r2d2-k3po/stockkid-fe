@@ -71,7 +71,7 @@ const ReplyList: FC<ReplyListProps> = ({
     replies
   }: RecursiveRepliesProps) => {
     return (
-      <div className="pl-5">
+      <div className="pl-3">
         {replies.length > 0 &&
           replies.map((replyId) => {
             return (

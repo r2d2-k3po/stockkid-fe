@@ -112,7 +112,6 @@ const ReplyEditor: FC<ReplyEditorProps> = ({
         } else {
           await requestReplyModify(replySaveRequest);
         }
-        await loadBoard(boardId, false);
       } catch (err) {
         console.log(err);
       }
@@ -124,8 +123,7 @@ const ReplyEditor: FC<ReplyEditorProps> = ({
       boardPageState.replyId,
       boardPageState.content,
       requestReplyRegister,
-      requestReplyModify,
-      loadBoard
+      requestReplyModify
     ]
   );
 
@@ -133,6 +131,7 @@ const ReplyEditor: FC<ReplyEditorProps> = ({
     if (isSuccessRegister || isErrorRegister) {
       const id = setTimeout(() => {
         if (isSuccessRegister) {
+          loadBoard(boardId, false);
           resetReplyEditorState();
         }
         resetRegister();
@@ -140,6 +139,8 @@ const ReplyEditor: FC<ReplyEditorProps> = ({
       return () => clearTimeout(id);
     }
   }, [
+    boardId,
+    loadBoard,
     isSuccessRegister,
     isErrorRegister,
     resetReplyEditorState,
@@ -150,13 +151,21 @@ const ReplyEditor: FC<ReplyEditorProps> = ({
     if (isSuccessModify || isErrorModify) {
       const id = setTimeout(() => {
         if (isSuccessModify) {
+          loadBoard(boardId, false);
           resetReplyEditorState();
         }
         resetModify();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessModify, isErrorModify, resetReplyEditorState, resetModify]);
+  }, [
+    boardId,
+    loadBoard,
+    isSuccessModify,
+    isErrorModify,
+    resetReplyEditorState,
+    resetModify
+  ]);
 
   return (
     <div className="pt-1 ml-7">

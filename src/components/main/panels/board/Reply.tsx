@@ -76,7 +76,6 @@ const Reply: FC<ReplyProps> = ({
           number: like == true ? 1 : -1
         };
         await requestReplyLike(likeRequest);
-        // await loadBoard(boardDTO.boardId, false);
       } catch (err) {
         console.log(err);
       }
@@ -128,42 +127,45 @@ const Reply: FC<ReplyProps> = ({
       e.stopPropagation();
       try {
         await requestReplyDelete(replyDTO.replyId);
-        await loadBoard(boardId, false);
       } catch (err) {
         console.log(err);
       }
     },
-    [boardId, requestReplyDelete, loadBoard, replyDTO.replyId]
+    [requestReplyDelete, replyDTO.replyId]
   );
 
   useEffect(() => {
     if (isSuccessDelete || isErrorDelete) {
       const id = setTimeout(() => {
-        setConfirmDeleteReply(false);
+        if (isSuccessDelete) {
+          loadBoard(boardId, false);
+          setConfirmDeleteReply(false);
+        }
         resetDelete();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessDelete, isErrorDelete, resetDelete]);
+  }, [boardId, loadBoard, isSuccessDelete, isErrorDelete, resetDelete]);
 
   useEffect(() => {
     if (isSuccessLike) {
+      loadBoard(boardId, false);
       setLikeUpdated(true);
     } else if (isErrorLike) {
       setLike(null);
       setLikeUpdated(true);
     }
-  }, [isSuccessLike, isErrorLike]);
+  }, [boardId, loadBoard, isSuccessLike, isErrorLike]);
 
   return (
     <div className="border-t border-info mb-2 mr-2 pt-2">
       <div className="flex justify-between">
         <div className="flex justify-start mb-2 gap-2">
           {parentNickname && (
-            <>
-              <i className="ri-reply-line ri-1x"></i>
+            <div className="text-sm">
               <span>{parentNickname}</span>
-            </>
+              <i className="ri-reply-line ri-1x"></i>
+            </div>
           )}
           <i className="ri-user-line ri-1x"></i>
           <button

@@ -77,12 +77,11 @@ const BoardDetail: FC<BoardDetailProps> = ({
           number: like == true ? 1 : -1
         };
         await requestBoardLike(likeRequest);
-        await loadBoard(boardDTO.boardId, false);
       } catch (err) {
         console.log(err);
       }
     },
-    [boardDTO.boardId, like, requestBoardLike, loadBoard]
+    [boardDTO.boardId, like, requestBoardLike]
   );
 
   const onClickToPreview = useCallback(
@@ -169,12 +168,11 @@ const BoardDetail: FC<BoardDetailProps> = ({
       e.stopPropagation();
       try {
         await requestBoardDelete(boardDTO.boardId);
-        await loadBoard(boardDTO.boardId, true);
       } catch (err) {
         console.log(err);
       }
     },
-    [boardDTO.boardId, requestBoardDelete, loadBoard]
+    [boardDTO.boardId, requestBoardDelete]
   );
 
   const enableReplyEditor = useCallback(
@@ -201,21 +199,31 @@ const BoardDetail: FC<BoardDetailProps> = ({
   useEffect(() => {
     if (isSuccessDelete || isErrorDelete) {
       const id = setTimeout(() => {
-        setConfirmDeleteBoard(false);
+        if (isSuccessDelete) {
+          loadBoard(boardDTO.boardId, true);
+          setConfirmDeleteBoard(false);
+        }
         resetDelete();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessDelete, isErrorDelete, resetDelete]);
+  }, [
+    boardDTO.boardId,
+    loadBoard,
+    isSuccessDelete,
+    isErrorDelete,
+    resetDelete
+  ]);
 
   useEffect(() => {
     if (isSuccessLike) {
+      loadBoard(boardDTO.boardId, false);
       setLikeUpdated(true);
     } else if (isErrorLike) {
       setLike(null);
       setLikeUpdated(true);
     }
-  }, [isSuccessLike, isErrorLike]);
+  }, [boardDTO.boardId, loadBoard, isSuccessLike, isErrorLike]);
 
   return (
     <div className="border-b border-warning my-2 mr-2">
