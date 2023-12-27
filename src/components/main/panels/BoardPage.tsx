@@ -5,7 +5,6 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState
 } from 'react';
 import {useTranslation} from 'react-i18next';
@@ -14,13 +13,10 @@ import {useAppDispatch, useAppSelector} from '../../../app/hooks';
 import BoardPreview from './board/BoardPreview';
 import {tokenDecoder} from '../../../utils/tokenDecoder';
 import {updatePanelState} from '../../../app/slices/panelsSlice';
-import {EditorStateProps, RemirrorContentType} from 'remirror';
 import {
   useLazyReadBoardPageQuery,
-  useLazyReadBoardQuery,
   useLazySearchBoardPageQuery
 } from '../../../app/api';
-import BoardEditor from './board/BoardEditor';
 import {
   BoardPageState,
   CommonPanelProps
@@ -45,39 +41,9 @@ export interface BoardDTO {
   modDate: string;
 }
 
-export interface ReplyDTO {
-  replyId: string;
-  parentId: string;
-  memberId: string;
-  nickname: string;
-  content: string;
-  likeCount: number;
-  regDate: string;
-  modDate: string;
-}
-
-export interface IdDTO {
-  id: string;
-}
-
 interface BoardPageDTO {
   boardDTOList: BoardDTO[];
   totalPages: number;
-}
-
-interface BoardReplyDTO {
-  boardDTO: BoardDTO;
-  replyDTOList: ReplyDTO[];
-}
-
-interface GetTextHelperOptions extends Partial<EditorStateProps> {
-  lineBreakDivider?: string;
-}
-
-export interface EditorRef {
-  clearContent: () => void;
-  setContent: (content: RemirrorContentType) => void;
-  getText: ({lineBreakDivider}: GetTextHelperOptions) => string;
 }
 
 const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
@@ -85,7 +51,6 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
   const dispatch = useAppDispatch();
 
   const tokens = useAppSelector((state) => state.auth);
-  const loggedIn = !(tokens.refreshToken == null);
 
   const decodedRefreshToken = useMemo(
     () => (tokens.refreshToken ? tokenDecoder(tokens.refreshToken) : null),
@@ -102,12 +67,6 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     [decodedRefreshToken]
   );
 
-  const boardEditorRef = useRef<EditorRef | null>(null);
-
-  const boardEditorReadOnlyRef = useRef<EditorRef | null>(null);
-
-  const replyEditorRef = useRef<EditorRef | null>(null);
-
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
   ]?.panelState as BoardPageState;
@@ -120,19 +79,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
 
   const [requestBoardPageSearch] = useLazySearchBoardPageQuery();
 
-  const [requestBoardRead] = useLazyReadBoardQuery();
-
   const [boardDTOList, setBoardDTOList] = useState<
     BoardDTO[] | null | undefined
   >(null);
-
-  const [replyDTOList, setReplyDTOList] = useState<
-    ReplyDTO[] | null | undefined
-  >(null);
-
-  const [currentBoardId, setCurrentBoardId] = useState<string | null>(
-    boardPageState.currentBoardId
-  );
 
   const handleClickCategoryButton = useCallback(
     (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
@@ -305,122 +254,23 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {showBoardEditor: true}
+        panelState: {showBoardEditor: true, boardId: null}
       };
       dispatch(updatePanelState(payload));
     },
     [dispatch, panelId]
   );
 
-  const resetBoardEditorState = useCallback(() => {
-    boardEditorRef.current?.clearContent();
-    const payload = {
-      panelId: panelId,
-      panelState: {
-        showBoardEditor: false,
-        boardId: null,
-        boardCategory: '0',
-        title: '',
-        tag1: '',
-        tag2: '',
-        tag3: '',
-        preview: null,
-        content: undefined
-      }
+  const loadBoardPageRead = useCallback(async () => {
+    const boardPageSetting = {
+      page: boardPageState.currentPage.toString(),
+      size: '20',
+      boardCategory: boardPageState.boardPageCategory,
+      sortBy: boardPageState.sortBy
     };
-    dispatch(updatePanelState(payload));
-  }, [dispatch, panelId, boardEditorRef]);
-
-  const resetReplyEditorState = useCallback(() => {
-    replyEditorRef.current?.clearContent();
-    const payload = {
-      panelId: panelId,
-      panelState: {
-        showReplyEditor: false,
-        replyId: null,
-        parentId: null,
-        preview: null,
-        content: undefined
-      }
-    };
-    dispatch(updatePanelState(payload));
-  }, [dispatch, panelId, replyEditorRef]);
-
-  const loadBoard = useCallback(
-    async (boardId: string | null, setContent: boolean) => {
-      if (boardId != null) {
-        const dataBoard = await requestBoardRead(boardId as string).unwrap();
-        setBoardDTOList((boardDTOList) =>
-          boardDTOList?.map((boardDTO) => {
-            if (boardDTO.boardId == boardId) {
-              return (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO;
-            } else {
-              return boardDTO;
-            }
-          })
-        );
-        setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
-        if (setContent) {
-          boardEditorReadOnlyRef.current?.setContent(
-            JSON.parse(
-              (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO.content as string
-            )
-          );
-        }
-      }
-      if (currentBoardId != boardId) {
-        setCurrentBoardId(boardId);
-        const payload = {
-          panelId: panelId,
-          panelState: {currentBoardId: boardId}
-        };
-        dispatch(updatePanelState(payload));
-        if (
-          boardPageState.showReplyEditor &&
-          currentBoardId != null &&
-          boardId != null
-        )
-          resetReplyEditorState();
-      }
-    },
-    [
-      requestBoardRead,
-      panelId,
-      currentBoardId,
-      dispatch,
-      boardPageState.showReplyEditor,
-      resetReplyEditorState
-    ]
-  );
-
-  const loadBoardPage = useCallback(async () => {
-    let totalPages: number;
-    if (boardPageState.searchMode) {
-      const searchPageSetting = {
-        page: boardPageState.currentPage.toString(),
-        size: '20',
-        boardCategory: boardPageState.boardPageCategory,
-        sortBy: boardPageState.sortBy,
-        tag: boardPageState.tag
-      };
-      const dataSearchPage = await requestBoardPageSearch(
-        searchPageSetting
-      ).unwrap();
-      setBoardDTOList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
-      totalPages = (dataSearchPage?.apiObj as BoardPageDTO)?.totalPages || 1;
-    } else {
-      const boardPageSetting = {
-        page: boardPageState.currentPage.toString(),
-        size: '20',
-        boardCategory: boardPageState.boardPageCategory,
-        sortBy: boardPageState.sortBy
-      };
-      const dataBoardPage = await requestBoardPageRead(
-        boardPageSetting
-      ).unwrap();
-      setBoardDTOList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
-      totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
-    }
+    const dataBoardPage = await requestBoardPageRead(boardPageSetting).unwrap();
+    setBoardDTOList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
+    const totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
     const payload = {
       panelId: panelId,
       panelState: {
@@ -429,81 +279,88 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     };
     dispatch(updatePanelState(payload));
   }, [
-    boardPageState.searchMode,
+    boardPageState.currentPage,
+    boardPageState.boardPageCategory,
+    boardPageState.sortBy,
+    dispatch,
+    panelId,
+    requestBoardPageRead
+  ]);
+
+  const loadBoardPageSearch = useCallback(async () => {
+    const searchPageSetting = {
+      page: boardPageState.currentPage.toString(),
+      size: '20',
+      boardCategory: boardPageState.boardPageCategory,
+      sortBy: boardPageState.sortBy,
+      tag: boardPageState.tag
+    };
+    const dataSearchPage = await requestBoardPageSearch(
+      searchPageSetting
+    ).unwrap();
+    setBoardDTOList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
+    const totalPages =
+      (dataSearchPage?.apiObj as BoardPageDTO)?.totalPages || 1;
+    const payload = {
+      panelId: panelId,
+      panelState: {
+        totalPages: totalPages
+      }
+    };
+    dispatch(updatePanelState(payload));
+  }, [
     boardPageState.currentPage,
     boardPageState.boardPageCategory,
     boardPageState.sortBy,
     boardPageState.tag,
     dispatch,
     panelId,
-    requestBoardPageRead,
     requestBoardPageSearch
   ]);
 
   useEffect(() => {
-    try {
-      loadBoardPage();
-    } catch (err) {
-      console.log(err);
-    }
-  }, [loadBoardPage]);
-
-  useEffect(() => {
-    if (currentBoardId != null) {
+    if (!boardPageState.searchMode) {
       try {
-        const currentBoard = boardDTOList?.find(
-          (boardDTO) => boardDTO.boardId == currentBoardId
-        );
-        if (currentBoard && currentBoard.content == null) {
-          loadBoard(currentBoardId, true);
-        }
+        void loadBoardPageRead();
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     }
-  }, [loadBoard, boardDTOList, currentBoardId]);
+  }, [loadBoardPageRead, boardPageState.searchMode]);
 
   useEffect(() => {
-    if (!loggedIn && boardPageState.showBoardEditor) {
-      resetBoardEditorState();
+    if (boardPageState.searchMode) {
+      try {
+        void loadBoardPageSearch();
+      } catch (err) {
+        console.error(err);
+      }
     }
-  }, [loggedIn, resetBoardEditorState, boardPageState.showBoardEditor]);
+  }, [loadBoardPageSearch, boardPageState.searchMode]);
 
-  const boardPageView = useMemo(
+  useEffect(() => {
+    if (memberId == null && boardPageState.showBoardEditor) {
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          showBoardEditor: false
+        }
+      };
+      dispatch(updatePanelState(payload));
+    }
+  }, [memberId, boardPageState.showBoardEditor, panelId, dispatch]);
+
+  const boardPreviewPage = useMemo(
     () =>
-      boardDTOList?.map((boardDTO) =>
-        boardDTO.boardId == currentBoardId ? (
-          <BoardDetail
-            key={boardDTO.boardId}
-            panelId={panelId}
-            memberId={memberId}
-            boardDTO={boardDTO}
-            replyDTOList={replyDTOList}
-            loadBoard={loadBoard}
-            boardEditorRef={boardEditorRef}
-            boardEditorReadOnlyRef={boardEditorReadOnlyRef}
-            replyEditorRef={replyEditorRef}
-            resetReplyEditorState={resetReplyEditorState}
-          />
-        ) : (
-          <BoardPreview
-            key={boardDTO.boardId}
-            panelId={panelId}
-            memberId={memberId}
-            boardDTO={boardDTO}
-            loadBoard={loadBoard}
-          />
-        )
-      ),
-    [
-      currentBoardId,
-      boardDTOList,
-      replyDTOList,
-      loadBoard,
-      memberId,
-      panelId,
-      resetReplyEditorState
-    ]
+      boardDTOList?.map((boardDTO) => (
+        <BoardPreview
+          key={boardDTO.boardId}
+          panelId={panelId}
+          memberId={memberId}
+          boardDTO={boardDTO}
+        />
+      )),
+    [boardDTOList, memberId, panelId]
   );
 
   return (
@@ -640,7 +497,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-sm btn-accent btn-outline btn-circle ml-3"
             disabled={
-              !loggedIn ||
+              memberId == null ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }
@@ -650,19 +507,15 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </button>
         </div>
       </div>
-      <div hidden={!boardPageState.showBoardEditor}>
-        <BoardEditor
+      {boardPageState.boardId != null || boardPageState.showBoardEditor ? (
+        <BoardDetail
+          memberId={memberId}
           panelId={panelId}
           memberRole={memberRole}
-          boardEditorRef={boardEditorRef}
-          loadBoardPage={loadBoardPage}
-          loadBoard={loadBoard}
-          resetBoardEditorState={resetBoardEditorState}
         />
-      </div>
-      {!boardPageState.showBoardEditor && (
+      ) : (
         <div className="my-2 ml-3 mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
-          {!!boardPageView && boardPageView}
+          {!!boardPreviewPage && boardPreviewPage}
         </div>
       )}
     </div>

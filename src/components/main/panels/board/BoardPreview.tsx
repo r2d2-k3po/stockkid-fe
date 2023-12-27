@@ -9,28 +9,24 @@ type BoardPreviewProps = {
   memberId: string | null;
   panelId: string;
   boardDTO: BoardDTO;
-  loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
 };
 
-const BoardPreview: FC<BoardPreviewProps> = ({
-  memberId,
-  panelId,
-  boardDTO,
-  loadBoard
-}) => {
+const BoardPreview: FC<BoardPreviewProps> = ({memberId, panelId, boardDTO}) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
 
   const onClickToDetail = useCallback(
     async (e: MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      try {
-        await loadBoard(boardDTO?.boardId as string, false);
-      } catch (err) {
-        console.log(err);
-      }
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          boardId: boardDTO?.boardId
+        }
+      };
+      dispatch(updatePanelState(payload));
     },
-    [boardDTO?.boardId, loadBoard]
+    [boardDTO?.boardId, panelId, dispatch]
   );
 
   const onClickSearchTag = useCallback(
@@ -43,7 +39,8 @@ const BoardPreview: FC<BoardPreviewProps> = ({
           searchDisabled: false,
           searchMode: true,
           currentPage: 1,
-          targetPage: 1
+          targetPage: 1,
+          boardId: null
         }
       };
       dispatch(updatePanelState(payload));

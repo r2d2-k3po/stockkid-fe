@@ -54,8 +54,7 @@ export const panelState: PanelState = {
     content: undefined,
     showReplyEditor: false,
     replyId: null,
-    parentId: null,
-    currentBoardId: null
+    parentId: null
   }
 };
 
@@ -85,5 +84,4 @@ export type BoardPageState = {
   showReplyEditor: boolean;
   replyId: string | null;
   parentId: string | null;
-  currentBoardId: string | null;
 };
