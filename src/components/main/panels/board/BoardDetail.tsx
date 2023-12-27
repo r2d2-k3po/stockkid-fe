@@ -1,11 +1,19 @@
-import React, {FC, MouseEvent, useCallback, useEffect, useState} from 'react';
+import React, {
+  FC,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import {useTranslation} from 'react-i18next';
-import {BoardDTO, EditorRef, ReplyDTO} from '../BoardPage';
+import {BoardDTO} from '../BoardPage';
 import {DateTime} from 'luxon';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {
   useDeleteBoardMutation,
+  useLazyReadBoardQuery,
   useLikeBoardMutation
 } from '../../../../app/api';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
@@ -13,50 +21,75 @@ import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 import ReplyList from './ReplyList';
 import Editor from './Editor';
 import {BoardPageState} from '../../../../app/constants/panelInfo';
+import {EditorStateProps, RemirrorContentType} from 'remirror';
+
+export interface IdDTO {
+  id: string;
+}
+
+export interface ReplyDTO {
+  replyId: string;
+  parentId: string;
+  memberId: string;
+  nickname: string;
+  content: string;
+  likeCount: number;
+  regDate: string;
+  modDate: string;
+}
+
+interface BoardReplyDTO {
+  boardDTO: BoardDTO;
+  replyDTOList: ReplyDTO[];
+}
+
+interface GetTextHelperOptions extends Partial<EditorStateProps> {
+  lineBreakDivider?: string;
+}
+
+export interface EditorRef {
+  clearContent: () => void;
+  setContent: (content: RemirrorContentType) => void;
+  getText: ({lineBreakDivider}: GetTextHelperOptions) => string;
+}
 
 type BoardDetailProps = {
   memberId: string | null;
+  memberRole: string | null;
   panelId: string;
-  boardDTO: BoardDTO;
-  replyDTOList: ReplyDTO[] | null | undefined;
-  loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
-  boardEditorRef: React.MutableRefObject<EditorRef | null>;
-  boardEditorReadOnlyRef: React.MutableRefObject<EditorRef | null>;
-  replyEditorRef: React.MutableRefObject<EditorRef | null>;
-  resetReplyEditorState: () => void;
 };
 
-const BoardDetail: FC<BoardDetailProps> = ({
-  memberId,
-  panelId,
-  boardDTO,
-  replyDTOList,
-  loadBoard,
-  boardEditorRef,
-  boardEditorReadOnlyRef,
-  replyEditorRef,
-  resetReplyEditorState
-}) => {
+const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
-
-  const [confirmDeleteBoard, setConfirmDeleteBoard] = useState<boolean>(false);
-
-  const [like, setLike] = useState<boolean | null>(null);
-
-  const [likeUpdated, setLikeUpdated] = useState<boolean>(false);
 
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
   ]?.panelState as BoardPageState;
+
+  const boardEditorRef = useRef<EditorRef | null>(null);
+
+  const replyEditorRef = useRef<EditorRef | null>(null);
+
+  const [requestBoardRead] = useLazyReadBoardQuery();
+
+  const [requestBoardLike, {isSuccess: isSuccessLike, isError: isErrorLike}] =
+    useLikeBoardMutation();
 
   const [
     requestBoardDelete,
     {isSuccess: isSuccessDelete, isError: isErrorDelete, reset: resetDelete}
   ] = useDeleteBoardMutation();
 
-  const [requestBoardLike, {isSuccess: isSuccessLike, isError: isErrorLike}] =
-    useLikeBoardMutation();
+  const [boardDTO, setBoardDTO] = useState<BoardDTO | null>(null);
+
+  const [replyDTOList, setReplyDTOList] = useState<ReplyDTO[] | null>(null);
+
+  const [confirmDeleteBoard, setConfirmDeleteBoard] = useState<boolean>(false);
+
+  const [like, setLike] = useState<boolean | null>(null);
+
+  const [likeUpdated, setLikeUpdated] = useState<boolean>(false);
 
   const onClickLike = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -73,7 +106,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
       e.stopPropagation();
       try {
         const likeRequest = {
-          id: boardDTO.boardId,
+          id: boardPageState.boardId as string,
           number: like == true ? 1 : -1
         };
         await requestBoardLike(likeRequest);
@@ -81,19 +114,22 @@ const BoardDetail: FC<BoardDetailProps> = ({
         console.log(err);
       }
     },
-    [boardDTO.boardId, like, requestBoardLike]
+    [boardPageState.boardId, like, requestBoardLike]
   );
 
   const onClickToPreview = useCallback(
-    async (e: MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
+    (e: MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
       e.stopPropagation();
-      try {
-        await loadBoard(null, false);
-      } catch (err) {
-        console.log(err);
-      }
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          showBoardEditor: false,
+          boardId: null
+        }
+      };
+      dispatch(updatePanelState(payload));
     },
-    [loadBoard]
+    [panelId, dispatch]
   );
 
   const onClickSearchTag = useCallback(
@@ -121,35 +157,34 @@ const BoardDetail: FC<BoardDetailProps> = ({
         panelId: panelId,
         panelState: {
           showBoardEditor: true,
-          boardId: boardDTO.boardId,
-          nickname: boardDTO.nickname,
-          title: boardDTO.title,
-          boardCategory: boardDTO.boardCategory,
-          preview: boardDTO.preview,
-          content: JSON.parse(boardDTO.content as string),
-          tag1: boardDTO.tag1,
-          tag2: boardDTO.tag2,
-          tag3: boardDTO.tag3
+          boardId: boardDTO?.boardId,
+          nickname: boardDTO?.nickname,
+          title: boardDTO?.title,
+          boardCategory: boardDTO?.boardCategory,
+          preview: boardDTO?.preview,
+          content: JSON.parse(boardDTO?.content as string),
+          tag1: boardDTO?.tag1,
+          tag2: boardDTO?.tag2,
+          tag3: boardDTO?.tag3
         }
       };
       dispatch(updatePanelState(payload));
-      boardEditorRef.current?.setContent(
-        JSON.parse(boardDTO.content as string)
-      );
+      // boardEditorRef.current?.setContent(
+      //   JSON.parse(boardDTO?.content as string)
+      // );
     },
     [
       dispatch,
       panelId,
-      boardDTO.boardId,
-      boardDTO.nickname,
-      boardDTO.title,
-      boardDTO.boardCategory,
-      boardDTO.preview,
-      boardDTO.content,
-      boardDTO.tag1,
-      boardDTO.tag2,
-      boardDTO.tag3,
-      boardEditorRef
+      boardDTO?.boardId,
+      boardDTO?.nickname,
+      boardDTO?.title,
+      boardDTO?.boardCategory,
+      boardDTO?.preview,
+      boardDTO?.content,
+      boardDTO?.tag1,
+      boardDTO?.tag2,
+      boardDTO?.tag3
     ]
   );
 
@@ -189,6 +224,90 @@ const BoardDetail: FC<BoardDetailProps> = ({
     },
     [dispatch, panelId]
   );
+
+  // const resetBoardEditorState = useCallback(() => {
+  //   boardEditorRef.current?.clearContent();
+  //   const payload = {
+  //     panelId: panelId,
+  //     panelState: {
+  //       showBoardEditor: false,
+  //       boardId: null,
+  //       boardCategory: '0',
+  //       title: '',
+  //       tag1: '',
+  //       tag2: '',
+  //       tag3: '',
+  //       preview: null,
+  //       content: undefined
+  //     }
+  //   };
+  //   dispatch(updatePanelState(payload));
+  // }, [dispatch, panelId, boardEditorRef]);
+
+  // const resetReplyEditorState = useCallback(() => {
+  //   replyEditorRef.current?.clearContent();
+  //   const payload = {
+  //     panelId: panelId,
+  //     panelState: {
+  //       showReplyEditor: false,
+  //       replyId: null,
+  //       parentId: null,
+  //       preview: null,
+  //       content: undefined
+  //     }
+  //   };
+  //   dispatch(updatePanelState(payload));
+  // }, [dispatch, panelId, replyEditorRef]);
+
+  // useEffect(() => {
+  //   if (currentBoardId != null) {
+  //     try {
+  //       const currentBoard = boardDTOList?.find(
+  //         (boardDTO) => boardDTO.boardId == currentBoardId
+  //       );
+  //       if (currentBoard && currentBoard.content == null) {
+  //         loadBoard(currentBoardId, true);
+  //       }
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   }
+  // }, [loadBoard, boardDTOList, currentBoardId]);
+
+  const loadBoard = useCallback(
+    async (boardId: string, setContent: boolean) => {
+      const dataBoard = await requestBoardRead(boardId as string).unwrap();
+      setBoardDTO((dataBoard?.apiObj as BoardReplyDTO)?.boardDTO);
+      setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
+      if (setContent) {
+        boardEditorRef.current?.setContent(
+          JSON.parse(
+            (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO.content as string
+          )
+        );
+      }
+    },
+    [requestBoardRead]
+  );
+
+  useEffect(() => {
+    if (
+      boardPageState.boardId != null &&
+      !boardPageState.showBoardEditor &&
+      !boardPageState.showReplyEditor
+    ) {
+      try {
+        void loadBoard(boardPageState.boardId, false);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }, [
+    loadBoard,
+    boardPageState.boardId,
+    boardPageState.showBoardEditor,
+    boardPageState.showReplyEditor
+  ]);
 
   useEffect(() => {
     if (memberId == null && boardPageState.showReplyEditor) {
@@ -338,8 +457,9 @@ const BoardDetail: FC<BoardDetailProps> = ({
         </div>
       </div>
       <Editor
+        onChange={handleEditorChange}
         initialContent={JSON.parse(boardDTO?.content as string)}
-        editorRef={boardEditorReadOnlyRef}
+        editorRef={boardEditorRef}
         editable={false}
       />
       <div className="flex justify-between my-1">

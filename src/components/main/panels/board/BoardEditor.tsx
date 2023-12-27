@@ -10,7 +10,7 @@ import Editor from './Editor';
 import {RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {EditorRef, IdDTO} from '../BoardPage';
+import {EditorRef, IdDTO} from './BoardDetail';
 import {
   BoardSaveRequest,
   useModifyBoardMutation,

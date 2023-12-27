@@ -21,7 +21,7 @@ import 'remirror/styles/all.css';
 import {BubbleMenu} from './remirror/BubbleMenu';
 import {TopToolbar} from './remirror/TopToolbar';
 import {RemirrorContentType, RemirrorJSON} from 'remirror';
-import {EditorRef} from '../BoardPage';
+import {EditorRef} from './BoardDetail';
 import {useTranslation} from 'react-i18next';
 
 const ImperativeHandle = forwardRef(function ImperativeHandle(
@@ -44,9 +44,9 @@ const ImperativeHandle = forwardRef(function ImperativeHandle(
 type OnChangeType = (json: RemirrorJSON) => void;
 
 type EditorProps = {
-  onChange?: OnChangeType;
+  onChange: OnChangeType;
   initialContent: RemirrorContentType | undefined;
-  editorRef?: React.MutableRefObject<EditorRef | null>;
+  editorRef: React.MutableRefObject<EditorRef | null>;
   editable: boolean;
 };
 
