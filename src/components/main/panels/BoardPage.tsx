@@ -261,24 +261,38 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     [dispatch, panelId]
   );
 
-  const loadBoardPageRead = useCallback(async () => {
-    const boardPageSetting = {
-      page: boardPageState.currentPage.toString(),
-      size: '20',
-      boardCategory: boardPageState.boardPageCategory,
-      sortBy: boardPageState.sortBy
+  useEffect(() => {
+    const loadBoardPageRead = async () => {
+      const boardPageSetting = {
+        page: boardPageState.currentPage.toString(),
+        size: '20',
+        boardCategory: boardPageState.boardPageCategory,
+        sortBy: boardPageState.sortBy
+      };
+      const dataBoardPage = await requestBoardPageRead(
+        boardPageSetting
+      ).unwrap();
+      setBoardDTOList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
+      const totalPages =
+        (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          totalPages: totalPages
+        }
+      };
+      dispatch(updatePanelState(payload));
     };
-    const dataBoardPage = await requestBoardPageRead(boardPageSetting).unwrap();
-    setBoardDTOList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
-    const totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
-    const payload = {
-      panelId: panelId,
-      panelState: {
-        totalPages: totalPages
+
+    if (!boardPageState.searchMode) {
+      try {
+        void loadBoardPageRead();
+      } catch (err) {
+        console.error(err);
       }
-    };
-    dispatch(updatePanelState(payload));
+    }
   }, [
+    boardPageState.searchMode,
     boardPageState.currentPage,
     boardPageState.boardPageCategory,
     boardPageState.sortBy,
@@ -287,28 +301,39 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     requestBoardPageRead
   ]);
 
-  const loadBoardPageSearch = useCallback(async () => {
-    const searchPageSetting = {
-      page: boardPageState.currentPage.toString(),
-      size: '20',
-      boardCategory: boardPageState.boardPageCategory,
-      sortBy: boardPageState.sortBy,
-      tag: boardPageState.tag
+  useEffect(() => {
+    const loadBoardPageSearch = async () => {
+      const searchPageSetting = {
+        page: boardPageState.currentPage.toString(),
+        size: '20',
+        boardCategory: boardPageState.boardPageCategory,
+        sortBy: boardPageState.sortBy,
+        tag: boardPageState.tag
+      };
+      const dataSearchPage = await requestBoardPageSearch(
+        searchPageSetting
+      ).unwrap();
+      setBoardDTOList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
+      const totalPages =
+        (dataSearchPage?.apiObj as BoardPageDTO)?.totalPages || 1;
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          totalPages: totalPages
+        }
+      };
+      dispatch(updatePanelState(payload));
     };
-    const dataSearchPage = await requestBoardPageSearch(
-      searchPageSetting
-    ).unwrap();
-    setBoardDTOList((dataSearchPage?.apiObj as BoardPageDTO)?.boardDTOList);
-    const totalPages =
-      (dataSearchPage?.apiObj as BoardPageDTO)?.totalPages || 1;
-    const payload = {
-      panelId: panelId,
-      panelState: {
-        totalPages: totalPages
+
+    if (boardPageState.searchMode) {
+      try {
+        void loadBoardPageSearch();
+      } catch (err) {
+        console.error(err);
       }
-    };
-    dispatch(updatePanelState(payload));
+    }
   }, [
+    boardPageState.searchMode,
     boardPageState.currentPage,
     boardPageState.boardPageCategory,
     boardPageState.sortBy,
@@ -317,26 +342,6 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     panelId,
     requestBoardPageSearch
   ]);
-
-  useEffect(() => {
-    if (!boardPageState.searchMode) {
-      try {
-        void loadBoardPageRead();
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  }, [loadBoardPageRead, boardPageState.searchMode]);
-
-  useEffect(() => {
-    if (boardPageState.searchMode) {
-      try {
-        void loadBoardPageSearch();
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  }, [loadBoardPageSearch, boardPageState.searchMode]);
 
   useEffect(() => {
     if (memberId == null && boardPageState.showBoardEditor) {
