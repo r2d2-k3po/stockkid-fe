@@ -47,11 +47,11 @@ export const panelState: PanelState = {
     boardCategory: '0',
     nickname: localStorage.getItem('nickname') || '',
     title: '',
-    tag1: undefined,
-    tag2: undefined,
-    tag3: undefined,
-    preview: undefined,
-    content: undefined,
+    tag1: null,
+    tag2: null,
+    tag3: null,
+    preview: null,
+    content: null,
     showReplyEditor: false,
     replyId: null,
     parentId: null
@@ -76,11 +76,11 @@ export type BoardPageState = {
   boardCategory: 'STOCK' | 'LIFE' | 'QA' | 'NOTICE' | '0';
   nickname: string;
   title: string;
-  tag1: string | undefined;
-  tag2: string | undefined;
-  tag3: string | undefined;
-  preview: string | undefined;
-  content: RemirrorContentType | undefined;
+  tag1: string | null;
+  tag2: string | null;
+  tag3: string | null;
+  preview: string | null;
+  content: RemirrorContentType | null;
   showReplyEditor: boolean;
   replyId: string | null;
   parentId: string | null;
