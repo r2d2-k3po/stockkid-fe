@@ -7,10 +7,10 @@ import React, {
 } from 'react';
 import {useTranslation} from 'react-i18next';
 import Editor from './Editor';
-import {RemirrorJSON} from 'remirror';
+import {RemirrorContentType, RemirrorJSON} from 'remirror';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
-import {EditorRef} from '../BoardPage';
+import {EditorRef} from './BoardDetail';
 import {
   ReplySaveRequest,
   useModifyReplyMutation,

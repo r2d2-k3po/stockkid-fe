@@ -3,7 +3,7 @@ import {DateTime} from 'luxon';
 import Editor from './Editor';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
-import {EditorRef, ReplyDTO} from '../BoardPage';
+import {EditorRef, ReplyDTO} from './BoardDetail';
 import {
   useDeleteReplyMutation,
   useLikeReplyMutation

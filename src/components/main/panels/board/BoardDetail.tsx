@@ -1,4 +1,5 @@
 import React, {
+  ChangeEvent,
   FC,
   MouseEvent,
   useCallback,
@@ -12,16 +13,19 @@ import {DateTime} from 'luxon';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {
+  BoardSaveRequest,
   useDeleteBoardMutation,
   useLazyReadBoardQuery,
-  useLikeBoardMutation
+  useLikeBoardMutation,
+  useModifyBoardMutation,
+  useRegisterBoardMutation
 } from '../../../../app/api';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 import ReplyList from './ReplyList';
 import Editor from './Editor';
 import {BoardPageState} from '../../../../app/constants/panelInfo';
-import {EditorStateProps, RemirrorContentType} from 'remirror';
+import {EditorStateProps, RemirrorContentType, RemirrorJSON} from 'remirror';
 
 export interface IdDTO {
   id: string;
@@ -59,8 +63,8 @@ type BoardTextType = {
   tag1: string | null;
   tag2: string | null;
   tag3: string | null;
-  preview: string | null;
-  content: RemirrorContentType | null;
+  preview: string | undefined;
+  content: RemirrorContentType | undefined;
 };
 
 type BoardDetailProps = {
@@ -72,6 +76,7 @@ type BoardDetailProps = {
 const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
+  const regexFinal = /^.{2,30}$/;
 
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
@@ -90,6 +95,20 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
     requestBoardDelete,
     {isSuccess: isSuccessDelete, isError: isErrorDelete, reset: resetDelete}
   ] = useDeleteBoardMutation();
+
+  const [
+    requestBoardRegister,
+    {
+      isSuccess: isSuccessRegister,
+      isError: isErrorRegister,
+      reset: resetRegister
+    }
+  ] = useRegisterBoardMutation();
+
+  const [
+    requestBoardModify,
+    {isSuccess: isSuccessModify, isError: isErrorModify, reset: resetModify}
+  ] = useModifyBoardMutation();
 
   const [boardDTO, setBoardDTO] = useState<BoardDTO | null>(null);
 
@@ -110,6 +129,8 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
     preview: boardPageState.preview,
     content: boardPageState.content
   });
+
+  // boardPageState.showBoardEditor == false ->
 
   const onClickLike = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -221,40 +242,6 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
     [dispatch, panelId]
   );
 
-  // const resetBoardEditorState = useCallback(() => {
-  //   boardEditorRef.current?.clearContent();
-  //   const payload = {
-  //     panelId: panelId,
-  //     panelState: {
-  //       showBoardEditor: false,
-  //       boardId: null,
-  //       boardCategory: '0',
-  //       title: '',
-  //       tag1: '',
-  //       tag2: '',
-  //       tag3: '',
-  //       preview: null,
-  //       content: undefined
-  //     }
-  //   };
-  //   dispatch(updatePanelState(payload));
-  // }, [dispatch, panelId, boardEditorRef]);
-
-  // const resetReplyEditorState = useCallback(() => {
-  //   replyEditorRef.current?.clearContent();
-  //   const payload = {
-  //     panelId: panelId,
-  //     panelState: {
-  //       showReplyEditor: false,
-  //       replyId: null,
-  //       parentId: null,
-  //       preview: null,
-  //       content: undefined
-  //     }
-  //   };
-  //   dispatch(updatePanelState(payload));
-  // }, [dispatch, panelId, replyEditorRef]);
-
   const loadBoard = useCallback(
     async (boardId: string, setContent: boolean) => {
       const dataBoard = await requestBoardRead(boardId as string).unwrap();
@@ -291,18 +278,6 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
   ]);
 
   useEffect(() => {
-    if (memberId == null && boardPageState.showReplyEditor) {
-      const payload = {
-        panelId: panelId,
-        panelState: {
-          showReplyEditor: false
-        }
-      };
-      dispatch(updatePanelState(payload));
-    }
-  }, [memberId, panelId, dispatch, boardPageState.showReplyEditor]);
-
-  useEffect(() => {
     if (isSuccessLike) {
       const number = like == true ? 1 : -1;
       const likeCount = (boardDTO?.likeCount as number) + number;
@@ -337,26 +312,236 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
     }
   }, [isSuccessDelete, isErrorDelete, resetDelete]);
 
-  // save Editor info before unmounting
+  // <- boardPageState.showBoardEditor == false
+
+  // boardPageState.showBoardEditor == true ->
+
+  const handleChangeBoardForm = useCallback(
+    (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
+      const regex = /^.{0,30}$/;
+      if (regex.test(e.target.value)) {
+        setBoardText((boardText) => {
+          return {
+            ...boardText,
+            [key]: key == 'title' ? e.target.value : e.target.value.trim()
+          };
+        });
+      }
+    },
+    []
+  );
+
+  const handleChangeCategory = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      e.stopPropagation();
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          boardCategory: e.target.value as 'STOCK' | 'LIFE' | 'QA' | 'NOTICE'
+        }
+      };
+      dispatch(updatePanelState(payload));
+    },
+    [dispatch, panelId]
+  );
+
+  const handleEditorChange = useCallback(
+    (json: RemirrorJSON) => {
+      setBoardText((boardText) => {
+        return {
+          ...boardText,
+          preview: boardEditorRef.current?.getText({lineBreakDivider: ' '}),
+          content: json
+        };
+      });
+    },
+    [boardEditorRef]
+  );
+
+  const resetBoardEditorState = useCallback(() => {
+    const payload = {
+      panelId: panelId,
+      panelState: {
+        showBoardEditor: false,
+        boardCategory: '0',
+        title: '',
+        tag1: null,
+        tag2: null,
+        tag3: null,
+        preview: undefined,
+        content: undefined
+      }
+    };
+    dispatch(updatePanelState(payload));
+  }, [dispatch, panelId]);
+
+  const onClickCancel = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      if (boardPageState.boardId == null) {
+        boardEditorRef.current?.clearContent();
+      } else {
+        boardEditorRef.current?.setContent(
+          JSON.parse(boardDTO?.content as string)
+        );
+      }
+      resetBoardEditorState();
+    },
+    [boardDTO?.content, boardPageState.boardId, resetBoardEditorState]
+  );
+
+  const onClickSave = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      try {
+        localStorage.setItem('nickname', boardText.nickname);
+        const boardSaveRequest: BoardSaveRequest = {
+          boardId: boardPageState.boardId,
+          boardCategory: boardPageState.boardCategory,
+          nickname: boardText.nickname,
+          title: boardText.title,
+          preview: boardText.preview as string,
+          content: JSON.stringify(boardText.content),
+          tag1: boardText.tag1 || null,
+          tag2: boardText.tag2 || null,
+          tag3: boardText.tag3 || null
+        };
+        if (boardPageState.boardId == null) {
+          const data = await requestBoardRegister(boardSaveRequest).unwrap();
+          const boardId = (data?.apiObj as IdDTO)?.id;
+          const payload = {
+            panelId: panelId,
+            panelState: {
+              boardId: boardId,
+              nickname: boardText.nickname
+            }
+          };
+          dispatch(updatePanelState(payload));
+        } else {
+          await requestBoardModify(boardSaveRequest);
+          const payload = {
+            panelId: panelId,
+            panelState: {
+              nickname: boardText.nickname
+            }
+          };
+          dispatch(updatePanelState(payload));
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [
+      boardPageState.boardId,
+      boardText.nickname,
+      boardPageState.boardCategory,
+      boardText.title,
+      boardText.preview,
+      boardText.content,
+      boardText.tag1,
+      boardText.tag2,
+      boardText.tag3,
+      requestBoardRegister,
+      requestBoardModify,
+      panelId,
+      dispatch
+    ]
+  );
+
+  useEffect(() => {
+    if (isSuccessRegister || isErrorRegister) {
+      const id = setTimeout(() => {
+        if (isSuccessRegister) {
+          resetBoardEditorState();
+        }
+        resetRegister();
+      }, 1000);
+      return () => clearTimeout(id);
+    }
+  }, [
+    isSuccessRegister,
+    isErrorRegister,
+    resetBoardEditorState,
+    resetRegister
+  ]);
+
+  useEffect(() => {
+    if (isSuccessModify || isErrorModify) {
+      const id = setTimeout(() => {
+        if (isSuccessModify) {
+          resetBoardEditorState();
+        }
+        resetModify();
+      }, 1000);
+      return () => clearTimeout(id);
+    }
+  }, [isSuccessModify, isErrorModify, resetBoardEditorState, resetModify]);
+
+  useEffect(() => {
+    if (memberId == null && boardPageState.showBoardEditor) {
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          showBoardEditor: false
+        }
+      };
+      dispatch(updatePanelState(payload));
+    }
+  }, [memberId, boardPageState.showBoardEditor, panelId, dispatch]);
+
+  // save BoardEditor info before unmounting
   useEffect(() => {
     return () => {
       if (boardPageState.showBoardEditor) {
         const payload = {
           panelId: panelId,
           panelState: {
-            nickname: boardDTO?.nickname,
-            title: boardDTO?.title,
-            preview: boardDTO?.preview,
-            content: JSON.parse(boardDTO?.content as string),
-            tag1: boardDTO?.tag1,
-            tag2: boardDTO?.tag2,
-            tag3: boardDTO?.tag3
+            nickname: boardText.nickname,
+            title: boardText.title,
+            preview: boardText.preview,
+            content: boardText.content,
+            tag1: boardText.tag1,
+            tag2: boardText.tag2,
+            tag3: boardText.tag3
           }
         };
         dispatch(updatePanelState(payload));
       }
     };
   }, []);
+
+  // <- boardPageState.showBoardEditor == true
+
+  // boardPageState.showReplyEditor == true ->
+
+  // const resetReplyEditorState = useCallback(() => {
+  //   replyEditorRef.current?.clearContent();
+  //   const payload = {
+  //     panelId: panelId,
+  //     panelState: {
+  //       showReplyEditor: false,
+  //       replyId: null,
+  //       parentId: null,
+  //       preview: null,
+  //       content: undefined
+  //     }
+  //   };
+  //   dispatch(updatePanelState(payload));
+  // }, [dispatch, panelId, replyEditorRef]);
+
+  useEffect(() => {
+    if (memberId == null && boardPageState.showReplyEditor) {
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          showReplyEditor: false
+        }
+      };
+      dispatch(updatePanelState(payload));
+    }
+  }, [memberId, panelId, dispatch, boardPageState.showReplyEditor]);
+
+  // <- boardPageState.showReplyEditor == true
 
   return (
     <div className="border-b border-warning my-2 mr-2">
@@ -474,7 +659,7 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
         onChange={handleEditorChange}
         initialContent={JSON.parse(boardDTO?.content as string)}
         editorRef={boardEditorRef}
-        editable={false}
+        editable={boardPageState.showBoardEditor}
       />
       <div className="flex justify-between my-1">
         <button
@@ -493,7 +678,7 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
           </button>
         </div>
         <div className="justify-end">
-          <div hidden={memberId != boardDTO.memberId || confirmDeleteBoard}>
+          <div hidden={memberId != boardDTO?.memberId || confirmDeleteBoard}>
             <button
               disabled={boardPageState.showReplyEditor}
               className="btn btn-xs btn-circle btn-outline btn-accent m-1"
@@ -509,7 +694,7 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
               <i className="ri-delete-bin-line ri-1x"></i>
             </button>
           </div>
-          <div hidden={memberId != boardDTO.memberId || !confirmDeleteBoard}>
+          <div hidden={memberId != boardDTO?.memberId || !confirmDeleteBoard}>
             <button
               onClick={cancelDeleteBoard}
               className="btn btn-xs btn-ghost mr-1"

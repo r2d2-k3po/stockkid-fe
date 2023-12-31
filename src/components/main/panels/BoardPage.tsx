@@ -343,18 +343,6 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     requestBoardPageSearch
   ]);
 
-  useEffect(() => {
-    if (memberId == null && boardPageState.showBoardEditor) {
-      const payload = {
-        panelId: panelId,
-        panelState: {
-          showBoardEditor: false
-        }
-      };
-      dispatch(updatePanelState(payload));
-    }
-  }, [memberId, boardPageState.showBoardEditor, panelId, dispatch]);
-
   const boardPreviewPage = useMemo(
     () =>
       boardDTOList?.map((boardDTO) => (

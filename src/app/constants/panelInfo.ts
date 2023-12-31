@@ -50,8 +50,8 @@ export const panelState: PanelState = {
     tag1: null,
     tag2: null,
     tag3: null,
-    preview: null,
-    content: null,
+    preview: undefined,
+    content: undefined,
     showReplyEditor: false,
     replyId: null,
     parentId: null
@@ -79,8 +79,8 @@ export type BoardPageState = {
   tag1: string | null;
   tag2: string | null;
   tag3: string | null;
-  preview: string | null;
-  content: RemirrorContentType | null;
+  preview: string | undefined;
+  content: RemirrorContentType | undefined;
   showReplyEditor: boolean;
   replyId: string | null;
   parentId: string | null;

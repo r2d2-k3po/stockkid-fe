@@ -1,5 +1,5 @@
 import React, {FC, MouseEvent, useMemo} from 'react';
-import {EditorRef, ReplyDTO} from '../BoardPage';
+import {EditorRef, ReplyDTO} from './BoardDetail';
 import {useAppSelector} from '../../../../app/hooks';
 import {BoardPageState} from '../../../../app/constants/panelInfo';
 import Reply from './Reply';
