@@ -88,8 +88,10 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
 
   const [requestBoardRead] = useLazyReadBoardQuery();
 
-  const [requestBoardLike, {isSuccess: isSuccessLike, isError: isErrorLike}] =
-    useLikeBoardMutation();
+  const [
+    requestBoardLike,
+    {isSuccess: isSuccessLike, isError: isErrorLike, reset: resetLike}
+  ] = useLikeBoardMutation();
 
   const [
     requestBoardDelete,
@@ -285,11 +287,13 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
         return {...(boardDTO as BoardDTO), likeCount: likeCount};
       });
       setLikeUpdated(true);
+      resetLike();
     } else if (isErrorLike) {
       setLike(null);
       setLikeUpdated(true);
+      resetLike();
     }
-  }, [isSuccessLike, isErrorLike, like, boardDTO?.likeCount]);
+  }, [isSuccessLike, isErrorLike, like, resetLike, boardDTO?.likeCount]);
 
   useEffect(() => {
     if (isSuccessDelete || isErrorDelete) {
@@ -412,20 +416,12 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
           const payload = {
             panelId: panelId,
             panelState: {
-              boardId: boardId,
-              nickname: boardText.nickname
+              boardId: boardId
             }
           };
           dispatch(updatePanelState(payload));
         } else {
           await requestBoardModify(boardSaveRequest);
-          const payload = {
-            panelId: panelId,
-            panelState: {
-              nickname: boardText.nickname
-            }
-          };
-          dispatch(updatePanelState(payload));
         }
       } catch (err) {
         console.log(err);
@@ -542,6 +538,10 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
   }, [memberId, panelId, dispatch, boardPageState.showReplyEditor]);
 
   // <- boardPageState.showReplyEditor == true
+
+  if (boardPageState.boardId != null && boardDTO == null) {
+    return null;
+  }
 
   return (
     <div className="border-b border-warning my-2 mr-2">
