@@ -207,12 +207,35 @@ const BoardDetail: FC<BoardDetailProps> = ({
       const payload = {
         panelId: panelId,
         panelState: {
-          showBoardEditor: true
+          showBoardEditor: true,
+          boardId: boardDTO?.boardId,
+          boardCategory: boardDTO?.boardCategory
         }
       };
       dispatch(updatePanelState(payload));
+      setBoardText({
+        nickname: boardDTO?.nickname as string,
+        title: boardDTO?.title as string,
+        tag1: boardDTO?.tag1 as string,
+        tag2: boardDTO?.tag2 as string,
+        tag3: boardDTO?.tag3 as string,
+        preview: boardDTO?.preview,
+        content: JSON.parse(boardDTO?.content as string)
+      });
     },
-    [dispatch, panelId]
+    [
+      dispatch,
+      panelId,
+      boardDTO?.boardId,
+      boardDTO?.boardCategory,
+      boardDTO?.nickname,
+      boardDTO?.title,
+      boardDTO?.tag1,
+      boardDTO?.tag2,
+      boardDTO?.tag3,
+      boardDTO?.preview,
+      boardDTO?.content
+    ]
   );
 
   const deleteBoard = useCallback((e: MouseEvent<HTMLButtonElement>) => {
@@ -432,6 +455,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
       panelId: panelId,
       panelState: {
         showBoardEditor: false,
+        boardId: null,
         boardCategory: '0',
         title: '',
         tag1: null,
@@ -590,17 +614,17 @@ const BoardDetail: FC<BoardDetailProps> = ({
   //   dispatch(updatePanelState(payload));
   // }, [dispatch, panelId, replyEditorRef]);
 
-  useEffect(() => {
-    if (memberId == null && boardPageState.showReplyEditor) {
-      const payload = {
-        panelId: panelId,
-        panelState: {
-          showReplyEditor: false
-        }
-      };
-      dispatch(updatePanelState(payload));
-    }
-  }, [memberId, panelId, dispatch, boardPageState.showReplyEditor]);
+  // useEffect(() => {
+  //   if (memberId == null && boardPageState.showReplyEditor) {
+  //     const payload = {
+  //       panelId: panelId,
+  //       panelState: {
+  //         showReplyEditor: false
+  //       }
+  //     };
+  //     dispatch(updatePanelState(payload));
+  //   }
+  // }, [memberId, panelId, dispatch, boardPageState.showReplyEditor]);
 
   // <- boardPageState.showReplyEditor == true
 
@@ -609,182 +633,303 @@ const BoardDetail: FC<BoardDetailProps> = ({
   }
 
   return (
-    <div className="border-b border-warning my-2 mr-2">
-      <div className="flex justify-between">
-        <div className="flex justify-start mb-2 gap-2">
-          <i className="ri-user-line ri-1x"></i>
-          <button
-            className={
-              memberId == boardDTO?.memberId
-                ? 'text-sm text-primary btn-ghost rounded -mt-1 px-0.5'
-                : 'text-sm text-info btn-ghost rounded -mt-1 px-0.5'
-            }
-          >
-            {boardDTO?.nickname}
-          </button>
-          <div
-            onClick={onClickToPreview}
-            className="text-md text-info ml-16 hover:text-accent"
-          >
-            {boardDTO?.title}
-          </div>
-        </div>
-        <div className="flex justify-end mb-2">
-          <i className="ri-time-line ri-1x"></i>
-          <div className="text-sm text-info mx-1">
-            {DateTime.fromISO(
-              boardDTO?.modDate.split('.')[0] as string
-            ).toFormat('HH:mm yyyy-MM-dd')}
-          </div>
-          <div className="text-xs text-info text-center w-16 mx-2 border-[1px] border-secondary rounded-lg my-0.5">
-            {t(
-              `BoardPage.Category.${
-                boardDTO?.boardCategory as 'STOCK' | 'LIFE' | 'QA' | 'NOTICE'
-              }`
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-between">
-        <div className="flex justify-start mb-2 gap-2">
-          <i className="ri-eye-line ri-1x"></i>
-          <div className="text-sm text-info">{boardDTO?.readCount}</div>
-          <i className="ri-chat-1-line ri-1x"></i>
-          <div className="text-sm text-info">{boardDTO?.replyCount}</div>
-          <i className="ri-star-line ri-1x"></i>
-          <div className="text-sm text-info">{boardDTO?.likeCount}</div>
-          <div hidden={memberId == null}>
-            <div className="flex gap-1">
-              <div
-                className={
-                  like == null ? 'invisible -mt-1 mr-1' : 'visible -mt-1 mr-1'
-                }
+    <div className="border-b border-warning my-2 mx-3">
+      {boardPageState.showBoardEditor ? (
+        // boardPageState.showBoardEditor == true ->
+        <>
+          <div className="flex justify-between">
+            <div className="flex justify-start mb-2 gap-2">
+              <i className="ri-user-line ri-1x"></i>
+              <input
+                type="text"
+                name="nickname"
+                placeholder={t('Board.placeholder.nickname') as string}
+                value={boardText.nickname}
+                onChange={handleChangeBoardForm('nickname')}
+                className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
+              />
+            </div>
+            <div className="flex justify-center">
+              <input
+                type="text"
+                name="title"
+                placeholder={t('Board.placeholder.title') as string}
+                value={boardText.title}
+                onChange={handleChangeBoardForm('title')}
+                className="w-96 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
+              />
+            </div>
+            <div className="flex justify-end mb-2">
+              <select
+                onChange={handleChangeCategory}
+                className="max-w-xs select select-secondary select-xs text-accent-content mx-3"
+                value={boardPageState.boardCategory}
               >
-                <button
-                  onClick={updateLike}
-                  disabled={likeUpdated}
-                  className="btn btn-xs btn-circle btn-outline btn-warning"
+                <option disabled value="0">
+                  {t('BoardPage.Category.Category')}
+                </option>
+                <option value="STOCK">{t('BoardPage.Category.STOCK')}</option>
+                <option value="LIFE">{t('BoardPage.Category.LIFE')}</option>
+                <option value="QA">{t('BoardPage.Category.QA')}</option>
+                <option
+                  disabled={memberRole != 'ADMIN' && memberRole != 'STAFF'}
+                  value="NOTICE"
                 >
-                  <i className="ri-arrow-left-double-line ri-1x"></i>
+                  {t('BoardPage.Category.NOTICE')}
+                </option>
+              </select>
+              <button
+                onClick={onClickCancel}
+                className="btn btn-xs btn-ghost mr-1"
+              >
+                {t('Common.Cancel')}
+              </button>
+              {isErrorRegister || isErrorModify ? (
+                <div className="ml-2.5 mr-3">
+                  <MaterialSymbolError size={19} />
+                </div>
+              ) : isSuccessRegister || isSuccessModify ? (
+                <div className="ml-2.5 mr-3">
+                  <MaterialSymbolSuccess size={19} />
+                </div>
+              ) : (
+                <button
+                  disabled={
+                    boardPageState.boardCategory == '0' ||
+                    !regexFinal.test(boardPageState.nickname) ||
+                    !regexFinal.test(boardPageState.title) ||
+                    !boardPageState.preview
+                  }
+                  onClick={onClickSave}
+                  className="btn btn-xs btn-accent"
+                >
+                  {t('Common.Save')}
                 </button>
-              </div>
-              <button
-                disabled={likeUpdated}
-                onClick={onClickLike}
-                className={
-                  like == true
-                    ? 'btn btn-xs btn-circle btn-outline btn-accent btn-active'
-                    : 'btn btn-xs btn-circle btn-outline btn-accent'
-                }
-              >
-                <i className="ri-thumb-up-line ri-1x"></i>
-              </button>
-              <button
-                disabled={likeUpdated}
-                onClick={onClickNotLike}
-                className={
-                  like == false
-                    ? 'btn btn-xs btn-circle btn-outline btn-error btn-active'
-                    : 'btn btn-xs btn-circle btn-outline btn-error'
-                }
-              >
-                <i className="ri-thumb-down-line ri-1x"></i>
-              </button>
+              )}
             </div>
           </div>
-        </div>
-        <div className="flex mb-2 mr-4 gap-4">
-          {boardDTO?.tag1 && (
-            <button
-              className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
-              onClick={onClickSearchTag(boardDTO?.tag1)}
-            >
-              {boardDTO?.tag1}
-            </button>
-          )}
-          {boardDTO?.tag2 && (
-            <button
-              className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
-              onClick={onClickSearchTag(boardDTO?.tag2)}
-            >
-              {boardDTO?.tag2}
-            </button>
-          )}
-          {boardDTO?.tag3 && (
-            <button
-              className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
-              onClick={onClickSearchTag(boardDTO?.tag3)}
-            >
-              {boardDTO?.tag3}
-            </button>
-          )}
-        </div>
-      </div>
+          <div className="flex justify-between">
+            <div className="flex justify-start mb-2 gap-2"></div>
+            <div className="flex justify-end mb-2 mr-24 gap-2">
+              <input
+                type="text"
+                name="tag1"
+                placeholder={t('Board.placeholder.tag1') as string}
+                value={boardText.tag1 ?? ''}
+                onChange={handleChangeBoardForm('tag1')}
+                className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
+              />
+              <input
+                type="text"
+                name="tag2"
+                placeholder={t('Board.placeholder.tag2') as string}
+                value={boardText.tag2 ?? ''}
+                onChange={handleChangeBoardForm('tag2')}
+                className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
+              />
+              <input
+                type="text"
+                name="tag3"
+                placeholder={t('Board.placeholder.tag3') as string}
+                value={boardText.tag3 ?? ''}
+                onChange={handleChangeBoardForm('tag3')}
+                className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        // <- boardPageState.showBoardEditor == true
+        // boardPageState.showBoardEditor == false ->
+        <>
+          <div className="flex justify-between">
+            <div className="flex justify-start mb-2 gap-2">
+              <i className="ri-user-line ri-1x"></i>
+              <button
+                className={
+                  memberId == boardDTO?.memberId
+                    ? 'text-sm text-primary btn-ghost rounded -mt-1 px-0.5'
+                    : 'text-sm text-info btn-ghost rounded -mt-1 px-0.5'
+                }
+              >
+                {boardDTO?.nickname}
+              </button>
+              <div
+                onClick={onClickToPreview}
+                className="text-md text-info ml-16 hover:text-accent"
+              >
+                {boardDTO?.title}
+              </div>
+            </div>
+            <div className="flex justify-end mb-2">
+              <i className="ri-time-line ri-1x"></i>
+              <div className="text-sm text-info mx-1">
+                {DateTime.fromISO(
+                  boardDTO?.modDate.split('.')[0] as string
+                ).toFormat('HH:mm yyyy-MM-dd')}
+              </div>
+              <div className="text-xs text-info text-center w-16 mx-2 border-[1px] border-secondary rounded-lg my-0.5">
+                {t(
+                  `BoardPage.Category.${
+                    boardDTO?.boardCategory as
+                      | 'STOCK'
+                      | 'LIFE'
+                      | 'QA'
+                      | 'NOTICE'
+                  }`
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <div className="flex justify-start mb-2 gap-2">
+              <i className="ri-eye-line ri-1x"></i>
+              <div className="text-sm text-info">{boardDTO?.readCount}</div>
+              <i className="ri-chat-1-line ri-1x"></i>
+              <div className="text-sm text-info">{boardDTO?.replyCount}</div>
+              <i className="ri-star-line ri-1x"></i>
+              <div className="text-sm text-info">{boardDTO?.likeCount}</div>
+              <div hidden={memberId == null}>
+                <div className="flex gap-1">
+                  <div
+                    className={
+                      like == null
+                        ? 'invisible -mt-1 mr-1'
+                        : 'visible -mt-1 mr-1'
+                    }
+                  >
+                    <button
+                      onClick={updateLike}
+                      disabled={likeUpdated}
+                      className="btn btn-xs btn-circle btn-outline btn-warning"
+                    >
+                      <i className="ri-arrow-left-double-line ri-1x"></i>
+                    </button>
+                  </div>
+                  <button
+                    disabled={likeUpdated}
+                    onClick={onClickLike}
+                    className={
+                      like == true
+                        ? 'btn btn-xs btn-circle btn-outline btn-accent btn-active'
+                        : 'btn btn-xs btn-circle btn-outline btn-accent'
+                    }
+                  >
+                    <i className="ri-thumb-up-line ri-1x"></i>
+                  </button>
+                  <button
+                    disabled={likeUpdated}
+                    onClick={onClickNotLike}
+                    className={
+                      like == false
+                        ? 'btn btn-xs btn-circle btn-outline btn-error btn-active'
+                        : 'btn btn-xs btn-circle btn-outline btn-error'
+                    }
+                  >
+                    <i className="ri-thumb-down-line ri-1x"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="flex mb-2 mr-4 gap-4">
+              {boardDTO?.tag1 && (
+                <button
+                  className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+                  onClick={onClickSearchTag(boardDTO?.tag1)}
+                >
+                  {boardDTO?.tag1}
+                </button>
+              )}
+              {boardDTO?.tag2 && (
+                <button
+                  className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+                  onClick={onClickSearchTag(boardDTO?.tag2)}
+                >
+                  {boardDTO?.tag2}
+                </button>
+              )}
+              {boardDTO?.tag3 && (
+                <button
+                  className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+                  onClick={onClickSearchTag(boardDTO?.tag3)}
+                >
+                  {boardDTO?.tag3}
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+        // <- boardPageState.showBoardEditor == false
+      )}
       <Editor
         onChange={handleEditorChange}
         initialContent={JSON.parse(boardDTO?.content as string)}
         editorRef={boardEditorRef}
         editable={boardPageState.showBoardEditor}
       />
-      <div className="flex justify-between my-1">
-        <button
-          disabled={memberId == null || boardPageState.showReplyEditor}
-          onClick={enableReplyEditor(null)}
-          className="btn btn-xs btn-circle btn-outline btn-warning m-1"
-        >
-          <i className="ri-reply-line ri-1x"></i>
-        </button>
-        <div className="justify-center">
+      {!boardPageState.showBoardEditor && (
+        // boardPageState.showBoardEditor == false ->
+        <div className="flex justify-between my-1">
           <button
-            onClick={onClickToPreview}
-            className="btn btn-xs btn-circle btn-outline btn-info hover:btn-accent m-1"
+            disabled={memberId == null || boardPageState.showReplyEditor}
+            onClick={enableReplyEditor(null)}
+            className="btn btn-xs btn-circle btn-outline btn-warning m-1"
           >
-            <i className="ri-skip-up-line ri-1x"></i>
+            <i className="ri-reply-line ri-1x"></i>
           </button>
-        </div>
-        <div className="justify-end">
-          <div hidden={memberId != boardDTO?.memberId || confirmDeleteBoard}>
+          <div className="justify-center">
             <button
-              disabled={boardPageState.showReplyEditor}
-              className="btn btn-xs btn-circle btn-outline btn-accent m-1"
-              onClick={enableBoardEditorToModify}
+              onClick={onClickToPreview}
+              className="btn btn-xs btn-circle btn-outline btn-info hover:btn-accent m-1"
             >
-              <i className="ri-edit-2-line ri-1x"></i>
-            </button>
-            <button
-              disabled={boardPageState.showReplyEditor}
-              className="btn btn-xs btn-circle btn-outline btn-error m-1"
-              onClick={deleteBoard}
-            >
-              <i className="ri-delete-bin-line ri-1x"></i>
+              <i className="ri-skip-up-line ri-1x"></i>
             </button>
           </div>
-          <div hidden={memberId != boardDTO?.memberId || !confirmDeleteBoard}>
-            <button
-              onClick={cancelDeleteBoard}
-              className="btn btn-xs btn-ghost mr-1"
-            >
-              {t('Common.Cancel')}
-            </button>
-            {isErrorDelete ? (
-              <div className="ml-2.5 mr-3">
-                <MaterialSymbolError size={19} />
-              </div>
-            ) : isSuccessDelete ? (
-              <div className="ml-2.5 mr-3">
-                <MaterialSymbolSuccess size={19} />
-              </div>
-            ) : (
+          <div className="justify-end">
+            <div hidden={memberId != boardDTO?.memberId || confirmDeleteBoard}>
               <button
-                onClick={reallyDeleteBoard}
-                className="btn btn-xs btn-accent"
+                disabled={boardPageState.showReplyEditor}
+                className="btn btn-xs btn-circle btn-outline btn-accent m-1"
+                onClick={enableBoardEditorToModify}
               >
-                {t('Common.Delete')}
+                <i className="ri-edit-2-line ri-1x"></i>
               </button>
-            )}
+              <button
+                disabled={boardPageState.showReplyEditor}
+                className="btn btn-xs btn-circle btn-outline btn-error m-1"
+                onClick={deleteBoard}
+              >
+                <i className="ri-delete-bin-line ri-1x"></i>
+              </button>
+            </div>
+            <div hidden={memberId != boardDTO?.memberId || !confirmDeleteBoard}>
+              <button
+                onClick={cancelDeleteBoard}
+                className="btn btn-xs btn-ghost mr-1"
+              >
+                {t('Common.Cancel')}
+              </button>
+              {isErrorDelete ? (
+                <div className="ml-2.5 mr-3">
+                  <MaterialSymbolError size={19} />
+                </div>
+              ) : isSuccessDelete ? (
+                <div className="ml-2.5 mr-3">
+                  <MaterialSymbolSuccess size={19} />
+                </div>
+              ) : (
+                <button
+                  onClick={reallyDeleteBoard}
+                  className="btn btn-xs btn-accent"
+                >
+                  {t('Common.Delete')}
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+        // <- boardPageState.showBoardEditor == false
+      )}
       {/*<ReplyList*/}
       {/*  panelId={panelId}*/}
       {/*  memberId={memberId}*/}
