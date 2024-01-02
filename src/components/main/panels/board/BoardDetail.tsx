@@ -71,9 +71,17 @@ type BoardDetailProps = {
   memberId: string | null;
   memberRole: string | null;
   panelId: string;
+  setBoardDTOList: React.Dispatch<
+    React.SetStateAction<BoardDTO[] | null | undefined>
+  >;
 };
 
-const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
+const BoardDetail: FC<BoardDetailProps> = ({
+  memberId,
+  memberRole,
+  panelId,
+  setBoardDTOList
+}) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const regexFinal = /^.{2,30}$/;
@@ -249,6 +257,19 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
       const dataBoard = await requestBoardRead(boardId as string).unwrap();
       setBoardDTO((dataBoard?.apiObj as BoardReplyDTO)?.boardDTO);
       setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
+      setBoardDTOList((boardDTOList) =>
+        boardDTOList?.map((bDTO) => {
+          if (bDTO.boardId == boardPageState.boardId) {
+            return {
+              ...bDTO,
+              readCount: (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO
+                .readCount
+            };
+          } else {
+            return bDTO;
+          }
+        })
+      );
       if (setContent) {
         boardEditorRef.current?.setContent(
           JSON.parse(
@@ -257,7 +278,7 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
         );
       }
     },
-    [requestBoardRead]
+    [requestBoardRead, boardPageState.boardId, setBoardDTOList]
   );
 
   useEffect(() => {
@@ -286,6 +307,18 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
       setBoardDTO((boardDTO) => {
         return {...(boardDTO as BoardDTO), likeCount: likeCount};
       });
+      setBoardDTOList((boardDTOList) =>
+        boardDTOList?.map((bDTO) => {
+          if (bDTO.boardId == boardPageState.boardId) {
+            return {
+              ...bDTO,
+              likeCount: likeCount
+            };
+          } else {
+            return bDTO;
+          }
+        })
+      );
       setLikeUpdated(true);
       resetLike();
     } else if (isErrorLike) {
@@ -293,7 +326,15 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
       setLikeUpdated(true);
       resetLike();
     }
-  }, [isSuccessLike, isErrorLike, like, resetLike, boardDTO?.likeCount]);
+  }, [
+    isSuccessLike,
+    isErrorLike,
+    like,
+    resetLike,
+    boardDTO?.likeCount,
+    boardPageState.boardId,
+    setBoardDTOList
+  ]);
 
   useEffect(() => {
     if (isSuccessDelete || isErrorDelete) {
@@ -308,13 +349,37 @@ const BoardDetail: FC<BoardDetailProps> = ({memberId, memberRole, panelId}) => {
                 '{"type":"doc","content":[{"type":"paragraph","attrs":{"dir":null,"ignoreBidiAutoUpdate":null},"content":[{"type":"text","text":"deleted"}]}]}'
             };
           });
+          boardEditorRef.current?.setContent(
+            JSON.parse(
+              '{"type":"doc","content":[{"type":"paragraph","attrs":{"dir":null,"ignoreBidiAutoUpdate":null},"content":[{"type":"text","text":"deleted"}]}]}'
+            )
+          );
+          setBoardDTOList((boardDTOList) =>
+            boardDTOList?.map((bDTO) => {
+              if (bDTO.boardId == boardPageState.boardId) {
+                return {
+                  ...bDTO,
+                  title: 'deleted',
+                  preview: 'deleted'
+                };
+              } else {
+                return bDTO;
+              }
+            })
+          );
           setConfirmDeleteBoard(false);
         }
         resetDelete();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessDelete, isErrorDelete, resetDelete]);
+  }, [
+    isSuccessDelete,
+    isErrorDelete,
+    resetDelete,
+    boardPageState.boardId,
+    setBoardDTOList
+  ]);
 
   // <- boardPageState.showBoardEditor == false
 

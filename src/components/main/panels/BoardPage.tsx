@@ -505,6 +505,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           memberId={memberId}
           panelId={panelId}
           memberRole={memberRole}
+          setBoardDTOList={setBoardDTOList}
         />
       ) : (
         <div className="my-2 ml-3 mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
