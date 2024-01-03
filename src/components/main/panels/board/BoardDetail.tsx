@@ -305,11 +305,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
   );
 
   useEffect(() => {
-    if (
-      boardPageState.boardId != null &&
-      !boardPageState.showBoardEditor &&
-      !boardPageState.showReplyEditor
-    ) {
+    if (boardPageState.boardId != null) {
       try {
         void loadBoard(boardPageState.boardId, false);
       } catch (err) {
@@ -455,7 +451,6 @@ const BoardDetail: FC<BoardDetailProps> = ({
       panelId: panelId,
       panelState: {
         showBoardEditor: false,
-        boardId: null,
         boardCategory: '0',
         title: '',
         tag1: null,
@@ -466,6 +461,15 @@ const BoardDetail: FC<BoardDetailProps> = ({
       }
     };
     dispatch(updatePanelState(payload));
+    setBoardText({
+      nickname: localStorage.getItem('nickname') || '',
+      title: '',
+      tag1: null,
+      tag2: null,
+      tag3: null,
+      preview: undefined,
+      content: undefined
+    });
   }, [dispatch, panelId]);
 
   const onClickCancel = useCallback(
@@ -574,26 +578,42 @@ const BoardDetail: FC<BoardDetailProps> = ({
     }
   }, [memberId, boardPageState.showBoardEditor, panelId, dispatch]);
 
-  // save BoardEditor info before unmounting
+  useEffect(() => {
+    if (boardPageState.boardId == null && boardPageState.showBoardEditor) {
+      boardEditorRef.current?.clearContent();
+    }
+  }, [boardPageState.boardId, boardPageState.showBoardEditor]);
+
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    mounted.current = true;
+
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (boardPageState.showBoardEditor && mounted.current) {
+      boardEditorRef.current?.setContent(
+        boardText.content as RemirrorContentType
+      );
+    }
+  }, []);
+
+  // save BoardEditor info when unintentionally unmounting
   useEffect(() => {
     return () => {
-      if (boardPageState.showBoardEditor) {
+      if (boardPageState.showBoardEditor && !mounted.current) {
         const payload = {
           panelId: panelId,
-          panelState: {
-            nickname: boardText.nickname,
-            title: boardText.title,
-            preview: boardText.preview,
-            content: boardText.content,
-            tag1: boardText.tag1,
-            tag2: boardText.tag2,
-            tag3: boardText.tag3
-          }
+          panelState: boardText
         };
         dispatch(updatePanelState(payload));
       }
     };
-  }, []);
+  }, [panelId, dispatch, boardPageState.showBoardEditor, boardText]);
 
   // <- boardPageState.showBoardEditor == true
 
@@ -628,7 +648,10 @@ const BoardDetail: FC<BoardDetailProps> = ({
 
   // <- boardPageState.showReplyEditor == true
 
-  if (boardPageState.boardId != null && boardDTO == null) {
+  if (
+    (boardPageState.boardId != null && boardDTO == null) ||
+    (boardPageState.boardId == null && !boardPageState.showBoardEditor)
+  ) {
     return null;
   }
 
@@ -696,9 +719,9 @@ const BoardDetail: FC<BoardDetailProps> = ({
                 <button
                   disabled={
                     boardPageState.boardCategory == '0' ||
-                    !regexFinal.test(boardPageState.nickname) ||
-                    !regexFinal.test(boardPageState.title) ||
-                    !boardPageState.preview
+                    !regexFinal.test(boardText.nickname) ||
+                    !regexFinal.test(boardText.title) ||
+                    !boardText.preview
                   }
                   onClick={onClickSave}
                   className="btn btn-xs btn-accent"
@@ -863,7 +886,11 @@ const BoardDetail: FC<BoardDetailProps> = ({
       )}
       <Editor
         onChange={handleEditorChange}
-        initialContent={JSON.parse(boardDTO?.content as string)}
+        initialContent={
+          boardPageState.showBoardEditor
+            ? boardText.content
+            : JSON.parse(boardDTO?.content as string)
+        }
         editorRef={boardEditorRef}
         editable={boardPageState.showBoardEditor}
       />

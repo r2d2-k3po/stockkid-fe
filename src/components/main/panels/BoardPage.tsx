@@ -500,14 +500,19 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </button>
         </div>
       </div>
-      {boardPageState.boardId != null || boardPageState.showBoardEditor ? (
+      <div
+        hidden={
+          boardPageState.boardId == null && !boardPageState.showBoardEditor
+        }
+      >
         <BoardDetail
           memberId={memberId}
           panelId={panelId}
           memberRole={memberRole}
           setBoardDTOList={setBoardDTOList}
         />
-      ) : (
+      </div>
+      {boardPageState.boardId == null && !boardPageState.showBoardEditor && (
         <div className="my-2 ml-3 mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
           {!!boardPreviewPage && boardPreviewPage}
         </div>
