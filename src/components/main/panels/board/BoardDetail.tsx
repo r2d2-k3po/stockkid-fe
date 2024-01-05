@@ -275,19 +275,15 @@ const BoardDetail: FC<BoardDetailProps> = ({
     [dispatch, panelId]
   );
 
-  useEffect(() => {
-    const loadBoard = async (boardId: string) => {
+  const loadBoard = useCallback(
+    async (boardId: string) => {
       const dataBoard = await requestBoardRead(boardId as string).unwrap();
       setBoardDTO((dataBoard?.apiObj as BoardReplyDTO)?.boardDTO);
       setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
       setBoardDTOList((boardDTOList) =>
         boardDTOList?.map((bDTO) => {
           if (bDTO.boardId == boardPageState.boardId) {
-            return {
-              ...bDTO,
-              readCount: (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO
-                .readCount
-            };
+            return (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO;
           } else {
             return bDTO;
           }
@@ -298,8 +294,11 @@ const BoardDetail: FC<BoardDetailProps> = ({
           (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO.content as string
         )
       );
-    };
+    },
+    [boardPageState.boardId, requestBoardRead, setBoardDTOList]
+  );
 
+  useEffect(() => {
     if (boardPageState.boardId != null) {
       try {
         void loadBoard(boardPageState.boardId);
@@ -307,7 +306,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
         console.error(err);
       }
     }
-  }, [boardPageState.boardId, requestBoardRead, setBoardDTOList]);
+  }, [loadBoard, boardPageState.boardId]);
 
   useEffect(() => {
     if (isSuccessLike) {
@@ -533,6 +532,9 @@ const BoardDetail: FC<BoardDetailProps> = ({
     if (isSuccessRegister || isErrorRegister) {
       const id = setTimeout(() => {
         if (isSuccessRegister) {
+          setBoardDTOList((boardDTOList) => {
+            return [boardDTO as BoardDTO, ...(boardDTOList as BoardDTO[])];
+          });
           resetBoardEditorState();
         }
         resetRegister();
@@ -543,20 +545,34 @@ const BoardDetail: FC<BoardDetailProps> = ({
     isSuccessRegister,
     isErrorRegister,
     resetBoardEditorState,
-    resetRegister
+    resetRegister,
+    boardDTO,
+    setBoardDTOList
   ]);
 
   useEffect(() => {
     if (isSuccessModify || isErrorModify) {
       const id = setTimeout(() => {
         if (isSuccessModify) {
+          try {
+            void loadBoard(boardPageState.boardId as string);
+          } catch (err) {
+            console.error(err);
+          }
           resetBoardEditorState();
         }
         resetModify();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [isSuccessModify, isErrorModify, resetBoardEditorState, resetModify]);
+  }, [
+    isSuccessModify,
+    isErrorModify,
+    resetBoardEditorState,
+    resetModify,
+    loadBoard,
+    boardPageState.boardId
+  ]);
 
   useEffect(() => {
     if (memberId == null && boardPageState.showBoardEditor) {
@@ -586,6 +602,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
     };
   }, []);
 
+  // setContent only when mounting (empty dependency list)
   useEffect(() => {
     if (boardPageState.showBoardEditor && mounted.current) {
       boardEditorRef.current?.setContent(

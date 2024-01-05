@@ -83,26 +83,6 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     BoardDTO[] | null | undefined
   >(null);
 
-  const handleClickCategoryButton = useCallback(
-    (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
-      (e: MouseEvent<HTMLButtonElement>) => {
-        e.stopPropagation();
-        const payload = {
-          panelId: panelId,
-          panelState: {
-            boardPageCategory: category,
-            tag: '',
-            searchDisabled: true,
-            searchMode: false,
-            currentPage: 1,
-            targetPage: 1
-          }
-        };
-        dispatch(updatePanelState(payload));
-      },
-    [dispatch, panelId]
-  );
-
   const handleChangeTag = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const regex = /^.{0,30}$/;
@@ -261,29 +241,61 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     [dispatch, panelId]
   );
 
-  useEffect(() => {
-    const loadBoardPageRead = async () => {
-      const boardPageSetting = {
-        page: boardPageState.currentPage.toString(),
-        size: '20',
-        boardCategory: boardPageState.boardPageCategory,
-        sortBy: boardPageState.sortBy
-      };
-      const dataBoardPage = await requestBoardPageRead(
-        boardPageSetting
-      ).unwrap();
-      setBoardDTOList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
-      const totalPages =
-        (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
-      const payload = {
-        panelId: panelId,
-        panelState: {
-          totalPages: totalPages
-        }
-      };
-      dispatch(updatePanelState(payload));
+  const loadBoardPageRead = useCallback(async () => {
+    const boardPageSetting = {
+      page: boardPageState.currentPage.toString(),
+      size: '20',
+      boardCategory: boardPageState.boardPageCategory,
+      sortBy: boardPageState.sortBy
     };
+    const dataBoardPage = await requestBoardPageRead(boardPageSetting).unwrap();
+    setBoardDTOList((dataBoardPage?.apiObj as BoardPageDTO)?.boardDTOList);
+    const totalPages = (dataBoardPage?.apiObj as BoardPageDTO)?.totalPages || 1;
+    const payload = {
+      panelId: panelId,
+      panelState: {
+        totalPages: totalPages
+      }
+    };
+    dispatch(updatePanelState(payload));
+  }, [
+    dispatch,
+    panelId,
+    boardPageState.currentPage,
+    boardPageState.boardPageCategory,
+    boardPageState.sortBy,
+    requestBoardPageRead
+  ]);
 
+  const handleClickCategoryButton = useCallback(
+    (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
+      (e: MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        const reload = category == boardPageState.boardPageCategory;
+        const payload = {
+          panelId: panelId,
+          panelState: {
+            boardPageCategory: category,
+            tag: '',
+            searchDisabled: true,
+            searchMode: false,
+            currentPage: 1,
+            targetPage: 1
+          }
+        };
+        dispatch(updatePanelState(payload));
+        if (reload) {
+          try {
+            void loadBoardPageRead();
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      },
+    [dispatch, panelId, boardPageState.boardPageCategory, loadBoardPageRead]
+  );
+
+  useEffect(() => {
     if (!boardPageState.searchMode) {
       try {
         void loadBoardPageRead();
@@ -291,15 +303,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         console.error(err);
       }
     }
-  }, [
-    boardPageState.searchMode,
-    boardPageState.currentPage,
-    boardPageState.boardPageCategory,
-    boardPageState.sortBy,
-    dispatch,
-    panelId,
-    requestBoardPageRead
-  ]);
+  }, [boardPageState.searchMode, loadBoardPageRead]);
 
   useEffect(() => {
     const loadBoardPageSearch = async () => {
