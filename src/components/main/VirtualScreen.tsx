@@ -38,7 +38,7 @@ function VirtualScreen() {
     ?.panelIds as string[];
 
   const handleLayoutChange = useCallback(
-    (currentLayout: Layout[], allLayouts: Layouts) => {
+    (_currentLayout: Layout[], allLayouts: Layouts) => {
       dispatch(
         updateScreenLayouts({
           currentIndex: currentIndex,

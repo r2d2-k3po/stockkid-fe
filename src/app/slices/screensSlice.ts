@@ -185,7 +185,7 @@ const screensSlice = createSlice({
       });
     },
     loadScreens: (
-      state: EntityState<Screen>,
+      _state: EntityState<Screen>,
       action: PayloadAction<LoadScreensPayload>
     ) => {
       return action.payload.screens;

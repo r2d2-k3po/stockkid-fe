@@ -76,7 +76,7 @@ const panelsSlice = createSlice({
           });
         }
       })
-      .addCase(loadScreens, (state, action) => {
+      .addCase(loadScreens, (_state, action) => {
         return action.payload.panels;
       });
   }

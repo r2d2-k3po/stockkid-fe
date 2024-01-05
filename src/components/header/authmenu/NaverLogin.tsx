@@ -66,7 +66,7 @@ const NaverLogin = () => {
               state: naverState as string
             };
             try {
-              naverSignin(naverSigninRequest);
+              void naverSignin(naverSigninRequest);
             } catch (err) {
               console.log(err);
             } finally {

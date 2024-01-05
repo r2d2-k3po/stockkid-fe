@@ -275,8 +275,8 @@ const BoardDetail: FC<BoardDetailProps> = ({
     [dispatch, panelId]
   );
 
-  const loadBoard = useCallback(
-    async (boardId: string, setContent: boolean) => {
+  useEffect(() => {
+    const loadBoard = async (boardId: string) => {
       const dataBoard = await requestBoardRead(boardId as string).unwrap();
       setBoardDTO((dataBoard?.apiObj as BoardReplyDTO)?.boardDTO);
       setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
@@ -293,31 +293,21 @@ const BoardDetail: FC<BoardDetailProps> = ({
           }
         })
       );
-      if (setContent) {
-        boardEditorRef.current?.setContent(
-          JSON.parse(
-            (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO.content as string
-          )
-        );
-      }
-    },
-    [requestBoardRead, boardPageState.boardId, setBoardDTOList]
-  );
+      boardEditorRef.current?.setContent(
+        JSON.parse(
+          (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO.content as string
+        )
+      );
+    };
 
-  useEffect(() => {
     if (boardPageState.boardId != null) {
       try {
-        void loadBoard(boardPageState.boardId, false);
+        void loadBoard(boardPageState.boardId);
       } catch (err) {
         console.error(err);
       }
     }
-  }, [
-    loadBoard,
-    boardPageState.boardId,
-    boardPageState.showBoardEditor,
-    boardPageState.showReplyEditor
-  ]);
+  }, [boardPageState.boardId, requestBoardRead, setBoardDTOList]);
 
   useEffect(() => {
     if (isSuccessLike) {
@@ -354,6 +344,11 @@ const BoardDetail: FC<BoardDetailProps> = ({
     boardPageState.boardId,
     setBoardDTOList
   ]);
+
+  useEffect(() => {
+    setLike(null);
+    setLikeUpdated(false);
+  }, [boardPageState.boardId]);
 
   useEffect(() => {
     if (isSuccessDelete || isErrorDelete) {
@@ -433,18 +428,15 @@ const BoardDetail: FC<BoardDetailProps> = ({
     [dispatch, panelId]
   );
 
-  const handleEditorChange = useCallback(
-    (json: RemirrorJSON) => {
-      setBoardText((boardText) => {
-        return {
-          ...boardText,
-          preview: boardEditorRef.current?.getText({lineBreakDivider: ' '}),
-          content: json
-        };
-      });
-    },
-    [boardEditorRef]
-  );
+  const handleEditorChange = useCallback((json: RemirrorJSON) => {
+    setBoardText((boardText) => {
+      return {
+        ...boardText,
+        preview: boardEditorRef.current?.getText({lineBreakDivider: ' '}),
+        content: json
+      };
+    });
+  }, []);
 
   const resetBoardEditorState = useCallback(() => {
     const payload = {
