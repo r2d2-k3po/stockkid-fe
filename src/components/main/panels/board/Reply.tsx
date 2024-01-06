@@ -1,4 +1,11 @@
-import React, {FC, MouseEvent, useCallback, useEffect, useState} from 'react';
+import React, {
+  FC,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import {DateTime} from 'luxon';
 import Editor from './Editor';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
@@ -12,29 +19,26 @@ import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {BoardPageState} from '../../../../app/constants/panelInfo';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
 import {useTranslation} from 'react-i18next';
+import {BoardDTO} from '../BoardPage';
 
 type ReplyProps = {
   memberId: string | null;
   panelId: string;
-  boardId: string;
-  loadBoard: (boardId: string | null, setContent: boolean) => Promise<void>;
   parentNickname: string | null;
   replyDTO: ReplyDTO;
-  replyEditorRef: React.MutableRefObject<EditorRef | null>;
-  enableReplyEditor: (
-    parentId: string | null
-  ) => (e: MouseEvent<HTMLButtonElement>) => void;
+  setBoardDTOList: React.Dispatch<
+    React.SetStateAction<BoardDTO[] | null | undefined>
+  >;
+  setReplyDTOList: React.Dispatch<React.SetStateAction<ReplyDTO[] | null>>;
 };
 
 const Reply: FC<ReplyProps> = ({
   memberId,
   panelId,
-  boardId,
-  loadBoard,
   parentNickname,
   replyDTO,
-  replyEditorRef,
-  enableReplyEditor
+  setBoardDTOList,
+  setReplyDTOList
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
@@ -42,6 +46,8 @@ const Reply: FC<ReplyProps> = ({
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
   ]?.panelState as BoardPageState;
+
+  const replyEditorRef = useRef<EditorRef | null>(null);
 
   const [confirmDeleteReply, setConfirmDeleteReply] = useState<boolean>(false);
 
@@ -156,6 +162,37 @@ const Reply: FC<ReplyProps> = ({
       setLikeUpdated(true);
     }
   }, [boardId, loadBoard, isSuccessLike, isErrorLike]);
+
+  // boardPageState.showReplyEditor == true ->
+
+  // const resetReplyEditorState = useCallback(() => {
+  //   replyEditorRef.current?.clearContent();
+  //   const payload = {
+  //     panelId: panelId,
+  //     panelState: {
+  //       showReplyEditor: false,
+  //       replyId: null,
+  //       parentId: null,
+  //       preview: null,
+  //       content: undefined
+  //     }
+  //   };
+  //   dispatch(updatePanelState(payload));
+  // }, [dispatch, panelId, replyEditorRef]);
+
+  // useEffect(() => {
+  //   if (memberId == null && boardPageState.showReplyEditor) {
+  //     const payload = {
+  //       panelId: panelId,
+  //       panelState: {
+  //         showReplyEditor: false
+  //       }
+  //     };
+  //     dispatch(updatePanelState(payload));
+  //   }
+  // }, [memberId, panelId, dispatch, boardPageState.showReplyEditor]);
+
+  // <- boardPageState.showReplyEditor == true
 
   return (
     <div className="border-t border-info mb-2 mr-2 pt-2">

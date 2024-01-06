@@ -44,9 +44,9 @@ const ImperativeHandle = forwardRef(function ImperativeHandle(
 type OnChangeType = (json: RemirrorJSON) => void;
 
 type EditorProps = {
-  onChange?: OnChangeType;
+  onChange: OnChangeType;
   initialContent: RemirrorContentType | undefined;
-  editorRef?: React.MutableRefObject<EditorRef | null>;
+  editorRef: React.MutableRefObject<EditorRef | null>;
   editable: boolean;
 };
 

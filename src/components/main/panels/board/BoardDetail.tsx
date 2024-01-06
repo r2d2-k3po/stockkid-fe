@@ -32,14 +32,14 @@ export interface IdDTO {
 }
 
 export interface ReplyDTO {
-  replyId: string;
-  parentId: string;
-  memberId: string;
-  nickname: string;
-  content: string;
-  likeCount: number;
-  regDate: string;
-  modDate: string;
+  replyId: string | null;
+  parentId: string | null;
+  memberId: string | null;
+  nickname: string | null;
+  content: string | null;
+  likeCount: number | null;
+  regDate: string | null;
+  modDate: string | null;
 }
 
 interface BoardReplyDTO {
@@ -91,8 +91,6 @@ const BoardDetail: FC<BoardDetailProps> = ({
   ]?.panelState as BoardPageState;
 
   const boardEditorRef = useRef<EditorRef | null>(null);
-
-  const replyEditorRef = useRef<EditorRef | null>(null);
 
   const [requestBoardRead] = useLazyReadBoardQuery();
 
@@ -267,6 +265,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
         panelId: panelId,
         panelState: {
           showReplyEditor: true,
+          replyId: null,
           parentId: parentId
         }
       };
@@ -574,6 +573,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
     boardPageState.boardId
   ]);
 
+  // disable BoardEditor when logged out
   useEffect(() => {
     if (memberId == null && boardPageState.showBoardEditor) {
       const payload = {
@@ -586,12 +586,14 @@ const BoardDetail: FC<BoardDetailProps> = ({
     }
   }, [memberId, boardPageState.showBoardEditor, panelId, dispatch]);
 
+  // prepare for new content to register
   useEffect(() => {
     if (boardPageState.boardId == null && boardPageState.showBoardEditor) {
       boardEditorRef.current?.clearContent();
     }
   }, [boardPageState.boardId, boardPageState.showBoardEditor]);
 
+  // settings for unintentional unmounting
   const mounted = useRef(false);
 
   useEffect(() => {
@@ -602,7 +604,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
     };
   }, []);
 
-  // setContent only when mounting (empty dependency list)
+  // setContent only when mounting with BoardEditor open (empty dependency list)
   useEffect(() => {
     if (boardPageState.showBoardEditor && mounted.current) {
       boardEditorRef.current?.setContent(
@@ -625,37 +627,6 @@ const BoardDetail: FC<BoardDetailProps> = ({
   }, [panelId, dispatch, boardPageState.showBoardEditor, boardText]);
 
   // <- boardPageState.showBoardEditor == true
-
-  // boardPageState.showReplyEditor == true ->
-
-  // const resetReplyEditorState = useCallback(() => {
-  //   replyEditorRef.current?.clearContent();
-  //   const payload = {
-  //     panelId: panelId,
-  //     panelState: {
-  //       showReplyEditor: false,
-  //       replyId: null,
-  //       parentId: null,
-  //       preview: null,
-  //       content: undefined
-  //     }
-  //   };
-  //   dispatch(updatePanelState(payload));
-  // }, [dispatch, panelId, replyEditorRef]);
-
-  // useEffect(() => {
-  //   if (memberId == null && boardPageState.showReplyEditor) {
-  //     const payload = {
-  //       panelId: panelId,
-  //       panelState: {
-  //         showReplyEditor: false
-  //       }
-  //     };
-  //     dispatch(updatePanelState(payload));
-  //   }
-  // }, [memberId, panelId, dispatch, boardPageState.showReplyEditor]);
-
-  // <- boardPageState.showReplyEditor == true
 
   if (
     (boardPageState.boardId != null && boardDTO == null) ||
@@ -966,16 +937,15 @@ const BoardDetail: FC<BoardDetailProps> = ({
         </div>
         // <- boardPageState.showBoardEditor == false
       )}
-      {/*<ReplyList*/}
-      {/*  panelId={panelId}*/}
-      {/*  memberId={memberId}*/}
-      {/*  boardId={boardDTO.boardId}*/}
-      {/*  replyDTOList={replyDTOList}*/}
-      {/*  loadBoard={loadBoard}*/}
-      {/*  replyEditorRef={replyEditorRef}*/}
-      {/*  enableReplyEditor={enableReplyEditor}*/}
-      {/*  resetReplyEditorState={resetReplyEditorState}*/}
-      {/*/>*/}
+      <div hidden={boardPageState.showBoardEditor}>
+        <ReplyList
+          panelId={panelId}
+          memberId={memberId}
+          replyDTOList={replyDTOList}
+          setBoardDTOList={setBoardDTOList}
+          setReplyDTOList={setReplyDTOList}
+        />
+      </div>
     </div>
   );
 };
