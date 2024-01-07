@@ -1,4 +1,5 @@
 import React, {
+  ChangeEvent,
   FC,
   MouseEvent,
   useCallback,
@@ -10,26 +11,43 @@ import {DateTime} from 'luxon';
 import Editor from './Editor';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
-import {EditorRef, ReplyDTO} from './BoardDetail';
+import {EditorRef, IdDTO, ReplyDTO} from './BoardDetail';
 import {
+  ReplySaveRequest,
   useDeleteReplyMutation,
-  useLikeReplyMutation
+  useLikeReplyMutation,
+  useModifyReplyMutation,
+  useRegisterReplyMutation
 } from '../../../../app/api';
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
-import {BoardPageState} from '../../../../app/constants/panelInfo';
+import {
+  BoardPageState,
+  deletedContent,
+  deletedString
+} from '../../../../app/constants/panelInfo';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
 import {useTranslation} from 'react-i18next';
 import {BoardDTO} from '../BoardPage';
+import {RemirrorContentType, RemirrorJSON} from 'remirror';
+
+type ReplyText = {
+  nickname: string;
+  preview: string | undefined;
+  content: RemirrorContentType | undefined;
+};
 
 type ReplyProps = {
   memberId: string | null;
   panelId: string;
   parentNickname: string | null;
   replyDTO: ReplyDTO;
+  replyCount: number | undefined;
   setBoardDTOList: React.Dispatch<
     React.SetStateAction<BoardDTO[] | null | undefined>
   >;
-  setReplyDTOList: React.Dispatch<React.SetStateAction<ReplyDTO[] | null>>;
+  setReplyDTOList: React.Dispatch<
+    React.SetStateAction<ReplyDTO[] | null | undefined>
+  >;
 };
 
 const Reply: FC<ReplyProps> = ({
@@ -37,11 +55,13 @@ const Reply: FC<ReplyProps> = ({
   panelId,
   parentNickname,
   replyDTO,
+  replyCount,
   setBoardDTOList,
   setReplyDTOList
 }) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
+  const regexFinal = /^.{2,30}$/;
 
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
@@ -49,19 +69,44 @@ const Reply: FC<ReplyProps> = ({
 
   const replyEditorRef = useRef<EditorRef | null>(null);
 
+  const [
+    requestReplyDelete,
+    {isSuccess: isSuccessDelete, isError: isErrorDelete, reset: resetDelete}
+  ] = useDeleteReplyMutation();
+
+  const [
+    requestReplyLike,
+    {isSuccess: isSuccessLike, isError: isErrorLike, reset: resetLike}
+  ] = useLikeReplyMutation();
+
+  const [
+    requestReplyRegister,
+    {
+      data: dataReplyRegister,
+      isSuccess: isSuccessRegister,
+      isError: isErrorRegister,
+      reset: resetRegister
+    }
+  ] = useRegisterReplyMutation();
+
+  const [
+    requestReplyModify,
+    {isSuccess: isSuccessModify, isError: isErrorModify, reset: resetModify}
+  ] = useModifyReplyMutation();
+
   const [confirmDeleteReply, setConfirmDeleteReply] = useState<boolean>(false);
 
   const [like, setLike] = useState<boolean | null>(null);
 
   const [likeUpdated, setLikeUpdated] = useState<boolean>(false);
 
-  const [
-    requestReplyDelete,
-    {isSuccess: isSuccessDelete, isError: isErrorDelete, reset: resetDelete}
-  ] = useDeleteReplyMutation();
+  const [replyText, setReplyText] = useState<ReplyText>({
+    nickname: boardPageState.nickname,
+    preview: boardPageState.preview,
+    content: boardPageState.content
+  });
 
-  const [requestReplyLike, {isSuccess: isSuccessLike, isError: isErrorLike}] =
-    useLikeReplyMutation();
+  // boardPageState.showReplyEditor == false ->
 
   const onClickLike = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -78,7 +123,7 @@ const Reply: FC<ReplyProps> = ({
       e.stopPropagation();
       try {
         const likeRequest = {
-          id: replyDTO.replyId,
+          id: replyDTO.replyId as string,
           number: like == true ? 1 : -1
         };
         await requestReplyLike(likeRequest);
@@ -97,15 +142,15 @@ const Reply: FC<ReplyProps> = ({
         panelState: {
           showReplyEditor: true,
           parentId: replyDTO.parentId,
-          replyId: replyDTO.replyId,
-          nickname: replyDTO.nickname,
-          content: JSON.parse(replyDTO.content as string)
+          replyId: replyDTO.replyId
         }
       };
       dispatch(updatePanelState(payload));
-      replyEditorRef.current?.setContent(
-        JSON.parse(replyDTO.content as string)
-      );
+      setReplyText({
+        nickname: replyDTO?.nickname as string,
+        preview: undefined,
+        content: JSON.parse(replyDTO?.content as string)
+      });
     },
     [
       dispatch,
@@ -113,8 +158,7 @@ const Reply: FC<ReplyProps> = ({
       replyDTO.parentId,
       replyDTO.replyId,
       replyDTO.nickname,
-      replyDTO.content,
-      replyEditorRef
+      replyDTO.content
     ]
   );
 
@@ -132,7 +176,7 @@ const Reply: FC<ReplyProps> = ({
     async (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       try {
-        await requestReplyDelete(replyDTO.replyId);
+        await requestReplyDelete(replyDTO.replyId as string);
       } catch (err) {
         console.log(err);
       }
@@ -144,55 +188,334 @@ const Reply: FC<ReplyProps> = ({
     if (isSuccessDelete || isErrorDelete) {
       const id = setTimeout(() => {
         if (isSuccessDelete) {
-          loadBoard(boardId, false);
+          replyEditorRef.current?.setContent(JSON.parse(deletedContent));
+          setReplyDTOList((replyDTOList) =>
+            replyDTOList?.map((rDTO) => {
+              if (rDTO.replyId == replyDTO.replyId) {
+                return {
+                  ...rDTO,
+                  content: JSON.parse(deletedContent)
+                };
+              } else {
+                return rDTO;
+              }
+            })
+          );
           setConfirmDeleteReply(false);
         }
         resetDelete();
       }, 1000);
       return () => clearTimeout(id);
     }
-  }, [boardId, loadBoard, isSuccessDelete, isErrorDelete, resetDelete]);
+  }, [
+    isSuccessDelete,
+    isErrorDelete,
+    replyDTO.replyId,
+    setReplyDTOList,
+    resetDelete
+  ]);
 
   useEffect(() => {
     if (isSuccessLike) {
-      loadBoard(boardId, false);
+      const number = like == true ? 1 : -1;
+      const likeCount = (replyDTO?.likeCount as number) + number;
+      setReplyDTOList((replyDTOList) =>
+        replyDTOList?.map((rDTO) => {
+          if (rDTO.replyId == replyDTO.replyId) {
+            return {
+              ...rDTO,
+              likeCount: likeCount
+            };
+          } else {
+            return rDTO;
+          }
+        })
+      );
       setLikeUpdated(true);
+      resetLike();
     } else if (isErrorLike) {
       setLike(null);
       setLikeUpdated(true);
+      resetLike();
     }
-  }, [boardId, loadBoard, isSuccessLike, isErrorLike]);
+  }, [
+    isSuccessLike,
+    isErrorLike,
+    like,
+    replyDTO.likeCount,
+    replyDTO.replyId,
+    setReplyDTOList,
+    resetLike
+  ]);
+
+  // <- boardPageState.showReplyEditor == false
 
   // boardPageState.showReplyEditor == true ->
 
-  // const resetReplyEditorState = useCallback(() => {
-  //   replyEditorRef.current?.clearContent();
-  //   const payload = {
-  //     panelId: panelId,
-  //     panelState: {
-  //       showReplyEditor: false,
-  //       replyId: null,
-  //       parentId: null,
-  //       preview: null,
-  //       content: undefined
-  //     }
-  //   };
-  //   dispatch(updatePanelState(payload));
-  // }, [dispatch, panelId, replyEditorRef]);
+  const handleChangeNickname = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const regex = /^.{0,30}$/;
+      if (regex.test(e.target.value)) {
+        setReplyText((replyText) => {
+          return {
+            ...replyText,
+            nickname: e.target.value.trim()
+          };
+        });
+      }
+    },
+    []
+  );
 
+  const handleReplyEditorChange = useCallback((json: RemirrorJSON) => {
+    setReplyText((replyText) => {
+      return {
+        ...replyText,
+        preview: replyEditorRef.current?.getText({lineBreakDivider: ' '}),
+        content: json
+      };
+    });
+  }, []);
+
+  const resetReplyEditorState = useCallback(() => {
+    const payload = {
+      panelId: panelId,
+      panelState: {
+        showReplyEditor: false,
+        replyId: null,
+        parentId: null,
+        preview: undefined,
+        content: undefined
+      }
+    };
+    dispatch(updatePanelState(payload));
+    setReplyText({
+      nickname: localStorage.getItem('nickname') || '',
+      preview: undefined,
+      content: undefined
+    });
+  }, [dispatch, panelId]);
+
+  const onClickCancel = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      if (replyDTO.replyId == null) {
+        replyEditorRef.current?.clearContent();
+      } else {
+        replyEditorRef.current?.setContent(
+          JSON.parse(replyDTO?.content as string)
+        );
+      }
+      resetReplyEditorState();
+    },
+    [replyDTO.replyId, replyDTO.content, resetReplyEditorState]
+  );
+
+  const onClickSave = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      try {
+        localStorage.setItem('nickname', replyText.nickname);
+        const replySaveRequest: ReplySaveRequest = {
+          boardId: boardPageState.boardId as string,
+          replyId: replyDTO.replyId,
+          parentId: replyDTO.parentId,
+          nickname: replyText.nickname,
+          content: JSON.stringify(replyText.content)
+        };
+        if (replyDTO.replyId == null) {
+          await requestReplyRegister(replySaveRequest);
+        } else {
+          await requestReplyModify(replySaveRequest);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [
+      boardPageState.boardId,
+      replyDTO.replyId,
+      replyDTO.parentId,
+      replyText.nickname,
+      replyText.content,
+      requestReplyRegister,
+      requestReplyModify
+    ]
+  );
+
+  useEffect(() => {
+    if (isSuccessRegister || isErrorRegister) {
+      const id = setTimeout(() => {
+        if (isSuccessRegister) {
+          setBoardDTOList((boardDTOList) =>
+            boardDTOList?.map((bDTO) => {
+              if (bDTO.boardId == boardPageState.boardId) {
+                return {
+                  ...bDTO,
+                  replyCount: (replyCount as number) + 1
+                };
+              } else {
+                return bDTO;
+              }
+            })
+          );
+          const replyId = (dataReplyRegister?.apiObj as IdDTO)?.id;
+          const now = DateTime.now().toISO();
+          const newReplyDTO: ReplyDTO = {
+            replyId: replyId,
+            parentId: replyDTO.parentId,
+            memberId: replyDTO.memberId,
+            nickname: replyText.nickname,
+            content: JSON.stringify(replyText.content),
+            likeCount: 0,
+            regDate: now,
+            modDate: now
+          };
+          setReplyDTOList((replyDTOList) => {
+            return [...(replyDTOList as ReplyDTO[]), newReplyDTO];
+          });
+          resetReplyEditorState();
+        }
+        resetRegister();
+      }, 1000);
+      return () => clearTimeout(id);
+    }
+  }, [
+    boardPageState.boardId,
+    replyCount,
+    setBoardDTOList,
+    dataReplyRegister?.apiObj,
+    replyDTO.memberId,
+    replyDTO.parentId,
+    replyText.nickname,
+    replyText.content,
+    isSuccessRegister,
+    isErrorRegister,
+    setReplyDTOList,
+    resetReplyEditorState,
+    resetRegister
+  ]);
+
+  useEffect(() => {
+    if (isSuccessModify || isErrorModify) {
+      const id = setTimeout(() => {
+        if (isSuccessModify) {
+          const now = DateTime.now().toISO();
+          const newReplyDTO: ReplyDTO = {
+            replyId: replyDTO.replyId,
+            parentId: replyDTO.parentId,
+            memberId: replyDTO.memberId,
+            nickname: replyText.nickname,
+            content: JSON.stringify(replyText.content),
+            likeCount: replyDTO.likeCount,
+            regDate: replyDTO.regDate,
+            modDate: now
+          };
+          setReplyDTOList((replyDTOList) =>
+            replyDTOList?.map((rDTO) => {
+              if (rDTO.replyId == replyDTO.replyId) {
+                return newReplyDTO;
+              } else {
+                return rDTO;
+              }
+            })
+          );
+          resetReplyEditorState();
+        }
+        resetModify();
+      }, 1000);
+      return () => clearTimeout(id);
+    }
+  }, [
+    replyDTO.replyId,
+    replyDTO.memberId,
+    replyDTO.parentId,
+    replyText.nickname,
+    replyText.content,
+    replyDTO.likeCount,
+    replyDTO.regDate,
+    isSuccessModify,
+    isErrorModify,
+    setReplyDTOList,
+    resetReplyEditorState,
+    resetModify
+  ]);
+
+  // disable ReplyEditor when logged out
+  useEffect(() => {
+    if (memberId == null && boardPageState.showReplyEditor) {
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          showReplyEditor: false,
+          replyId: null,
+          parentId: null
+        }
+      };
+      dispatch(updatePanelState(payload));
+    }
+  }, [memberId, panelId, dispatch, boardPageState.showReplyEditor]);
+
+  // prepare for new content to register
   // useEffect(() => {
-  //   if (memberId == null && boardPageState.showReplyEditor) {
-  //     const payload = {
-  //       panelId: panelId,
-  //       panelState: {
-  //         showReplyEditor: false
-  //       }
-  //     };
-  //     dispatch(updatePanelState(payload));
+  //   if (boardPageState.boardId == null && boardPageState.showBoardEditor) {
+  //     boardEditorRef.current?.clearContent();
   //   }
-  // }, [memberId, panelId, dispatch, boardPageState.showReplyEditor]);
+  // }, [boardPageState.boardId, boardPageState.showBoardEditor]);
+
+  // settings for unintentional unmounting
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    mounted.current = true;
+
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  // setContent only when mounting with ReplyEditor open (empty dependency list)
+  useEffect(() => {
+    if (
+      boardPageState.showReplyEditor &&
+      replyDTO.replyId == boardPageState.replyId &&
+      mounted.current
+    ) {
+      replyEditorRef.current?.setContent(
+        replyText.content as RemirrorContentType
+      );
+    }
+  }, []);
+
+  // save ReplyEditor info when unintentionally unmounting
+  useEffect(() => {
+    return () => {
+      if (
+        boardPageState.showReplyEditor &&
+        replyDTO.replyId == boardPageState.replyId &&
+        !mounted.current
+      ) {
+        const payload = {
+          panelId: panelId,
+          panelState: replyText
+        };
+        dispatch(updatePanelState(payload));
+      }
+    };
+  }, [
+    panelId,
+    dispatch,
+    boardPageState.showReplyEditor,
+    boardPageState.replyId,
+    replyDTO.replyId,
+    replyText
+  ]);
 
   // <- boardPageState.showReplyEditor == true
+
+  if (replyDTO.replyId == null && !boardPageState.showReplyEditor) {
+    return null;
+  }
 
   return (
     <div className="border-t border-info mb-2 mr-2 pt-2">

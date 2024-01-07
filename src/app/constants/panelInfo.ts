@@ -85,3 +85,8 @@ export type BoardPageState = {
   replyId: string | null;
   parentId: string | null;
 };
+
+export const deletedString = 'deleted';
+
+export const deletedContent =
+  '{"type":"doc","content":[{"type":"paragraph","attrs":{"dir":null,"ignoreBidiAutoUpdate":null},"content":[{"type":"text","text":"deleted"}]}]}';

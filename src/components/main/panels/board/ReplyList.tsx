@@ -20,11 +20,13 @@ type RecursiveRepliesProps = {
 type ReplyListProps = {
   memberId: string | null;
   panelId: string;
-  replyDTOList: ReplyDTO[] | null;
+  replyDTOList: ReplyDTO[] | null | undefined;
   setBoardDTOList: React.Dispatch<
     React.SetStateAction<BoardDTO[] | null | undefined>
   >;
-  setReplyDTOList: React.Dispatch<React.SetStateAction<ReplyDTO[] | null>>;
+  setReplyDTOList: React.Dispatch<
+    React.SetStateAction<ReplyDTO[] | null | undefined>
+  >;
 };
 
 const ReplyList: FC<ReplyListProps> = ({
@@ -63,7 +65,7 @@ const ReplyList: FC<ReplyListProps> = ({
         replyDTO: {
           replyId: null,
           parentId: boardPageState.parentId,
-          memberId: null,
+          memberId: memberId,
           nickname: null,
           content: null,
           likeCount: null,
@@ -103,6 +105,7 @@ const ReplyList: FC<ReplyListProps> = ({
                 panelId={panelId}
                 parentNickname={parentNickname}
                 replyDTO={replyEntities[replyId].replyDTO as ReplyDTO}
+                replyCount={replyDTOList?.length}
                 setBoardDTOList={setBoardDTOList}
                 setReplyDTOList={setReplyDTOList}
               />

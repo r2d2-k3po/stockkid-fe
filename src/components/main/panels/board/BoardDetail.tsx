@@ -24,7 +24,11 @@ import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 import ReplyList from './ReplyList';
 import Editor from './Editor';
-import {BoardPageState} from '../../../../app/constants/panelInfo';
+import {
+  BoardPageState,
+  deletedContent,
+  deletedString
+} from '../../../../app/constants/panelInfo';
 import {EditorStateProps, RemirrorContentType, RemirrorJSON} from 'remirror';
 
 export interface IdDTO {
@@ -57,7 +61,7 @@ export interface EditorRef {
   getText: ({lineBreakDivider}: GetTextHelperOptions) => string;
 }
 
-type BoardTextType = {
+type BoardText = {
   nickname: string;
   title: string;
   tag1: string | null;
@@ -120,7 +124,9 @@ const BoardDetail: FC<BoardDetailProps> = ({
 
   const [boardDTO, setBoardDTO] = useState<BoardDTO | null>(null);
 
-  const [replyDTOList, setReplyDTOList] = useState<ReplyDTO[] | null>(null);
+  const [replyDTOList, setReplyDTOList] = useState<
+    ReplyDTO[] | null | undefined
+  >(null);
 
   const [like, setLike] = useState<boolean | null>(null);
 
@@ -128,7 +134,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
 
   const [confirmDeleteBoard, setConfirmDeleteBoard] = useState<boolean>(false);
 
-  const [boardText, setBoardText] = useState<BoardTextType>({
+  const [boardText, setBoardText] = useState<BoardText>({
     nickname: boardPageState.nickname,
     title: boardPageState.title,
     tag1: boardPageState.tag1,
@@ -355,24 +361,19 @@ const BoardDetail: FC<BoardDetailProps> = ({
           setBoardDTO((boardDTO) => {
             return {
               ...(boardDTO as BoardDTO),
-              title: 'deleted',
-              preview: 'deleted',
-              content:
-                '{"type":"doc","content":[{"type":"paragraph","attrs":{"dir":null,"ignoreBidiAutoUpdate":null},"content":[{"type":"text","text":"deleted"}]}]}'
+              title: deletedString,
+              preview: deletedString,
+              content: deletedContent
             };
           });
-          boardEditorRef.current?.setContent(
-            JSON.parse(
-              '{"type":"doc","content":[{"type":"paragraph","attrs":{"dir":null,"ignoreBidiAutoUpdate":null},"content":[{"type":"text","text":"deleted"}]}]}'
-            )
-          );
+          boardEditorRef.current?.setContent(JSON.parse(deletedContent));
           setBoardDTOList((boardDTOList) =>
             boardDTOList?.map((bDTO) => {
               if (bDTO.boardId == boardPageState.boardId) {
                 return {
                   ...bDTO,
-                  title: 'deleted',
-                  preview: 'deleted'
+                  title: deletedString,
+                  preview: deletedString
                 };
               } else {
                 return bDTO;
@@ -426,7 +427,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
     [dispatch, panelId]
   );
 
-  const handleEditorChange = useCallback((json: RemirrorJSON) => {
+  const handleBoardEditorChange = useCallback((json: RemirrorJSON) => {
     setBoardText((boardText) => {
       return {
         ...boardText,
@@ -865,7 +866,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
         // <- boardPageState.showBoardEditor == false
       )}
       <Editor
-        onChange={handleEditorChange}
+        onChange={handleBoardEditorChange}
         initialContent={
           boardPageState.showBoardEditor
             ? boardText.content
