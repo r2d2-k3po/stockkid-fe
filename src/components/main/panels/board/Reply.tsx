@@ -22,8 +22,7 @@ import {
 import {useAppDispatch, useAppSelector} from '../../../../app/hooks';
 import {
   BoardPageState,
-  deletedContent,
-  deletedString
+  deletedContent
 } from '../../../../app/constants/panelInfo';
 import {updatePanelState} from '../../../../app/slices/panelsSlice';
 import {useTranslation} from 'react-i18next';
@@ -132,6 +131,22 @@ const Reply: FC<ReplyProps> = ({
       }
     },
     [replyDTO.replyId, like, requestReplyLike]
+  );
+
+  const enableReplyEditor = useCallback(
+    (parentId: string | null) => (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      const payload = {
+        panelId: panelId,
+        panelState: {
+          showReplyEditor: true,
+          replyId: null,
+          parentId: parentId
+        }
+      };
+      dispatch(updatePanelState(payload));
+    },
+    [dispatch, panelId]
   );
 
   const enableReplyEditorToModify = useCallback(
@@ -262,20 +277,41 @@ const Reply: FC<ReplyProps> = ({
             nickname: e.target.value.trim()
           };
         });
+        if (!boardPageState.needSaveText) {
+          const payload = {
+            panelId: panelId,
+            panelState: {
+              needSaveText: true
+            }
+          };
+          dispatch(updatePanelState(payload));
+        }
       }
     },
-    []
+    [boardPageState.needSaveText, panelId, dispatch]
   );
 
-  const handleReplyEditorChange = useCallback((json: RemirrorJSON) => {
-    setReplyText((replyText) => {
-      return {
-        ...replyText,
-        preview: replyEditorRef.current?.getText({lineBreakDivider: ' '}),
-        content: json
-      };
-    });
-  }, []);
+  const handleReplyEditorChange = useCallback(
+    (json: RemirrorJSON) => {
+      setReplyText((replyText) => {
+        return {
+          ...replyText,
+          preview: replyEditorRef.current?.getText({lineBreakDivider: ' '}),
+          content: json
+        };
+      });
+      if (!boardPageState.needSaveText) {
+        const payload = {
+          panelId: panelId,
+          panelState: {
+            needSaveText: true
+          }
+        };
+        dispatch(updatePanelState(payload));
+      }
+    },
+    [boardPageState.needSaveText, panelId, dispatch]
+  );
 
   const resetReplyEditorState = useCallback(() => {
     const payload = {
@@ -284,8 +320,10 @@ const Reply: FC<ReplyProps> = ({
         showReplyEditor: false,
         replyId: null,
         parentId: null,
+        nickname: localStorage.getItem('nickname') || '',
         preview: undefined,
-        content: undefined
+        content: undefined,
+        needSaveText: false
       }
     };
     dispatch(updatePanelState(payload));
@@ -443,18 +481,20 @@ const Reply: FC<ReplyProps> = ({
 
   // disable ReplyEditor when logged out
   useEffect(() => {
-    if (memberId == null && boardPageState.showReplyEditor) {
-      const payload = {
-        panelId: panelId,
-        panelState: {
-          showReplyEditor: false,
-          replyId: null,
-          parentId: null
-        }
-      };
-      dispatch(updatePanelState(payload));
+    if (
+      memberId == null &&
+      boardPageState.showReplyEditor &&
+      boardPageState.replyId == replyDTO.replyId
+    ) {
+      resetReplyEditorState();
     }
-  }, [memberId, panelId, dispatch, boardPageState.showReplyEditor]);
+  }, [
+    memberId,
+    boardPageState.showReplyEditor,
+    boardPageState.replyId,
+    replyDTO.replyId,
+    resetReplyEditorState
+  ]);
 
   // prepare for new content to register
   // useEffect(() => {
@@ -465,12 +505,15 @@ const Reply: FC<ReplyProps> = ({
 
   // settings for unintentional unmounting
   const mounted = useRef(false);
+  console.log('reply mounted initialized');
 
   useEffect(() => {
     mounted.current = true;
+    console.log('reply mounted.current true');
 
     return () => {
       mounted.current = false;
+      console.log('reply mounted.current false');
     };
   }, []);
 
@@ -484,28 +527,35 @@ const Reply: FC<ReplyProps> = ({
       replyEditorRef.current?.setContent(
         replyText.content as RemirrorContentType
       );
+      console.log('replyEditorRef.current setContent');
     }
   }, []);
 
   // save ReplyEditor info when unintentionally unmounting
   useEffect(() => {
+    console.log('boardPageState.showReplyEditor && !mounted.current mounted');
     return () => {
       if (
         boardPageState.showReplyEditor &&
         replyDTO.replyId == boardPageState.replyId &&
-        !mounted.current
+        !mounted.current &&
+        boardPageState.needSaveText
       ) {
         const payload = {
           panelId: panelId,
-          panelState: replyText
+          panelState: {...replyText, needSaveText: false}
         };
-        dispatch(updatePanelState(payload));
+        console.log(
+          'boardPageState.showReplyEditor && !mounted.current unmounted'
+        );
+        // dispatch(updatePanelState(payload));
       }
     };
   }, [
     panelId,
     dispatch,
     boardPageState.showReplyEditor,
+    boardPageState.needSaveText,
     boardPageState.replyId,
     replyDTO.replyId,
     replyText
@@ -514,136 +564,201 @@ const Reply: FC<ReplyProps> = ({
   // <- boardPageState.showReplyEditor == true
 
   if (replyDTO.replyId == null && !boardPageState.showReplyEditor) {
+    console.log('reply return null');
     return null;
   }
 
   return (
     <div className="border-t border-info mb-2 mr-2 pt-2">
-      <div className="flex justify-between">
-        <div className="flex justify-start mb-2 gap-2">
-          {parentNickname && (
-            <div className="text-sm">
-              <span>{parentNickname}</span>
-              <i className="ri-reply-line ri-1x"></i>
-            </div>
-          )}
-          <i className="ri-user-line ri-1x"></i>
-          <button
-            className={
-              memberId == replyDTO.memberId
-                ? 'text-sm text-primary btn-ghost rounded -mt-1 px-0.5 mr-3'
-                : 'text-sm text-info btn-ghost rounded -mt-1 px-0.5 mr-3'
-            }
-          >
-            {replyDTO?.nickname}
-          </button>
-          <i className="ri-star-line ri-1x"></i>
-          <div className="text-sm text-info">{replyDTO?.likeCount}</div>
-          <div hidden={memberId == null}>
-            <div className="flex gap-1">
-              <div
-                className={
-                  like == null ? 'invisible -mt-1 mr-1' : 'visible -mt-1 mr-1'
-                }
-              >
-                <button
-                  onClick={updateLike}
-                  disabled={likeUpdated}
-                  className="btn btn-xs btn-circle btn-outline btn-warning"
-                >
-                  <i className="ri-arrow-left-double-line ri-1x"></i>
-                </button>
-              </div>
-              <button
-                disabled={likeUpdated}
-                onClick={onClickLike}
-                className={
-                  like == true
-                    ? 'btn btn-xs btn-circle btn-outline btn-accent btn-active'
-                    : 'btn btn-xs btn-circle btn-outline btn-accent'
-                }
-              >
-                <i className="ri-thumb-up-line ri-1x"></i>
-              </button>
-              <button
-                disabled={likeUpdated}
-                onClick={onClickNotLike}
-                className={
-                  like == false
-                    ? 'btn btn-xs btn-circle btn-outline btn-error btn-active'
-                    : 'btn btn-xs btn-circle btn-outline btn-error'
-                }
-              >
-                <i className="ri-thumb-down-line ri-1x"></i>
-              </button>
-            </div>
+      {boardPageState.showReplyEditor &&
+      boardPageState.replyId == replyDTO.replyId ? (
+        // boardPageState.showReplyEditor == true ->
+        <div className="flex justify-between">
+          <div className="flex justify-start mb-2 gap-2">
+            <i className="ri-user-line ri-1x"></i>
+            <input
+              type="text"
+              name="nickname"
+              placeholder={t('Board.placeholder.nickname') as string}
+              value={replyText.nickname}
+              onChange={handleChangeNickname}
+              className="w-28 max-w-xs input input-bordered input-secondary input-xs text-accent-content"
+            />
           </div>
-        </div>
-        <div className="flex justify-end mb-2">
-          <i className="ri-time-line ri-1x"></i>
-          <div className="text-sm text-info mx-1">
-            {DateTime.fromISO(
-              replyDTO?.modDate.split('.')[0] as string
-            ).toFormat('HH:mm yyyy-MM-dd')}
-          </div>
-        </div>
-      </div>
-      <Editor
-        initialContent={JSON.parse(replyDTO?.content as string)}
-        // editorRef={boardEditorReadOnlyRef}
-        editable={false}
-      />
-      <div className="flex justify-between my-1">
-        <button
-          disabled={memberId == null || boardPageState.showReplyEditor}
-          onClick={enableReplyEditor(replyDTO.replyId)}
-          className="btn btn-xs btn-circle btn-outline btn-warning m-1"
-        >
-          <i className="ri-reply-line ri-1x"></i>
-        </button>
-        <div className="justify-end">
-          <div hidden={memberId != replyDTO.memberId || confirmDeleteReply}>
+          <div className="flex justify-end mb-2">
             <button
-              disabled={boardPageState.showReplyEditor}
-              className="btn btn-xs btn-circle btn-outline btn-accent m-1"
-              onClick={enableReplyEditorToModify}
-            >
-              <i className="ri-edit-2-line ri-1x"></i>
-            </button>
-            <button
-              disabled={boardPageState.showReplyEditor}
-              className="btn btn-xs btn-circle btn-outline btn-error m-1"
-              onClick={deleteReply}
-            >
-              <i className="ri-delete-bin-line ri-1x"></i>
-            </button>
-          </div>
-          <div hidden={memberId != replyDTO.memberId || !confirmDeleteReply}>
-            <button
-              onClick={cancelDeleteReply}
+              onClick={onClickCancel}
               className="btn btn-xs btn-ghost mr-1"
             >
               {t('Common.Cancel')}
             </button>
-            {isErrorDelete ? (
+            {isErrorRegister || isErrorModify ? (
               <div className="ml-2.5 mr-3">
                 <MaterialSymbolError size={19} />
               </div>
-            ) : isSuccessDelete ? (
+            ) : isSuccessRegister || isSuccessModify ? (
               <div className="ml-2.5 mr-3">
                 <MaterialSymbolSuccess size={19} />
               </div>
             ) : (
               <button
-                onClick={reallyDeleteReply}
+                disabled={
+                  !regexFinal.test(replyText.nickname) || !replyText.preview
+                }
+                onClick={onClickSave}
                 className="btn btn-xs btn-accent"
               >
-                {t('Common.Delete')}
+                {t('Common.Save')}
               </button>
             )}
           </div>
         </div>
-      </div>
+      ) : (
+        // <- boardPageState.showReplyEditor == true
+        // boardPageState.showReplyEditor == false ->
+        <div className="flex justify-between">
+          <div className="flex justify-start mb-2 gap-2">
+            {parentNickname && (
+              <div className="text-sm">
+                <span>{parentNickname}</span>
+                <i className="ri-reply-line ri-1x"></i>
+              </div>
+            )}
+            <i className="ri-user-line ri-1x"></i>
+            <button
+              className={
+                memberId == replyDTO.memberId
+                  ? 'text-sm text-primary btn-ghost rounded -mt-1 px-0.5 mr-3'
+                  : 'text-sm text-info btn-ghost rounded -mt-1 px-0.5 mr-3'
+              }
+            >
+              {replyDTO?.nickname}
+            </button>
+            <i className="ri-star-line ri-1x"></i>
+            <div className="text-sm text-info">{replyDTO?.likeCount}</div>
+            <div hidden={memberId == null}>
+              <div className="flex gap-1">
+                <div
+                  className={
+                    like == null ? 'invisible -mt-1 mr-1' : 'visible -mt-1 mr-1'
+                  }
+                >
+                  <button
+                    onClick={updateLike}
+                    disabled={likeUpdated}
+                    className="btn btn-xs btn-circle btn-outline btn-warning"
+                  >
+                    <i className="ri-arrow-left-double-line ri-1x"></i>
+                  </button>
+                </div>
+                <button
+                  disabled={likeUpdated}
+                  onClick={onClickLike}
+                  className={
+                    like == true
+                      ? 'btn btn-xs btn-circle btn-outline btn-accent btn-active'
+                      : 'btn btn-xs btn-circle btn-outline btn-accent'
+                  }
+                >
+                  <i className="ri-thumb-up-line ri-1x"></i>
+                </button>
+                <button
+                  disabled={likeUpdated}
+                  onClick={onClickNotLike}
+                  className={
+                    like == false
+                      ? 'btn btn-xs btn-circle btn-outline btn-error btn-active'
+                      : 'btn btn-xs btn-circle btn-outline btn-error'
+                  }
+                >
+                  <i className="ri-thumb-down-line ri-1x"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end mb-2">
+            <i className="ri-time-line ri-1x"></i>
+            <div className="text-sm text-info mx-1">
+              {DateTime.fromISO(
+                (replyDTO?.modDate as string).split('.')[0] as string
+              ).toFormat('HH:mm yyyy-MM-dd')}
+            </div>
+          </div>
+        </div>
+        // <- boardPageState.showReplyEditor == false
+      )}
+      <Editor
+        onChange={handleReplyEditorChange}
+        initialContent={
+          boardPageState.showReplyEditor &&
+          boardPageState.replyId == replyDTO.replyId
+            ? replyText.content
+            : JSON.parse(replyDTO?.content as string)
+        }
+        editorRef={replyEditorRef}
+        editable={
+          boardPageState.showReplyEditor &&
+          boardPageState.replyId == replyDTO.replyId
+        }
+      />
+      {!(
+        boardPageState.showReplyEditor &&
+        boardPageState.replyId == replyDTO.replyId
+      ) && (
+        // boardPageState.showReplyEditor == false ->
+        <div className="flex justify-between my-1">
+          <button
+            disabled={memberId == null || boardPageState.showReplyEditor}
+            onClick={enableReplyEditor(replyDTO.replyId)}
+            className="btn btn-xs btn-circle btn-outline btn-warning m-1"
+          >
+            <i className="ri-reply-line ri-1x"></i>
+          </button>
+          <div className="justify-end">
+            <div hidden={memberId != replyDTO.memberId || confirmDeleteReply}>
+              <button
+                disabled={boardPageState.showReplyEditor}
+                className="btn btn-xs btn-circle btn-outline btn-accent m-1"
+                onClick={enableReplyEditorToModify}
+              >
+                <i className="ri-edit-2-line ri-1x"></i>
+              </button>
+              <button
+                disabled={boardPageState.showReplyEditor}
+                className="btn btn-xs btn-circle btn-outline btn-error m-1"
+                onClick={deleteReply}
+              >
+                <i className="ri-delete-bin-line ri-1x"></i>
+              </button>
+            </div>
+            <div hidden={memberId != replyDTO.memberId || !confirmDeleteReply}>
+              <button
+                onClick={cancelDeleteReply}
+                className="btn btn-xs btn-ghost mr-1"
+              >
+                {t('Common.Cancel')}
+              </button>
+              {isErrorDelete ? (
+                <div className="ml-2.5 mr-3">
+                  <MaterialSymbolError size={19} />
+                </div>
+              ) : isSuccessDelete ? (
+                <div className="ml-2.5 mr-3">
+                  <MaterialSymbolSuccess size={19} />
+                </div>
+              ) : (
+                <button
+                  onClick={reallyDeleteReply}
+                  className="btn btn-xs btn-accent"
+                >
+                  {t('Common.Delete')}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+        // <- boardPageState.showReplyEditor == false
+      )}
     </div>
   );
 };

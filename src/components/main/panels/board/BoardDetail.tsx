@@ -408,9 +408,18 @@ const BoardDetail: FC<BoardDetailProps> = ({
             [key]: key == 'title' ? e.target.value : e.target.value.trim()
           };
         });
+        if (!boardPageState.needSaveText) {
+          const payload = {
+            panelId: panelId,
+            panelState: {
+              needSaveText: true
+            }
+          };
+          dispatch(updatePanelState(payload));
+        }
       }
     },
-    []
+    [boardPageState.needSaveText, panelId, dispatch]
   );
 
   const handleChangeCategory = useCallback(
@@ -427,15 +436,27 @@ const BoardDetail: FC<BoardDetailProps> = ({
     [dispatch, panelId]
   );
 
-  const handleBoardEditorChange = useCallback((json: RemirrorJSON) => {
-    setBoardText((boardText) => {
-      return {
-        ...boardText,
-        preview: boardEditorRef.current?.getText({lineBreakDivider: ' '}),
-        content: json
-      };
-    });
-  }, []);
+  const handleBoardEditorChange = useCallback(
+    (json: RemirrorJSON) => {
+      setBoardText((boardText) => {
+        return {
+          ...boardText,
+          preview: boardEditorRef.current?.getText({lineBreakDivider: ' '}),
+          content: json
+        };
+      });
+      if (!boardPageState.needSaveText) {
+        const payload = {
+          panelId: panelId,
+          panelState: {
+            needSaveText: true
+          }
+        };
+        dispatch(updatePanelState(payload));
+      }
+    },
+    [boardPageState.needSaveText, panelId, dispatch]
+  );
 
   const resetBoardEditorState = useCallback(() => {
     const payload = {
@@ -443,12 +464,14 @@ const BoardDetail: FC<BoardDetailProps> = ({
       panelState: {
         showBoardEditor: false,
         boardCategory: '0',
+        nickname: localStorage.getItem('nickname') || '',
         title: '',
         tag1: null,
         tag2: null,
         tag3: null,
         preview: undefined,
-        content: undefined
+        content: undefined,
+        needSaveText: false
       }
     };
     dispatch(updatePanelState(payload));
@@ -577,15 +600,9 @@ const BoardDetail: FC<BoardDetailProps> = ({
   // disable BoardEditor when logged out
   useEffect(() => {
     if (memberId == null && boardPageState.showBoardEditor) {
-      const payload = {
-        panelId: panelId,
-        panelState: {
-          showBoardEditor: false
-        }
-      };
-      dispatch(updatePanelState(payload));
+      resetBoardEditorState();
     }
-  }, [memberId, boardPageState.showBoardEditor, panelId, dispatch]);
+  }, [memberId, boardPageState.showBoardEditor, resetBoardEditorState]);
 
   // prepare for new content to register
   useEffect(() => {
@@ -596,12 +613,15 @@ const BoardDetail: FC<BoardDetailProps> = ({
 
   // settings for unintentional unmounting
   const mounted = useRef(false);
+  console.log('mounted initialized');
 
   useEffect(() => {
     mounted.current = true;
+    console.log('mounted.current true');
 
     return () => {
       mounted.current = false;
+      console.log('mounted.current false');
     };
   }, []);
 
@@ -611,21 +631,36 @@ const BoardDetail: FC<BoardDetailProps> = ({
       boardEditorRef.current?.setContent(
         boardText.content as RemirrorContentType
       );
+      console.log('boardEditorRef.current setContent');
     }
   }, []);
 
   // save BoardEditor info when unintentionally unmounting
   useEffect(() => {
+    console.log('boardPageState.showBoardEditor && !mounted.current mounted');
     return () => {
-      if (boardPageState.showBoardEditor && !mounted.current) {
+      if (
+        boardPageState.showBoardEditor &&
+        !mounted.current &&
+        boardPageState.needSaveText
+      ) {
         const payload = {
           panelId: panelId,
-          panelState: boardText
+          panelState: {...boardText, needSaveText: false}
         };
+        console.log(
+          'boardPageState.showBoardEditor && !mounted.current unmounted'
+        );
         dispatch(updatePanelState(payload));
       }
     };
-  }, [panelId, dispatch, boardPageState.showBoardEditor, boardText]);
+  }, [
+    panelId,
+    dispatch,
+    boardPageState.showBoardEditor,
+    boardPageState.needSaveText,
+    boardText
+  ]);
 
   // <- boardPageState.showBoardEditor == true
 
@@ -633,6 +668,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
     (boardPageState.boardId != null && boardDTO == null) ||
     (boardPageState.boardId == null && !boardPageState.showBoardEditor)
   ) {
+    console.log('return null');
     return null;
   }
 
@@ -786,7 +822,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
             </div>
           </div>
           <div className="flex justify-between">
-            <div className="flex justify-start mb-2 gap-2">
+            <div className="flex justify-start gap-2">
               <i className="ri-eye-line ri-1x"></i>
               <div className="text-sm text-info">{boardDTO?.readCount}</div>
               <i className="ri-chat-1-line ri-1x"></i>
@@ -835,10 +871,10 @@ const BoardDetail: FC<BoardDetailProps> = ({
                 </div>
               </div>
             </div>
-            <div className="flex mb-2 mr-4 gap-4">
+            <div className="flex mr-4 gap-4">
               {boardDTO?.tag1 && (
                 <button
-                  className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+                  className="text-xs text-info btn-ghost rounded -mt-1 px-1"
                   onClick={onClickSearchTag(boardDTO?.tag1)}
                 >
                   {boardDTO?.tag1}
@@ -846,7 +882,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
               )}
               {boardDTO?.tag2 && (
                 <button
-                  className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+                  className="text-xs text-info btn-ghost rounded -mt-1 px-1"
                   onClick={onClickSearchTag(boardDTO?.tag2)}
                 >
                   {boardDTO?.tag2}
@@ -854,7 +890,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
               )}
               {boardDTO?.tag3 && (
                 <button
-                  className="text-xs text-info btn-ghost rounded -mt-1 px-0.5"
+                  className="text-xs text-info btn-ghost rounded -mt-1 px-1"
                   onClick={onClickSearchTag(boardDTO?.tag3)}
                 >
                   {boardDTO?.tag3}

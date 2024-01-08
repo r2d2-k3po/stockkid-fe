@@ -85,6 +85,7 @@ const ReplyList: FC<ReplyListProps> = ({
     }
     return entities;
   }, [
+    memberId,
     replyDTOList,
     boardPageState.showReplyEditor,
     boardPageState.replyId,
