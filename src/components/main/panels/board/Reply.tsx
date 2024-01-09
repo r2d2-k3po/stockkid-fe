@@ -209,7 +209,7 @@ const Reply: FC<ReplyProps> = ({
               if (rDTO.replyId == replyDTO.replyId) {
                 return {
                   ...rDTO,
-                  content: JSON.parse(deletedContent)
+                  content: deletedContent
                 };
               } else {
                 return rDTO;
@@ -267,6 +267,8 @@ const Reply: FC<ReplyProps> = ({
 
   // boardPageState.showReplyEditor == true ->
 
+  const needSaveText = useRef(false);
+
   const handleChangeNickname = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const regex = /^.{0,30}$/;
@@ -277,43 +279,25 @@ const Reply: FC<ReplyProps> = ({
             nickname: e.target.value.trim()
           };
         });
-        if (!boardPageState.needSaveText) {
-          const payload = {
-            panelId: panelId,
-            panelState: {
-              needSaveText: true
-            }
-          };
-          dispatch(updatePanelState(payload));
-        }
+        needSaveText.current = true;
       }
     },
-    [boardPageState.needSaveText, panelId, dispatch]
+    []
   );
 
-  const handleReplyEditorChange = useCallback(
-    (json: RemirrorJSON) => {
-      setReplyText((replyText) => {
-        return {
-          ...replyText,
-          preview: replyEditorRef.current?.getText({lineBreakDivider: ' '}),
-          content: json
-        };
-      });
-      if (!boardPageState.needSaveText) {
-        const payload = {
-          panelId: panelId,
-          panelState: {
-            needSaveText: true
-          }
-        };
-        dispatch(updatePanelState(payload));
-      }
-    },
-    [boardPageState.needSaveText, panelId, dispatch]
-  );
+  const handleReplyEditorChange = useCallback((json: RemirrorJSON) => {
+    setReplyText((replyText) => {
+      return {
+        ...replyText,
+        preview: replyEditorRef.current?.getText({lineBreakDivider: ' '}),
+        content: json
+      };
+    });
+    needSaveText.current = true;
+  }, []);
 
   const resetReplyEditorState = useCallback(() => {
+    needSaveText.current = false;
     const payload = {
       panelId: panelId,
       panelState: {
@@ -322,8 +306,7 @@ const Reply: FC<ReplyProps> = ({
         parentId: null,
         nickname: localStorage.getItem('nickname') || '',
         preview: undefined,
-        content: undefined,
-        needSaveText: false
+        content: undefined
       }
     };
     dispatch(updatePanelState(payload));
@@ -505,15 +488,12 @@ const Reply: FC<ReplyProps> = ({
 
   // settings for unintentional unmounting
   const mounted = useRef(false);
-  console.log('reply mounted initialized');
 
   useEffect(() => {
     mounted.current = true;
-    console.log('reply mounted.current true');
 
     return () => {
       mounted.current = false;
-      console.log('reply mounted.current false');
     };
   }, []);
 
@@ -527,35 +507,30 @@ const Reply: FC<ReplyProps> = ({
       replyEditorRef.current?.setContent(
         replyText.content as RemirrorContentType
       );
-      console.log('replyEditorRef.current setContent');
     }
   }, []);
 
   // save ReplyEditor info when unintentionally unmounting
   useEffect(() => {
-    console.log('boardPageState.showReplyEditor && !mounted.current mounted');
     return () => {
       if (
         boardPageState.showReplyEditor &&
         replyDTO.replyId == boardPageState.replyId &&
         !mounted.current &&
-        boardPageState.needSaveText
+        needSaveText.current
       ) {
         const payload = {
           panelId: panelId,
-          panelState: {...replyText, needSaveText: false}
+          panelState: replyText
         };
-        console.log(
-          'boardPageState.showReplyEditor && !mounted.current unmounted'
-        );
-        // dispatch(updatePanelState(payload));
+        dispatch(updatePanelState(payload));
+        needSaveText.current = false;
       }
     };
   }, [
     panelId,
     dispatch,
     boardPageState.showReplyEditor,
-    boardPageState.needSaveText,
     boardPageState.replyId,
     replyDTO.replyId,
     replyText
@@ -563,13 +538,17 @@ const Reply: FC<ReplyProps> = ({
 
   // <- boardPageState.showReplyEditor == true
 
-  if (replyDTO.replyId == null && !boardPageState.showReplyEditor) {
+  if (
+    replyDTO.replyId == null &&
+    (!boardPageState.showReplyEditor ||
+      replyDTO.replyId != boardPageState.replyId)
+  ) {
     console.log('reply return null');
     return null;
   }
 
   return (
-    <div className="border-t border-info mb-2 mr-2 pt-2">
+    <div className="border-t border-info pt-2">
       {boardPageState.showReplyEditor &&
       boardPageState.replyId == replyDTO.replyId ? (
         // boardPageState.showReplyEditor == true ->
@@ -617,7 +596,7 @@ const Reply: FC<ReplyProps> = ({
         // <- boardPageState.showReplyEditor == true
         // boardPageState.showReplyEditor == false ->
         <div className="flex justify-between">
-          <div className="flex justify-start mb-2 gap-2">
+          <div className="flex justify-start gap-2">
             {parentNickname && (
               <div className="text-sm">
                 <span>{parentNickname}</span>
@@ -676,31 +655,40 @@ const Reply: FC<ReplyProps> = ({
               </div>
             </div>
           </div>
-          <div className="flex justify-end mb-2">
+          <div className="flex justify-end">
             <i className="ri-time-line ri-1x"></i>
             <div className="text-sm text-info mx-1">
               {DateTime.fromISO(
-                (replyDTO?.modDate as string).split('.')[0] as string
+                (replyDTO?.regDate as string).split('.')[0] as string
               ).toFormat('HH:mm yyyy-MM-dd')}
             </div>
           </div>
         </div>
         // <- boardPageState.showReplyEditor == false
       )}
-      <Editor
-        onChange={handleReplyEditorChange}
-        initialContent={
+      <div
+        className={
           boardPageState.showReplyEditor &&
           boardPageState.replyId == replyDTO.replyId
-            ? replyText.content
-            : JSON.parse(replyDTO?.content as string)
+            ? 'mb-2'
+            : ''
         }
-        editorRef={replyEditorRef}
-        editable={
-          boardPageState.showReplyEditor &&
-          boardPageState.replyId == replyDTO.replyId
-        }
-      />
+      >
+        <Editor
+          onChange={handleReplyEditorChange}
+          initialContent={
+            boardPageState.showReplyEditor &&
+            boardPageState.replyId == replyDTO.replyId
+              ? replyText.content
+              : JSON.parse(replyDTO?.content as string)
+          }
+          editorRef={replyEditorRef}
+          editable={
+            boardPageState.showReplyEditor &&
+            boardPageState.replyId == replyDTO.replyId
+          }
+        />
+      </div>
       {!(
         boardPageState.showReplyEditor &&
         boardPageState.replyId == replyDTO.replyId

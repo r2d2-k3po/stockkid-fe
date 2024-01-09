@@ -54,8 +54,7 @@ export const panelState: PanelState = {
     content: undefined,
     showReplyEditor: false,
     replyId: null,
-    parentId: null,
-    needSaveText: false
+    parentId: null
   }
 };
 
@@ -85,7 +84,6 @@ export type BoardPageState = {
   showReplyEditor: boolean;
   replyId: string | null;
   parentId: string | null;
-  needSaveText: boolean;
 };
 
 export const deletedString = 'deleted';

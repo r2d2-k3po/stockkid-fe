@@ -16,7 +16,7 @@ import {
   useRemirror,
   useRemirrorContext
 } from '@remirror/react';
-import 'remirror/styles/all.css';
+import './remirror/all.css';
 
 import {BubbleMenu} from './remirror/BubbleMenu';
 import {TopToolbar} from './remirror/TopToolbar';

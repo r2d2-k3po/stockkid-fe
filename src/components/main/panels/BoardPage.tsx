@@ -114,6 +114,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         panelId: panelId,
         panelState: {
           searchMode: true,
+          boardId: null,
           currentPage: 1,
           targetPage: 1
         }
@@ -134,6 +135,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             | 'likeCount'
             | 'replyCount'
             | 'readCount',
+          boardId: null,
           currentPage: 1,
           targetPage: 1
         }
@@ -148,7 +150,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: 1}
+        panelState: {currentPage: 1, boardId: null}
       };
       dispatch(updatePanelState(payload));
     },
@@ -160,7 +162,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.currentPage - 1}
+        panelState: {currentPage: boardPageState.currentPage - 1, boardId: null}
       };
       dispatch(updatePanelState(payload));
     },
@@ -172,7 +174,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.currentPage + 1}
+        panelState: {currentPage: boardPageState.currentPage + 1, boardId: null}
       };
       dispatch(updatePanelState(payload));
     },
@@ -184,7 +186,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.totalPages}
+        panelState: {currentPage: boardPageState.totalPages, boardId: null}
       };
       dispatch(updatePanelState(payload));
     },
@@ -222,7 +224,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.targetPage}
+        panelState: {currentPage: boardPageState.targetPage, boardId: null}
       };
       dispatch(updatePanelState(payload));
     },
@@ -276,6 +278,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           panelId: panelId,
           panelState: {
             boardPageCategory: category,
+            boardId: null,
             tag: '',
             searchDisabled: true,
             searchMode: false,
@@ -365,6 +368,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       <div className="flex justify-between border-b border-warning my-2 mx-3">
         <div className="flex justify-start gap-2 mb-2 mt-1">
           <button
+            disabled={
+              boardPageState.showBoardEditor || boardPageState.showReplyEditor
+            }
             className={
               boardPageState.boardPageCategory == 'ALL'
                 ? categoryButtonClassNameActive
@@ -375,6 +381,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             {t('BoardPage.Category.ALL')}
           </button>
           <button
+            disabled={
+              boardPageState.showBoardEditor || boardPageState.showReplyEditor
+            }
             className={
               boardPageState.boardPageCategory == 'STOCK'
                 ? categoryButtonClassNameActive
@@ -385,6 +394,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             {t('BoardPage.Category.STOCK')}
           </button>
           <button
+            disabled={
+              boardPageState.showBoardEditor || boardPageState.showReplyEditor
+            }
             className={
               boardPageState.boardPageCategory == 'LIFE'
                 ? categoryButtonClassNameActive
@@ -395,6 +407,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             {t('BoardPage.Category.LIFE')}
           </button>
           <button
+            disabled={
+              boardPageState.showBoardEditor || boardPageState.showReplyEditor
+            }
             className={
               boardPageState.boardPageCategory == 'QA'
                 ? categoryButtonClassNameActive
@@ -405,6 +420,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             {t('BoardPage.Category.QA')}
           </button>
           <button
+            disabled={
+              boardPageState.showBoardEditor || boardPageState.showReplyEditor
+            }
             className={
               boardPageState.boardPageCategory == 'NOTICE'
                 ? categoryButtonClassNameActive
@@ -417,6 +435,9 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         </div>
         <div className="flex justify-center gap-2 mb-2">
           <input
+            disabled={
+              boardPageState.showBoardEditor || boardPageState.showReplyEditor
+            }
             type="text"
             name="tag"
             placeholder={t('BoardPage.placeholder.tag') as string}
@@ -427,10 +448,17 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <div className="mt-1" onClick={handleClickSearch}>
             <Search
               searchMode={boardPageState.searchMode}
-              searchDisabled={boardPageState.searchDisabled}
+              searchDisabled={
+                boardPageState.searchDisabled ||
+                boardPageState.showBoardEditor ||
+                boardPageState.showReplyEditor
+              }
             />
           </div>
           <select
+            disabled={
+              boardPageState.showBoardEditor || boardPageState.showReplyEditor
+            }
             onChange={handleChangeSortBy}
             className="max-w-xs select select-info select-xs text-accent-content mt-1"
             value={boardPageState.sortBy}
@@ -446,14 +474,22 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         <div className="flex justify-end gap-1 mb-2 text-secondary">
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
-            disabled={boardPageState.currentPage == 1}
+            disabled={
+              boardPageState.currentPage == 1 ||
+              boardPageState.showBoardEditor ||
+              boardPageState.showReplyEditor
+            }
             onClick={moveToFirstPage}
           >
             <i className="ri-skip-left-line ri-lg"></i>
           </button>
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
-            disabled={boardPageState.currentPage == 1}
+            disabled={
+              boardPageState.currentPage == 1 ||
+              boardPageState.showBoardEditor ||
+              boardPageState.showReplyEditor
+            }
             onClick={moveToPrevPage}
           >
             <i className="ri-arrow-left-s-line ri-lg"></i>
@@ -463,19 +499,30 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </span>
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
-            disabled={boardPageState.currentPage == boardPageState.totalPages}
+            disabled={
+              boardPageState.currentPage == boardPageState.totalPages ||
+              boardPageState.showBoardEditor ||
+              boardPageState.showReplyEditor
+            }
             onClick={moveToNextPage}
           >
             <i className="ri-arrow-right-s-line ri-lg"></i>
           </button>
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
-            disabled={boardPageState.currentPage == boardPageState.totalPages}
+            disabled={
+              boardPageState.currentPage == boardPageState.totalPages ||
+              boardPageState.showBoardEditor ||
+              boardPageState.showReplyEditor
+            }
             onClick={moveToLastPage}
           >
             <i className="ri-skip-right-line ri-lg"></i>
           </button>
           <input
+            disabled={
+              boardPageState.showBoardEditor || boardPageState.showReplyEditor
+            }
             type="number"
             name="targetPage"
             value={boardPageState.targetPage}
@@ -486,7 +533,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           />
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
-            disabled={boardPageState.currentPage == boardPageState.targetPage}
+            disabled={
+              boardPageState.currentPage == boardPageState.targetPage ||
+              boardPageState.showBoardEditor ||
+              boardPageState.showReplyEditor
+            }
             onClick={moveToTargetPage}
           >
             <i className="ri-corner-up-left-double-line ri-lg"></i>
@@ -504,18 +555,12 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </button>
         </div>
       </div>
-      <div
-        hidden={
-          boardPageState.boardId == null && !boardPageState.showBoardEditor
-        }
-      >
-        <BoardDetail
-          memberId={memberId}
-          panelId={panelId}
-          memberRole={memberRole}
-          setBoardDTOList={setBoardDTOList}
-        />
-      </div>
+      <BoardDetail
+        memberId={memberId}
+        panelId={panelId}
+        memberRole={memberRole}
+        setBoardDTOList={setBoardDTOList}
+      />
       {boardPageState.boardId == null && !boardPageState.showBoardEditor && (
         <div className="my-2 ml-3 mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
           {!!boardPreviewPage && boardPreviewPage}

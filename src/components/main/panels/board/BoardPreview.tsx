@@ -73,7 +73,7 @@ const BoardPreview: FC<BoardPreviewProps> = ({memberId, panelId, boardDTO}) => {
           <i className="ri-time-line ri-1x"></i>
           <div className="text-sm text-info mx-1">
             {DateTime.fromISO(
-              boardDTO?.modDate.split('.')[0] as string
+              boardDTO?.regDate.split('.')[0] as string
             ).toFormat('HH:mm yyyy-MM-dd')}
           </div>
           <div className="text-xs text-info text-center w-16 mx-2 border-[1px] border-secondary rounded-lg my-0.5">
