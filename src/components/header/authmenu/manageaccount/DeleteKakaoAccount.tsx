@@ -5,7 +5,7 @@ import {
   KakaoSigninRequest,
   useDeleteKakaoAccountMutation
 } from '../../../../app/api';
-import {updateRefreshToken} from '../../../../app/slices/authSlice';
+import {updateTokens} from '../../../../app/slices/authSlice';
 import KakaoButton from '../../../common/KakaoButton';
 import {nanoid} from 'nanoid';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
@@ -85,7 +85,7 @@ const DeleteKakaoAccount: FC<DeleteAccountProps> = ({
               nonce: kakaoNonce as string
             };
             try {
-              kakaoSignin(kakaoSigninRequest);
+              void kakaoSignin(kakaoSigninRequest);
             } catch (err) {
               console.log(err);
             } finally {
@@ -128,7 +128,7 @@ const DeleteKakaoAccount: FC<DeleteAccountProps> = ({
       const id = setTimeout(() => {
         hideThisRef();
         if (isSuccess) {
-          dispatch(updateRefreshToken(null));
+          dispatch(updateTokens({accessToken: null, refreshToken: null}));
         }
         reset();
         setIsClicked(false);

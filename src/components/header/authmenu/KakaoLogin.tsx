@@ -61,7 +61,7 @@ const KakaoLogin = () => {
               nonce: kakaoNonce as string
             };
             try {
-              kakaoSignin(kakaoSigninRequest);
+              void kakaoSignin(kakaoSigninRequest);
             } catch (err) {
               console.log(err);
             } finally {

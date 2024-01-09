@@ -18,7 +18,7 @@ import {
   getRemainingTimeBeforeExpiration,
   tokenDecoder
 } from '../../../utils/tokenDecoder';
-import {updateRefreshToken} from '../../../app/slices/authSlice';
+import {updateTokens} from '../../../app/slices/authSlice';
 import GoogleSignin from './GoogleSignin';
 import NaverLogin from './NaverLogin';
 import KakaoLogin from './KakaoLogin';
@@ -104,7 +104,7 @@ const AuthMenu = () => {
         );
         setExpiresInMinutesRefresh(remainingTime);
         if (remainingTime == 0) {
-          dispatch(updateRefreshToken(null));
+          dispatch(updateTokens({accessToken: null, refreshToken: null}));
         }
       }, duration);
       return () => clearInterval(id);

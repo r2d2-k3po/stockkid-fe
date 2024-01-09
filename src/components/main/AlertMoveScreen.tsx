@@ -30,7 +30,7 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
   const options = useMemo(
     () =>
       [...Array(screenTotal)].map(
-        (unused, index) =>
+        (_unused, index) =>
           index !== parseInt(currentScreen) - 1 && (
             <option value={(index + 1).toString()} key={index}>
               {index + 1}

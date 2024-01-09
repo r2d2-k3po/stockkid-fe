@@ -2,8 +2,9 @@ import {FC} from 'react';
 import Clock from '../../components/main/panels/Clock';
 import ClockMini from '../../components/main/panels/ClockMini';
 import BoardPage from '../../components/main/panels/BoardPage';
+import {RemirrorContentType} from 'remirror';
 
-type CommonPanelProps = {
+export type CommonPanelProps = {
   panelId: string;
 };
 
@@ -46,10 +47,46 @@ export const panelState: PanelState = {
     boardCategory: '0',
     nickname: localStorage.getItem('nickname') || '',
     title: '',
-    tag1: undefined,
-    tag2: undefined,
-    tag3: undefined,
+    tag1: null,
+    tag2: null,
+    tag3: null,
     preview: undefined,
-    content: undefined
+    content: undefined,
+    showReplyEditor: false,
+    replyId: null,
+    parentId: null
   }
 };
+
+export type ClockState = {
+  timeZone: string;
+};
+
+export type BoardPageState = {
+  boardPageCategory: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE';
+  tag: string;
+  searchDisabled: boolean;
+  searchMode: boolean;
+  sortBy: 'id' | 'likeCount' | 'replyCount' | 'readCount';
+  currentPage: number;
+  targetPage: number;
+  totalPages: number;
+  showBoardEditor: boolean;
+  boardId: string | null;
+  boardCategory: 'STOCK' | 'LIFE' | 'QA' | 'NOTICE' | '0';
+  nickname: string;
+  title: string;
+  tag1: string | null;
+  tag2: string | null;
+  tag3: string | null;
+  preview: string | undefined;
+  content: RemirrorContentType | undefined;
+  showReplyEditor: boolean;
+  replyId: string | null;
+  parentId: string | null;
+};
+
+export const deletedString = 'deleted';
+
+export const deletedContent =
+  '{"type":"doc","content":[{"type":"paragraph","attrs":{"dir":null,"ignoreBidiAutoUpdate":null},"content":[{"type":"text","text":"deleted"}]}]}';

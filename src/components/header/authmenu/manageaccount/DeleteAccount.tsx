@@ -9,7 +9,7 @@ import React, {
 import {useTranslation} from 'react-i18next';
 import {useDeleteAccountMutation} from '../../../../app/api';
 import {useAppDispatch} from '../../../../app/hooks';
-import {updateRefreshToken} from '../../../../app/slices/authSlice';
+import {updateTokens} from '../../../../app/slices/authSlice';
 import MaterialSymbolError from '../../../common/MaterialSymbolError';
 import MaterialSymbolSuccess from '../../../common/MaterialSymbolSuccess';
 
@@ -81,7 +81,7 @@ const DeleteAccount: FC<DeleteAccountProps> = ({
       const id = setTimeout(() => {
         hideThisRef();
         if (isSuccess) {
-          dispatch(updateRefreshToken(null));
+          dispatch(updateTokens({accessToken: null, refreshToken: null}));
         }
         reset();
       }, 3000);

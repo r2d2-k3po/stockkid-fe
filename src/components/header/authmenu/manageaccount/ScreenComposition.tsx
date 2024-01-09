@@ -218,12 +218,19 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
       await requestScreenTitlesDefaultLoad();
     }
 
-    try {
-      loadScreenTitles();
-    } catch (err) {
-      console.log(err);
+    if (currentTask == 'load') {
+      try {
+        void loadScreenTitles();
+      } catch (err) {
+        console.log(err);
+      }
     }
-  }, [loggedIn, requestScreenTitlesLoad, requestScreenTitlesDefaultLoad]);
+  }, [
+    loggedIn,
+    currentTask,
+    requestScreenTitlesLoad,
+    requestScreenTitlesDefaultLoad
+  ]);
 
   useEffect(() => {
     if (currentTask == 'load') {
