@@ -1,3 +1,4 @@
+import './remirror/all.css';
 import React, {
   FC,
   forwardRef,
@@ -76,7 +77,7 @@ const Editor: FC<EditorProps> = ({
   });
 
   return (
-    <div className="remirror-theme">
+    <div className="remirror-theme relative mb-[1px]">
       <Remirror manager={manager} initialContent={state} editable={editable}>
         <ImperativeHandle ref={editorRef} />
         {editable && <TopToolbar />}

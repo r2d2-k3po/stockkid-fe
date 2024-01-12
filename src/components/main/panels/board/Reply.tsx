@@ -548,7 +548,7 @@ const Reply: FC<ReplyProps> = ({
   }
 
   return (
-    <div className="border-t border-info pt-2">
+    <div className="border-t border-info pt-1">
       {boardPageState.showReplyEditor &&
       boardPageState.replyId == replyDTO.replyId ? (
         // boardPageState.showReplyEditor == true ->
@@ -617,19 +617,17 @@ const Reply: FC<ReplyProps> = ({
             <div className="text-sm text-info">{replyDTO?.likeCount}</div>
             <div hidden={memberId == null}>
               <div className="flex gap-1">
-                <div
+                <button
+                  onClick={updateLike}
+                  disabled={likeUpdated}
                   className={
-                    like == null ? 'invisible -mt-1 mr-1' : 'visible -mt-1 mr-1'
+                    like == null
+                      ? 'btn btn-xs btn-circle btn-outline btn-warning invisible mr-1'
+                      : 'btn btn-xs btn-circle btn-outline btn-warning visible mr-1'
                   }
                 >
-                  <button
-                    onClick={updateLike}
-                    disabled={likeUpdated}
-                    className="btn btn-xs btn-circle btn-outline btn-warning"
-                  >
-                    <i className="ri-arrow-left-double-line ri-1x"></i>
-                  </button>
-                </div>
+                  <i className="ri-arrow-left-double-line ri-1x"></i>
+                </button>
                 <button
                   disabled={likeUpdated}
                   onClick={onClickLike}
@@ -694,7 +692,7 @@ const Reply: FC<ReplyProps> = ({
         boardPageState.replyId == replyDTO.replyId
       ) && (
         // boardPageState.showReplyEditor == false ->
-        <div className="flex justify-between my-1">
+        <div className="flex justify-between">
           <button
             disabled={memberId == null || boardPageState.showReplyEditor}
             onClick={enableReplyEditor(replyDTO.replyId)}

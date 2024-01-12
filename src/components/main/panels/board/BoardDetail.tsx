@@ -31,6 +31,7 @@ import {
 } from '../../../../app/constants/panelInfo';
 import {EditorStateProps, RemirrorContentType, RemirrorJSON} from 'remirror';
 import RecursiveReplies from './RecursiveReplies';
+import MyEditor from './MyEditor';
 
 export interface IdDTO {
   id: string;
@@ -694,8 +695,8 @@ const BoardDetail: FC<BoardDetailProps> = ({
   }
 
   return (
-    <div className="my-2 ml-3 mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
-      <div className="mr-1">
+    <div className="my-2 ml-[11px] mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
+      <div className="ml-[1px] mr-1">
         {boardPageState.showBoardEditor ? (
           // boardPageState.showBoardEditor == true ->
           <>
@@ -853,21 +854,17 @@ const BoardDetail: FC<BoardDetailProps> = ({
                 <div className="text-sm text-info">{boardDTO?.likeCount}</div>
                 <div hidden={memberId == null}>
                   <div className="flex gap-1">
-                    <div
+                    <button
+                      onClick={updateLike}
+                      disabled={likeUpdated}
                       className={
                         like == null
-                          ? 'invisible -mt-1 mr-1'
-                          : 'visible -mt-1 mr-1'
+                          ? 'btn btn-xs btn-circle btn-outline btn-warning invisible mr-1'
+                          : 'btn btn-xs btn-circle btn-outline btn-warning visible mr-1'
                       }
                     >
-                      <button
-                        onClick={updateLike}
-                        disabled={likeUpdated}
-                        className="btn btn-xs btn-circle btn-outline btn-warning"
-                      >
-                        <i className="ri-arrow-left-double-line ri-1x"></i>
-                      </button>
-                    </div>
+                      <i className="ri-arrow-left-double-line ri-1x"></i>
+                    </button>
                     <button
                       disabled={likeUpdated}
                       onClick={onClickLike}
@@ -935,7 +932,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
         />
         {!boardPageState.showBoardEditor && (
           // boardPageState.showBoardEditor == false ->
-          <div className="flex justify-between my-1">
+          <div className="flex justify-between">
             <button
               disabled={memberId == null || boardPageState.showReplyEditor}
               onClick={enableReplyEditor(null)}
@@ -1014,6 +1011,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
             />
           )}
         </div>
+        <MyEditor />
       </div>
     </div>
   );
