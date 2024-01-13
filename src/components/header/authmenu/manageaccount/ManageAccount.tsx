@@ -66,7 +66,7 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
           <option value="screenComposition">
             {t('ManageAccount.select.screenComposition')}
           </option>
-          {loginMethod == 'UP' && (
+          {loginMethod === 'UP' && (
             <option value="changePassword">
               {t('ManageAccount.select.changePassword')}
             </option>
@@ -78,41 +78,41 @@ const ManageAccount: FC<ManageAccountProps> = ({loginMethod, hideThisRef}) => {
           )}
         </select>
       )}
-      {currentTask == 'screenComposition' && (
+      {currentTask === 'screenComposition' && (
         <ScreenComposition
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}
         />
       )}
-      {loginMethod == 'UP' && currentTask == 'changePassword' && (
+      {loginMethod === 'UP' && currentTask === 'changePassword' && (
         <ChangePassword
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}
           setIsLoading={setIsLoading}
         />
       )}
-      {loginMethod == 'UP' && currentTask == 'deleteAccount' && (
+      {loginMethod === 'UP' && currentTask === 'deleteAccount' && (
         <DeleteAccount
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}
           setIsLoading={setIsLoading}
         />
       )}
-      {loginMethod == 'GGL' && currentTask == 'deleteAccount' && (
+      {loginMethod === 'GGL' && currentTask === 'deleteAccount' && (
         <DeleteGoogleAccount
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}
           setIsLoading={setIsLoading}
         />
       )}
-      {loginMethod == 'NAV' && currentTask == 'deleteAccount' && (
+      {loginMethod === 'NAV' && currentTask === 'deleteAccount' && (
         <DeleteNaverAccount
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}
           setIsLoading={setIsLoading}
         />
       )}
-      {loginMethod == 'KKO' && currentTask == 'deleteAccount' && (
+      {loginMethod === 'KKO' && currentTask === 'deleteAccount' && (
         <DeleteKakaoAccount
           hideThisRef={hideThisRef}
           setIsUninitialized={setIsUninitialized}

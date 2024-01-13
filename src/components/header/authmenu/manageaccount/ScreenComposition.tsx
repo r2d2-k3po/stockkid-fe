@@ -151,16 +151,16 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
       e.stopPropagation();
       try {
         const key = 'screenSetting' + currentNumber;
-        if (currentTask == 'save') {
+        if (currentTask === 'save') {
           const screenSetting = {
             screens: screens,
             panels: panels
           };
-          if (currentTarget == 'localStorage') {
+          if (currentTarget === 'localStorage') {
             localStorage.setItem('screenTitle' + currentNumber, currentTitle);
             localStorage.setItem(key, JSON.stringify(screenSetting));
             setIsSuccessLocal(true);
-          } else if (currentTarget == 'server') {
+          } else if (currentTarget === 'server') {
             const screenCompositionSaveRequest = {
               number: currentNumber,
               screenTitle: currentTitle,
@@ -168,21 +168,21 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
             };
             await requestScreenCompositionSave(screenCompositionSaveRequest);
           }
-        } else if (currentTask == 'load') {
-          if (currentTarget == 'localStorage') {
+        } else if (currentTask === 'load') {
+          if (currentTarget === 'localStorage') {
             if (localStorage.getItem(key)) {
               const screenSetting = JSON.parse(
                 localStorage.getItem(key) as string
               ) as ScreenSetting;
               dispatch(loadScreens(screenSetting));
             }
-          } else if (currentTarget == 'server') {
+          } else if (currentTarget === 'server') {
             const data = await requestScreenSettingLoad(currentNumber).unwrap();
             const screenSetting = JSON.parse(
               (data.apiObj as ScreenSettingLoad).screenSetting
             ) as ScreenSetting;
             dispatch(loadScreens(screenSetting));
-          } else if (currentTarget == 'serverDefault') {
+          } else if (currentTarget === 'serverDefault') {
             const data = await requestScreenSettingDefaultLoad(
               currentNumber
             ).unwrap();
@@ -218,7 +218,7 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
       await requestScreenTitlesDefaultLoad();
     }
 
-    if (currentTask == 'load') {
+    if (currentTask === 'load') {
       try {
         void loadScreenTitles();
       } catch (err) {
@@ -233,14 +233,14 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
   ]);
 
   useEffect(() => {
-    if (currentTask == 'load') {
-      if (currentTarget == 'localStorage') {
+    if (currentTask === 'load') {
+      if (currentTarget === 'localStorage') {
         setLoadedTitle(
           localStorage.getItem('screenTitle' + currentNumber)
             ? (localStorage.getItem('screenTitle' + currentNumber) as string)
             : ''
         );
-      } else if (currentTarget == 'server') {
+      } else if (currentTarget === 'server') {
         setLoadedTitle(
           (dataScreenTitles?.apiObj as ScreenTitles)[
             'screenTitle' + currentNumber
@@ -250,7 +250,7 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
               ]
             : ''
         );
-      } else if (currentTarget == 'serverDefault') {
+      } else if (currentTarget === 'serverDefault') {
         setLoadedTitle(
           (dataScreenTitlesDefault?.apiObj as ScreenTitles)[
             'screenTitle' + currentNumber
@@ -333,7 +333,7 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
             {t('ScreenComposition.selectTarget.server')}
           </option>
         )}
-        {currentTask == 'load' && (
+        {currentTask === 'load' && (
           <option value="serverDefault">
             {t('ScreenComposition.selectTarget.serverDefault')}
           </option>
@@ -348,7 +348,7 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
         <option value="2">2</option>
         <option value="3">3</option>
       </select>
-      {currentTask == 'save' && (
+      {currentTask === 'save' && (
         <input
           type="text"
           name="currentTitle"
@@ -358,7 +358,7 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
           className="w-28 max-w-xs input input-bordered input-sm text-accent-content"
         />
       )}
-      {currentTask == 'load' && (
+      {currentTask === 'load' && (
         <div className="ml-1">{loadedTitle ? loadedTitle : 'N/A'}</div>
       )}
       <div className="flex-none w-36">
@@ -371,8 +371,8 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
         </button>
         <button
           disabled={
-            (currentTask == 'save' && !regexFinal.test(currentTitle)) ||
-            (currentTask == 'load' && !regexFinal.test(loadedTitle))
+            (currentTask === 'save' && !regexFinal.test(currentTitle)) ||
+            (currentTask === 'load' && !regexFinal.test(loadedTitle))
           }
           onClick={onClickHandleTask}
           className={
@@ -381,8 +381,8 @@ const ScreenComposition: FC<ScreenCompositionProps> = ({
               : 'btn btn-xs btn-accent'
           }
         >
-          {currentTask == 'save' && t('ScreenComposition.selectTask.save')}
-          {currentTask == 'load' && t('ScreenComposition.selectTask.load')}
+          {currentTask === 'save' && t('ScreenComposition.selectTask.save')}
+          {currentTask === 'load' && t('ScreenComposition.selectTask.load')}
         </button>
       </div>
       {(isSuccessLocal ||

@@ -273,7 +273,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
       (e: MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
-        const reload = category == boardPageState.boardPageCategory;
+        const reload = category === boardPageState.boardPageCategory;
         const payload = {
           panelId: panelId,
           panelState: {
@@ -372,7 +372,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
               boardPageState.showBoardEditor || boardPageState.showReplyEditor
             }
             className={
-              boardPageState.boardPageCategory == 'ALL'
+              boardPageState.boardPageCategory === 'ALL'
                 ? categoryButtonClassNameActive
                 : categoryButtonClassName
             }
@@ -385,7 +385,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
               boardPageState.showBoardEditor || boardPageState.showReplyEditor
             }
             className={
-              boardPageState.boardPageCategory == 'STOCK'
+              boardPageState.boardPageCategory === 'STOCK'
                 ? categoryButtonClassNameActive
                 : categoryButtonClassName
             }
@@ -398,7 +398,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
               boardPageState.showBoardEditor || boardPageState.showReplyEditor
             }
             className={
-              boardPageState.boardPageCategory == 'LIFE'
+              boardPageState.boardPageCategory === 'LIFE'
                 ? categoryButtonClassNameActive
                 : categoryButtonClassName
             }
@@ -411,7 +411,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
               boardPageState.showBoardEditor || boardPageState.showReplyEditor
             }
             className={
-              boardPageState.boardPageCategory == 'QA'
+              boardPageState.boardPageCategory === 'QA'
                 ? categoryButtonClassNameActive
                 : categoryButtonClassName
             }
@@ -424,7 +424,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
               boardPageState.showBoardEditor || boardPageState.showReplyEditor
             }
             className={
-              boardPageState.boardPageCategory == 'NOTICE'
+              boardPageState.boardPageCategory === 'NOTICE'
                 ? categoryButtonClassNameActive
                 : categoryButtonClassName
             }
@@ -475,7 +475,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={
-              boardPageState.currentPage == 1 ||
+              boardPageState.currentPage === 1 ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }
@@ -486,7 +486,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={
-              boardPageState.currentPage == 1 ||
+              boardPageState.currentPage === 1 ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }
@@ -500,7 +500,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={
-              boardPageState.currentPage == boardPageState.totalPages ||
+              boardPageState.currentPage === boardPageState.totalPages ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }
@@ -511,7 +511,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={
-              boardPageState.currentPage == boardPageState.totalPages ||
+              boardPageState.currentPage === boardPageState.totalPages ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }
@@ -534,7 +534,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={
-              boardPageState.currentPage == boardPageState.targetPage ||
+              boardPageState.currentPage === boardPageState.targetPage ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }

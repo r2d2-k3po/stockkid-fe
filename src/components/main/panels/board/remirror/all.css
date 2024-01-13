@@ -3653,16 +3653,53 @@ button:active .remirror-menu-pane-shortcut,
 /**
  * Styles extracted from: packages/remirror__theme/src/extension-list-theme.ts
  */
+
+.remirror-editor ul {
+  list-style-position: outside;
+  list-style-type: disc;
+  padding-left: 9px;
+}
+
+.remirror-editor ul ul {
+  list-style-position: outside;
+  list-style-type: circle;
+  padding-left: 9px;
+}
+
+.remirror-editor ul ul ul {
+  list-style-position: outside;
+  list-style-type: square;
+  padding-left: 9px;
+}
+
+.remirror-editor ol {
+  list-style-position: outside;
+  list-style-type: decimal;
+  padding-left: 9px;
+}
+
+.remirror-editor ol ol {
+  list-style-position: outside;
+  list-style-type: lower-roman;
+  padding-left: 9px;
+}
+
+.remirror-editor ol ol ol {
+  list-style-position: outside;
+  list-style-type: lower-alpha;
+  padding-left: 9px;
+}
+
 /* don't show the custom markers in a ordered list */
 .remirror-editor ol > li > .remirror-list-item-marker-container {
-  display: block;
+  display: none;
 }
 /* don't show the origin markers when using custom markers (checkbox / collapsible) */
 .remirror-editor ul > li.remirror-list-item-with-custom-mark {
-  list-style: decimal;
+  list-style: none;
 }
 .remirror-editor .remirror-ul-list-content > li.remirror-list-item-with-custom-mark {
-  list-style: decimal;
+  list-style: none;
 }
 /* override the browser's default styles */
 .remirror-editor ul ul + ul {
@@ -3671,8 +3708,8 @@ button:active .remirror-menu-pane-shortcut,
 }
 
 .remirror-list-item-marker-container {
-  /*position: absolute;*/
-  left: 32px;
+  position: absolute;
+  left: -25px;
   width: 24px;
   display: inline-block;
   text-align: center;
@@ -3680,6 +3717,7 @@ button:active .remirror-menu-pane-shortcut,
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  list-style-position: outside;
 }
 
 .remirror-list-item-checkbox {
@@ -3689,7 +3727,7 @@ button:active .remirror-menu-pane-shortcut,
 }
 
 .remirror-collapsible-list-item-closed li {
-  display: inline-block;
+  display: none;
 }
 
 .remirror-collapsible-list-item-closed .remirror-collapsible-list-item-button {
@@ -3726,7 +3764,7 @@ button:active .remirror-menu-pane-shortcut,
   position: absolute;
   top: 4px;
   bottom: 0px;
-  left: 20px;
+  left: -20px;
   width: 16px;
   cursor: pointer;
   -webkit-user-select: none;

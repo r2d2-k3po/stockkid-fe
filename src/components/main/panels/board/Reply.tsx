@@ -105,7 +105,7 @@ const Reply: FC<ReplyProps> = ({
     content: boardPageState.content
   });
 
-  // boardPageState.showReplyEditor == false ->
+  // boardPageState.showReplyEditor === false ->
 
   const onClickLike = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -123,7 +123,7 @@ const Reply: FC<ReplyProps> = ({
       try {
         const likeRequest = {
           id: replyDTO.replyId as string,
-          number: like == true ? 1 : -1
+          number: like === true ? 1 : -1
         };
         await requestReplyLike(likeRequest);
       } catch (err) {
@@ -206,7 +206,7 @@ const Reply: FC<ReplyProps> = ({
           replyEditorRef.current?.setContent(JSON.parse(deletedContent));
           setReplyDTOList((replyDTOList) =>
             replyDTOList?.map((rDTO) => {
-              if (rDTO.replyId == replyDTO.replyId) {
+              if (rDTO.replyId === replyDTO.replyId) {
                 return {
                   ...rDTO,
                   content: deletedContent
@@ -232,11 +232,11 @@ const Reply: FC<ReplyProps> = ({
 
   useEffect(() => {
     if (isSuccessLike) {
-      const number = like == true ? 1 : -1;
+      const number = like === true ? 1 : -1;
       const likeCount = (replyDTO?.likeCount as number) + number;
       setReplyDTOList((replyDTOList) =>
         replyDTOList?.map((rDTO) => {
-          if (rDTO.replyId == replyDTO.replyId) {
+          if (rDTO.replyId === replyDTO.replyId) {
             return {
               ...rDTO,
               likeCount: likeCount
@@ -263,9 +263,9 @@ const Reply: FC<ReplyProps> = ({
     resetLike
   ]);
 
-  // <- boardPageState.showReplyEditor == false
+  // <- boardPageState.showReplyEditor === false
 
-  // boardPageState.showReplyEditor == true ->
+  // boardPageState.showReplyEditor === true ->
 
   const needSaveText = useRef(false);
 
@@ -370,7 +370,7 @@ const Reply: FC<ReplyProps> = ({
         if (isSuccessRegister) {
           setBoardDTOList((boardDTOList) =>
             boardDTOList?.map((bDTO) => {
-              if (bDTO.boardId == boardPageState.boardId) {
+              if (bDTO.boardId === boardPageState.boardId) {
                 return {
                   ...bDTO,
                   replyCount: (replyCount as number) + 1
@@ -434,7 +434,7 @@ const Reply: FC<ReplyProps> = ({
           };
           setReplyDTOList((replyDTOList) =>
             replyDTOList?.map((rDTO) => {
-              if (rDTO.replyId == replyDTO.replyId) {
+              if (rDTO.replyId === replyDTO.replyId) {
                 return newReplyDTO;
               } else {
                 return rDTO;
@@ -467,7 +467,7 @@ const Reply: FC<ReplyProps> = ({
     if (
       memberId == null &&
       boardPageState.showReplyEditor &&
-      boardPageState.replyId == replyDTO.replyId
+      boardPageState.replyId === replyDTO.replyId
     ) {
       resetReplyEditorState();
     }
@@ -478,13 +478,6 @@ const Reply: FC<ReplyProps> = ({
     replyDTO.replyId,
     resetReplyEditorState
   ]);
-
-  // prepare for new content to register
-  // useEffect(() => {
-  //   if (boardPageState.boardId == null && boardPageState.showBoardEditor) {
-  //     boardEditorRef.current?.clearContent();
-  //   }
-  // }, [boardPageState.boardId, boardPageState.showBoardEditor]);
 
   // settings for unintentional unmounting
   const mounted = useRef(false);
@@ -501,7 +494,7 @@ const Reply: FC<ReplyProps> = ({
   useEffect(() => {
     if (
       boardPageState.showReplyEditor &&
-      replyDTO.replyId == boardPageState.replyId &&
+      replyDTO.replyId === boardPageState.replyId &&
       mounted.current
     ) {
       replyEditorRef.current?.setContent(
@@ -515,7 +508,7 @@ const Reply: FC<ReplyProps> = ({
     return () => {
       if (
         boardPageState.showReplyEditor &&
-        replyDTO.replyId == boardPageState.replyId &&
+        replyDTO.replyId === boardPageState.replyId &&
         !mounted.current &&
         needSaveText.current
       ) {
@@ -536,7 +529,7 @@ const Reply: FC<ReplyProps> = ({
     replyText
   ]);
 
-  // <- boardPageState.showReplyEditor == true
+  // <- boardPageState.showReplyEditor === true
 
   if (
     replyDTO.replyId == null &&
@@ -550,8 +543,8 @@ const Reply: FC<ReplyProps> = ({
   return (
     <div className="border-t border-info pt-1">
       {boardPageState.showReplyEditor &&
-      boardPageState.replyId == replyDTO.replyId ? (
-        // boardPageState.showReplyEditor == true ->
+      boardPageState.replyId === replyDTO.replyId ? (
+        // boardPageState.showReplyEditor === true ->
         <div className="flex justify-between">
           <div className="flex justify-start mb-2 gap-2">
             <i className="ri-user-line ri-1x"></i>
@@ -593,8 +586,8 @@ const Reply: FC<ReplyProps> = ({
           </div>
         </div>
       ) : (
-        // <- boardPageState.showReplyEditor == true
-        // boardPageState.showReplyEditor == false ->
+        // <- boardPageState.showReplyEditor === true
+        // boardPageState.showReplyEditor === false ->
         <div className="flex justify-between">
           <div className="flex justify-start gap-2">
             {parentNickname && (
@@ -606,7 +599,7 @@ const Reply: FC<ReplyProps> = ({
             <i className="ri-user-line ri-1x"></i>
             <button
               className={
-                memberId == replyDTO.memberId
+                memberId === replyDTO.memberId
                   ? 'text-sm text-primary btn-ghost rounded -mt-1 px-0.5 mr-3'
                   : 'text-sm text-info btn-ghost rounded -mt-1 px-0.5 mr-3'
               }
@@ -621,7 +614,7 @@ const Reply: FC<ReplyProps> = ({
                   onClick={updateLike}
                   disabled={likeUpdated}
                   className={
-                    like == null
+                    like === null
                       ? 'btn btn-xs btn-circle btn-outline btn-warning invisible mr-1'
                       : 'btn btn-xs btn-circle btn-outline btn-warning visible mr-1'
                   }
@@ -632,7 +625,7 @@ const Reply: FC<ReplyProps> = ({
                   disabled={likeUpdated}
                   onClick={onClickLike}
                   className={
-                    like == true
+                    like === true
                       ? 'btn btn-xs btn-circle btn-outline btn-accent btn-active'
                       : 'btn btn-xs btn-circle btn-outline btn-accent'
                   }
@@ -643,7 +636,7 @@ const Reply: FC<ReplyProps> = ({
                   disabled={likeUpdated}
                   onClick={onClickNotLike}
                   className={
-                    like == false
+                    like === false
                       ? 'btn btn-xs btn-circle btn-outline btn-error btn-active'
                       : 'btn btn-xs btn-circle btn-outline btn-error'
                   }
@@ -662,12 +655,12 @@ const Reply: FC<ReplyProps> = ({
             </div>
           </div>
         </div>
-        // <- boardPageState.showReplyEditor == false
+        // <- boardPageState.showReplyEditor === false
       )}
       <div
         className={
           boardPageState.showReplyEditor &&
-          boardPageState.replyId == replyDTO.replyId
+          boardPageState.replyId === replyDTO.replyId
             ? 'mb-2'
             : ''
         }
@@ -676,22 +669,22 @@ const Reply: FC<ReplyProps> = ({
           onChange={handleReplyEditorChange}
           initialContent={
             boardPageState.showReplyEditor &&
-            boardPageState.replyId == replyDTO.replyId
+            boardPageState.replyId === replyDTO.replyId
               ? replyText.content
               : JSON.parse(replyDTO?.content as string)
           }
           editorRef={replyEditorRef}
           editable={
             boardPageState.showReplyEditor &&
-            boardPageState.replyId == replyDTO.replyId
+            boardPageState.replyId === replyDTO.replyId
           }
         />
       </div>
       {!(
         boardPageState.showReplyEditor &&
-        boardPageState.replyId == replyDTO.replyId
+        boardPageState.replyId === replyDTO.replyId
       ) && (
-        // boardPageState.showReplyEditor == false ->
+        // boardPageState.showReplyEditor === false ->
         <div className="flex justify-between">
           <button
             disabled={memberId == null || boardPageState.showReplyEditor}
@@ -743,7 +736,7 @@ const Reply: FC<ReplyProps> = ({
             </div>
           </div>
         </div>
-        // <- boardPageState.showReplyEditor == false
+        // <- boardPageState.showReplyEditor === false
       )}
     </div>
   );

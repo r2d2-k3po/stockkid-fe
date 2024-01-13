@@ -55,7 +55,7 @@ const BoardPreview: FC<BoardPreviewProps> = ({memberId, panelId, boardDTO}) => {
           <i className="ri-user-line ri-1x"></i>
           <button
             className={
-              memberId == boardDTO.memberId
+              memberId === boardDTO.memberId
                 ? 'text-sm text-primary btn-ghost rounded -mt-1 px-0.5'
                 : 'text-sm text-info btn-ghost rounded -mt-1 px-0.5'
             }
