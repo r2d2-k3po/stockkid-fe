@@ -103,7 +103,7 @@ const AuthMenu = () => {
           decodedRefreshToken.exp as number
         );
         setExpiresInMinutesRefresh(remainingTime);
-        if (remainingTime == 0) {
+        if (remainingTime === 0) {
           dispatch(updateTokens({accessToken: null, refreshToken: null}));
         }
       }, duration);

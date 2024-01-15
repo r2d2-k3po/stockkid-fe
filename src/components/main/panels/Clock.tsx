@@ -10,7 +10,7 @@ const Clock: FC<CommonPanelProps> = ({panelId}) => {
   const dispatch = useAppDispatch();
 
   const locale =
-    i18n.language == 'ko' ? 'ko' : i18n.language == 'en' ? 'en-US' : '';
+    i18n.language === 'ko' ? 'ko' : i18n.language === 'en' ? 'en-US' : '';
 
   const clockState = useAppSelector((state) => state.panels).entities[panelId]
     ?.panelState as ClockState;

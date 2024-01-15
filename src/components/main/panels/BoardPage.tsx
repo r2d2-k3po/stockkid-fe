@@ -115,6 +115,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         panelState: {
           searchMode: true,
           boardId: null,
+          mountBoardDetail: false,
           currentPage: 1,
           targetPage: 1
         }
@@ -136,6 +137,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             | 'replyCount'
             | 'readCount',
           boardId: null,
+          mountBoardDetail: false,
           currentPage: 1,
           targetPage: 1
         }
@@ -150,7 +152,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: 1, boardId: null}
+        panelState: {currentPage: 1, boardId: null, mountBoardDetail: false}
       };
       dispatch(updatePanelState(payload));
     },
@@ -162,7 +164,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.currentPage - 1, boardId: null}
+        panelState: {
+          currentPage: boardPageState.currentPage - 1,
+          boardId: null,
+          mountBoardDetail: false
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -174,7 +180,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.currentPage + 1, boardId: null}
+        panelState: {
+          currentPage: boardPageState.currentPage + 1,
+          boardId: null,
+          mountBoardDetail: false
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -186,7 +196,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.totalPages, boardId: null}
+        panelState: {
+          currentPage: boardPageState.totalPages,
+          boardId: null,
+          mountBoardDetail: false
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -224,7 +238,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.targetPage, boardId: null}
+        panelState: {
+          currentPage: boardPageState.targetPage,
+          boardId: null,
+          mountBoardDetail: false
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -236,7 +254,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {showBoardEditor: true, boardId: null}
+        panelState: {
+          showBoardEditor: true,
+          boardId: null,
+          mountBoardDetail: true
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -273,12 +295,13 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
     (category: 'ALL' | 'STOCK' | 'LIFE' | 'QA' | 'NOTICE') =>
       (e: MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
-        const reload = category == boardPageState.boardPageCategory;
+        const reload = category === boardPageState.boardPageCategory;
         const payload = {
           panelId: panelId,
           panelState: {
             boardPageCategory: category,
             boardId: null,
+            mountBoardDetail: false,
             tag: '',
             searchDisabled: true,
             searchMode: false,
@@ -372,7 +395,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
               boardPageState.showBoardEditor || boardPageState.showReplyEditor
             }
             className={
-              boardPageState.boardPageCategory == 'ALL'
+              boardPageState.boardPageCategory === 'ALL'
                 ? categoryButtonClassNameActive
                 : categoryButtonClassName
             }
@@ -385,7 +408,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
               boardPageState.showBoardEditor || boardPageState.showReplyEditor
             }
             className={
-              boardPageState.boardPageCategory == 'STOCK'
+              boardPageState.boardPageCategory === 'STOCK'
                 ? categoryButtonClassNameActive
                 : categoryButtonClassName
             }
@@ -398,7 +421,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
               boardPageState.showBoardEditor || boardPageState.showReplyEditor
             }
             className={
-              boardPageState.boardPageCategory == 'LIFE'
+              boardPageState.boardPageCategory === 'LIFE'
                 ? categoryButtonClassNameActive
                 : categoryButtonClassName
             }
@@ -411,7 +434,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
               boardPageState.showBoardEditor || boardPageState.showReplyEditor
             }
             className={
-              boardPageState.boardPageCategory == 'QA'
+              boardPageState.boardPageCategory === 'QA'
                 ? categoryButtonClassNameActive
                 : categoryButtonClassName
             }
@@ -424,7 +447,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
               boardPageState.showBoardEditor || boardPageState.showReplyEditor
             }
             className={
-              boardPageState.boardPageCategory == 'NOTICE'
+              boardPageState.boardPageCategory === 'NOTICE'
                 ? categoryButtonClassNameActive
                 : categoryButtonClassName
             }
@@ -475,7 +498,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={
-              boardPageState.currentPage == 1 ||
+              boardPageState.currentPage === 1 ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }
@@ -486,7 +509,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={
-              boardPageState.currentPage == 1 ||
+              boardPageState.currentPage === 1 ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }
@@ -500,7 +523,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={
-              boardPageState.currentPage == boardPageState.totalPages ||
+              boardPageState.currentPage === boardPageState.totalPages ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }
@@ -511,7 +534,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={
-              boardPageState.currentPage == boardPageState.totalPages ||
+              boardPageState.currentPage === boardPageState.totalPages ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }
@@ -534,7 +557,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           <button
             className="btn btn-xs btn-ghost btn-circle mt-1"
             disabled={
-              boardPageState.currentPage == boardPageState.targetPage ||
+              boardPageState.currentPage === boardPageState.targetPage ||
               boardPageState.showBoardEditor ||
               boardPageState.showReplyEditor
             }
@@ -555,12 +578,14 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </button>
         </div>
       </div>
-      <BoardDetail
-        memberId={memberId}
-        panelId={panelId}
-        memberRole={memberRole}
-        setBoardDTOList={setBoardDTOList}
-      />
+      {boardPageState.mountBoardDetail && (
+        <BoardDetail
+          memberId={memberId}
+          panelId={panelId}
+          memberRole={memberRole}
+          setBoardDTOList={setBoardDTOList}
+        />
+      )}
       {boardPageState.boardId == null && !boardPageState.showBoardEditor && (
         <div className="my-2 ml-3 mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
           {!!boardPreviewPage && boardPreviewPage}

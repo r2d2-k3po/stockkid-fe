@@ -1,3 +1,4 @@
+import './remirror/all.css';
 import React, {
   FC,
   forwardRef,
@@ -16,7 +17,6 @@ import {
   useRemirror,
   useRemirrorContext
 } from '@remirror/react';
-import './remirror/all.css';
 
 import {BubbleMenu} from './remirror/BubbleMenu';
 import {TopToolbar} from './remirror/TopToolbar';
@@ -59,16 +59,12 @@ const Editor: FC<EditorProps> = ({
   const {t} = useTranslation();
 
   const extensions = useCallback(() => {
+    const ext = [new TableExtension(), ...wysiwygPreset()];
     if (editable) {
       const placeholder = t('Editor.placeholder') as string;
-      return [
-        new PlaceholderExtension({placeholder}),
-        new TableExtension(),
-        ...wysiwygPreset()
-      ];
-    } else {
-      return [new TableExtension(), ...wysiwygPreset()];
+      return [new PlaceholderExtension({placeholder}), ...ext];
     }
+    return ext;
   }, [editable, t]);
 
   const {manager, state} = useRemirror({
@@ -77,7 +73,7 @@ const Editor: FC<EditorProps> = ({
   });
 
   return (
-    <div className="remirror-theme">
+    <div className="remirror-theme relative mb-[1px]">
       <Remirror manager={manager} initialContent={state} editable={editable}>
         <ImperativeHandle ref={editorRef} />
         {editable && <TopToolbar />}

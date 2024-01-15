@@ -31,6 +31,7 @@ import {
 } from '../../../../app/constants/panelInfo';
 import {EditorStateProps, RemirrorContentType, RemirrorJSON} from 'remirror';
 import RecursiveReplies from './RecursiveReplies';
+import MyEditor from './MyEditor';
 
 export interface IdDTO {
   id: string;
@@ -152,7 +153,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
     content: boardPageState.content
   });
 
-  // boardPageState.showBoardEditor == false ->
+  // boardPageState.showBoardEditor === false ->
 
   const onClickLike = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -170,7 +171,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
       try {
         const likeRequest = {
           id: boardPageState.boardId as string,
-          number: like == true ? 1 : -1
+          number: like === true ? 1 : -1
         };
         await requestBoardLike(likeRequest);
       } catch (err) {
@@ -186,8 +187,8 @@ const BoardDetail: FC<BoardDetailProps> = ({
       const payload = {
         panelId: panelId,
         panelState: {
-          showBoardEditor: false,
-          boardId: null
+          boardId: null,
+          mountBoardDetail: false
         }
       };
       dispatch(updatePanelState(payload));
@@ -204,6 +205,8 @@ const BoardDetail: FC<BoardDetailProps> = ({
           tag: tag,
           searchDisabled: false,
           searchMode: true,
+          boardId: null,
+          mountBoardDetail: false,
           currentPage: 1,
           targetPage: 1
         }
@@ -213,9 +216,12 @@ const BoardDetail: FC<BoardDetailProps> = ({
     [dispatch, panelId]
   );
 
+  const needSaveText = useRef(false);
+
   const enableBoardEditorToModify = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
+      needSaveText.current = true;
       const payload = {
         panelId: panelId,
         panelState: {
@@ -295,7 +301,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
       setReplyDTOList((dataBoard?.apiObj as BoardReplyDTO)?.replyDTOList);
       setBoardDTOList((boardDTOList) =>
         boardDTOList?.map((bDTO) => {
-          if (bDTO.boardId == boardPageState.boardId) {
+          if (bDTO.boardId === boardPageState.boardId) {
             return (dataBoard?.apiObj as BoardReplyDTO)?.boardDTO;
           } else {
             return bDTO;
@@ -323,14 +329,14 @@ const BoardDetail: FC<BoardDetailProps> = ({
 
   useEffect(() => {
     if (isSuccessLike) {
-      const number = like == true ? 1 : -1;
+      const number = like === true ? 1 : -1;
       const likeCount = (boardDTO?.likeCount as number) + number;
       setBoardDTO((boardDTO) => {
         return {...(boardDTO as BoardDTO), likeCount: likeCount};
       });
       setBoardDTOList((boardDTOList) =>
         boardDTOList?.map((bDTO) => {
-          if (bDTO.boardId == boardPageState.boardId) {
+          if (bDTO.boardId === boardPageState.boardId) {
             return {
               ...bDTO,
               likeCount: likeCount
@@ -377,7 +383,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
           boardEditorRef.current?.setContent(JSON.parse(deletedContent));
           setBoardDTOList((boardDTOList) =>
             boardDTOList?.map((bDTO) => {
-              if (bDTO.boardId == boardPageState.boardId) {
+              if (bDTO.boardId === boardPageState.boardId) {
                 return {
                   ...bDTO,
                   title: deletedString,
@@ -402,11 +408,9 @@ const BoardDetail: FC<BoardDetailProps> = ({
     setBoardDTOList
   ]);
 
-  // <- boardPageState.showBoardEditor == false
+  // <- boardPageState.showBoardEditor === false
 
-  // boardPageState.showBoardEditor == true ->
-
-  const needSaveText = useRef(false);
+  // boardPageState.showBoardEditor === true ->
 
   const handleChangeBoardForm = useCallback(
     (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -415,7 +419,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
         setBoardText((boardText) => {
           return {
             ...boardText,
-            [key]: key == 'title' ? e.target.value : e.target.value.trim()
+            [key]: key === 'title' ? e.target.value : e.target.value.trim()
           };
         });
         needSaveText.current = true;
@@ -481,7 +485,13 @@ const BoardDetail: FC<BoardDetailProps> = ({
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       if (boardPageState.boardId == null) {
-        boardEditorRef.current?.clearContent();
+        const payload = {
+          panelId: panelId,
+          panelState: {
+            mountBoardDetail: false
+          }
+        };
+        dispatch(updatePanelState(payload));
       } else {
         boardEditorRef.current?.setContent(
           JSON.parse(boardDTO?.content as string)
@@ -502,7 +512,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
           boardCategory: boardPageState.boardCategory,
           nickname: boardText.nickname,
           title: boardText.title,
-          preview: boardText.preview as string,
+          preview: (boardText.preview as string).split('\u0000').join(''),
           content: JSON.stringify(boardText.content),
           tag1: boardText.tag1 || null,
           tag2: boardText.tag2 || null,
@@ -640,7 +650,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
     };
   }, [panelId, dispatch, boardPageState.showBoardEditor, boardText]);
 
-  // <- boardPageState.showBoardEditor == true
+  // <- boardPageState.showBoardEditor === true
 
   const replyEntities: ReplyEntities = useMemo(() => {
     const entities: ReplyEntities = {};
@@ -694,10 +704,10 @@ const BoardDetail: FC<BoardDetailProps> = ({
   }
 
   return (
-    <div className="my-2 ml-3 mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
-      <div className="mr-1">
+    <div className="my-2 ml-[11px] mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
+      <div className="ml-[1px] mr-1">
         {boardPageState.showBoardEditor ? (
-          // boardPageState.showBoardEditor == true ->
+          // boardPageState.showBoardEditor === true ->
           <>
             <div className="flex justify-between">
               <div className="flex justify-start mb-2 gap-2">
@@ -757,7 +767,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
                 ) : (
                   <button
                     disabled={
-                      boardPageState.boardCategory == '0' ||
+                      boardPageState.boardCategory === '0' ||
                       !regexFinal.test(boardText.nickname) ||
                       !regexFinal.test(boardText.title) ||
                       !boardText.preview
@@ -801,8 +811,8 @@ const BoardDetail: FC<BoardDetailProps> = ({
             </div>
           </>
         ) : (
-          // <- boardPageState.showBoardEditor == true
-          // boardPageState.showBoardEditor == false ->
+          // <- boardPageState.showBoardEditor === true
+          // boardPageState.showBoardEditor === false ->
           <>
             <div className="flex justify-between">
               <div className="flex justify-start mb-2 gap-2">
@@ -853,26 +863,22 @@ const BoardDetail: FC<BoardDetailProps> = ({
                 <div className="text-sm text-info">{boardDTO?.likeCount}</div>
                 <div hidden={memberId == null}>
                   <div className="flex gap-1">
-                    <div
+                    <button
+                      onClick={updateLike}
+                      disabled={likeUpdated}
                       className={
-                        like == null
-                          ? 'invisible -mt-1 mr-1'
-                          : 'visible -mt-1 mr-1'
+                        like === null
+                          ? 'btn btn-xs btn-circle btn-outline btn-warning invisible mr-1'
+                          : 'btn btn-xs btn-circle btn-outline btn-warning visible mr-1'
                       }
                     >
-                      <button
-                        onClick={updateLike}
-                        disabled={likeUpdated}
-                        className="btn btn-xs btn-circle btn-outline btn-warning"
-                      >
-                        <i className="ri-arrow-left-double-line ri-1x"></i>
-                      </button>
-                    </div>
+                      <i className="ri-arrow-left-double-line ri-1x"></i>
+                    </button>
                     <button
                       disabled={likeUpdated}
                       onClick={onClickLike}
                       className={
-                        like == true
+                        like === true
                           ? 'btn btn-xs btn-circle btn-outline btn-accent btn-active'
                           : 'btn btn-xs btn-circle btn-outline btn-accent'
                       }
@@ -883,7 +889,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
                       disabled={likeUpdated}
                       onClick={onClickNotLike}
                       className={
-                        like == false
+                        like === false
                           ? 'btn btn-xs btn-circle btn-outline btn-error btn-active'
                           : 'btn btn-xs btn-circle btn-outline btn-error'
                       }
@@ -921,7 +927,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
               </div>
             </div>
           </>
-          // <- boardPageState.showBoardEditor == false
+          // <- boardPageState.showBoardEditor === false
         )}
         <Editor
           onChange={handleBoardEditorChange}
@@ -934,8 +940,8 @@ const BoardDetail: FC<BoardDetailProps> = ({
           editable={boardPageState.showBoardEditor}
         />
         {!boardPageState.showBoardEditor && (
-          // boardPageState.showBoardEditor == false ->
-          <div className="flex justify-between my-1">
+          // boardPageState.showBoardEditor === false ->
+          <div className="flex justify-between">
             <button
               disabled={memberId == null || boardPageState.showReplyEditor}
               onClick={enableReplyEditor(null)}
@@ -998,7 +1004,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
               </div>
             </div>
           </div>
-          // <- boardPageState.showBoardEditor == false
+          // <- boardPageState.showBoardEditor === false
         )}
         <div hidden={boardPageState.showBoardEditor}>
           {replyEntities['board'].replies.length > 0 && (
@@ -1014,6 +1020,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
             />
           )}
         </div>
+        {/*<MyEditor />*/}
       </div>
     </div>
   );

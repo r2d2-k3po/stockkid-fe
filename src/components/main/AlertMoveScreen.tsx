@@ -83,7 +83,7 @@ const AlertMoveScreen: FC<AlertMoveScreenProps> = ({
         </button>
         <button
           disabled={
-            parseInt(targetScreen) == 0 || targetScreen === currentScreen
+            parseInt(targetScreen) === 0 || targetScreen === currentScreen
           }
           onClick={onClickMove}
           className="btn btn-xs btn-primary"

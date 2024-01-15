@@ -2,7 +2,7 @@
  * Styles extracted from: packages/remirror__theme/src/components-theme.ts
  */
 .remirror-editor-wrapper {
-  padding-top: var(--rmr-space-3);
+  padding-top: var(--rmr-space-1);
 }
 
 .remirror-button-active {
@@ -587,7 +587,7 @@ button:active .remirror-menu-pane-shortcut,
   position: relative;
   font-variant-ligatures: none;
   font-feature-settings: 'liga' 0;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .remirror-editor.ProseMirror pre {
@@ -3653,6 +3653,43 @@ button:active .remirror-menu-pane-shortcut,
 /**
  * Styles extracted from: packages/remirror__theme/src/extension-list-theme.ts
  */
+
+.remirror-editor ul {
+  list-style-position: outside;
+  list-style-type: disc;
+  padding-left: 9px;
+}
+
+.remirror-editor ul ul {
+  list-style-position: outside;
+  list-style-type: circle;
+  padding-left: 9px;
+}
+
+.remirror-editor ul ul ul {
+  list-style-position: outside;
+  list-style-type: square;
+  padding-left: 9px;
+}
+
+.remirror-editor ol {
+  list-style-position: outside;
+  list-style-type: decimal;
+  padding-left: 9px;
+}
+
+.remirror-editor ol ol {
+  list-style-position: outside;
+  list-style-type: lower-roman;
+  padding-left: 9px;
+}
+
+.remirror-editor ol ol ol {
+  list-style-position: outside;
+  list-style-type: lower-alpha;
+  padding-left: 9px;
+}
+
 /* don't show the custom markers in a ordered list */
 .remirror-editor ol > li > .remirror-list-item-marker-container {
   display: none;
@@ -3672,7 +3709,7 @@ button:active .remirror-menu-pane-shortcut,
 
 .remirror-list-item-marker-container {
   position: absolute;
-  left: -32px;
+  left: -25px;
   width: 24px;
   display: inline-block;
   text-align: center;
@@ -3680,6 +3717,7 @@ button:active .remirror-menu-pane-shortcut,
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  list-style-position: outside;
 }
 
 .remirror-list-item-checkbox {
@@ -4535,7 +4573,8 @@ button:active .remirror-menu-pane-shortcut,
 .remirror-theme h4,
 .remirror-theme h5,
 .remirror-theme h6 {
-  color: var(--rmr-color-text);
+  --tw-text-opacity: 1;
+  color: hsl(var(--ac) / var(--tw-text-opacity));
   font-family: var(--rmr-font-family-heading);
   line-height: var(--rmr-line-height-heading);
   font-weight: var(--rmr-font-weight-heading);
@@ -4566,17 +4605,19 @@ button:active .remirror-menu-pane-shortcut,
 }
 
 .remirror-theme .ProseMirror {
-  min-height: var(--rmr-space-6);
+  min-height: var(--rmr-space-4);
   box-shadow: var(--rmr-color-border) 0px 0px 0px 0.1em;
-  padding: var(--rmr-space-3);
+  padding: var(--rmr-space-2);
+  padding-left: var(--rmr-space-3);
+  padding-right: var(--rmr-space-3);
   border-radius: var(--rmr-radius-border);
   outline: none;
 }
 
-.remirror-theme .ProseMirror:active,
-.remirror-theme .ProseMirror:focus {
-  box-shadow: var(--rmr-color-outline) 0px 0px 0px 0.2em;
-}
+/*.remirror-theme .ProseMirror:active,*/
+/*.remirror-theme .ProseMirror:focus {*/
+/*  box-shadow: var(--rmr-color-outline) 0px 0px 0px 0.2em;*/
+/*}*/
 
 .remirror-theme .ProseMirror p,
 .remirror-theme .ProseMirror h1,
