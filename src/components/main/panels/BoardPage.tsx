@@ -115,6 +115,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
         panelState: {
           searchMode: true,
           boardId: null,
+          mountBoardDetail: false,
           currentPage: 1,
           targetPage: 1
         }
@@ -136,6 +137,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
             | 'replyCount'
             | 'readCount',
           boardId: null,
+          mountBoardDetail: false,
           currentPage: 1,
           targetPage: 1
         }
@@ -150,7 +152,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: 1, boardId: null}
+        panelState: {currentPage: 1, boardId: null, mountBoardDetail: false}
       };
       dispatch(updatePanelState(payload));
     },
@@ -162,7 +164,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.currentPage - 1, boardId: null}
+        panelState: {
+          currentPage: boardPageState.currentPage - 1,
+          boardId: null,
+          mountBoardDetail: false
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -174,7 +180,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.currentPage + 1, boardId: null}
+        panelState: {
+          currentPage: boardPageState.currentPage + 1,
+          boardId: null,
+          mountBoardDetail: false
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -186,7 +196,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.totalPages, boardId: null}
+        panelState: {
+          currentPage: boardPageState.totalPages,
+          boardId: null,
+          mountBoardDetail: false
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -224,7 +238,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {currentPage: boardPageState.targetPage, boardId: null}
+        panelState: {
+          currentPage: boardPageState.targetPage,
+          boardId: null,
+          mountBoardDetail: false
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -236,7 +254,11 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
       e.stopPropagation();
       const payload = {
         panelId: panelId,
-        panelState: {showBoardEditor: true, boardId: null}
+        panelState: {
+          showBoardEditor: true,
+          boardId: null,
+          mountBoardDetail: true
+        }
       };
       dispatch(updatePanelState(payload));
     },
@@ -279,6 +301,7 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           panelState: {
             boardPageCategory: category,
             boardId: null,
+            mountBoardDetail: false,
             tag: '',
             searchDisabled: true,
             searchMode: false,
@@ -555,12 +578,14 @@ const BoardPage: FC<CommonPanelProps> = ({panelId}) => {
           </button>
         </div>
       </div>
-      <BoardDetail
-        memberId={memberId}
-        panelId={panelId}
-        memberRole={memberRole}
-        setBoardDTOList={setBoardDTOList}
-      />
+      {boardPageState.mountBoardDetail && (
+        <BoardDetail
+          memberId={memberId}
+          panelId={panelId}
+          memberRole={memberRole}
+          setBoardDTOList={setBoardDTOList}
+        />
+      )}
       {boardPageState.boardId == null && !boardPageState.showBoardEditor && (
         <div className="my-2 ml-3 mr-1 absolute left-0 right-0 top-20 bottom-0 overflow-y-auto">
           {!!boardPreviewPage && boardPreviewPage}

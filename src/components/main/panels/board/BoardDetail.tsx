@@ -187,8 +187,8 @@ const BoardDetail: FC<BoardDetailProps> = ({
       const payload = {
         panelId: panelId,
         panelState: {
-          showBoardEditor: false,
-          boardId: null
+          boardId: null,
+          mountBoardDetail: false
         }
       };
       dispatch(updatePanelState(payload));
@@ -205,6 +205,8 @@ const BoardDetail: FC<BoardDetailProps> = ({
           tag: tag,
           searchDisabled: false,
           searchMode: true,
+          boardId: null,
+          mountBoardDetail: false,
           currentPage: 1,
           targetPage: 1
         }
@@ -214,9 +216,12 @@ const BoardDetail: FC<BoardDetailProps> = ({
     [dispatch, panelId]
   );
 
+  const needSaveText = useRef(false);
+
   const enableBoardEditorToModify = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
+      needSaveText.current = true;
       const payload = {
         panelId: panelId,
         panelState: {
@@ -407,8 +412,6 @@ const BoardDetail: FC<BoardDetailProps> = ({
 
   // boardPageState.showBoardEditor === true ->
 
-  const needSaveText = useRef(false);
-
   const handleChangeBoardForm = useCallback(
     (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
       const regex = /^.{0,30}$/;
@@ -482,7 +485,13 @@ const BoardDetail: FC<BoardDetailProps> = ({
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       if (boardPageState.boardId == null) {
-        boardEditorRef.current?.clearContent();
+        const payload = {
+          panelId: panelId,
+          panelState: {
+            mountBoardDetail: false
+          }
+        };
+        dispatch(updatePanelState(payload));
       } else {
         boardEditorRef.current?.setContent(
           JSON.parse(boardDTO?.content as string)
@@ -503,7 +512,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
           boardCategory: boardPageState.boardCategory,
           nickname: boardText.nickname,
           title: boardText.title,
-          preview: boardText.preview as string,
+          preview: (boardText.preview as string).split('\u0000').join(''),
           content: JSON.stringify(boardText.content),
           tag1: boardText.tag1 || null,
           tag2: boardText.tag2 || null,
@@ -1011,7 +1020,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
             />
           )}
         </div>
-        <MyEditor />
+        {/*<MyEditor />*/}
       </div>
     </div>
   );

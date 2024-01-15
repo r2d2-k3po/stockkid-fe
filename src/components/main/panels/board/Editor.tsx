@@ -59,16 +59,12 @@ const Editor: FC<EditorProps> = ({
   const {t} = useTranslation();
 
   const extensions = useCallback(() => {
+    const ext = [new TableExtension(), ...wysiwygPreset()];
     if (editable) {
       const placeholder = t('Editor.placeholder') as string;
-      return [
-        new PlaceholderExtension({placeholder}),
-        new TableExtension(),
-        ...wysiwygPreset()
-      ];
-    } else {
-      return [new TableExtension(), ...wysiwygPreset()];
+      return [new PlaceholderExtension({placeholder}), ...ext];
     }
+    return ext;
   }, [editable, t]);
 
   const {manager, state} = useRemirror({

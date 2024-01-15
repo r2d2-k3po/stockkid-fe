@@ -197,7 +197,7 @@ input[type='radio'] + .remirror-form-label {
 
 .remirror-menu-pane-active {
   color: var(--rmr-color-primary-text);
-  background-color: yellow;
+  background-color: var(--rmr-color-primary);
 }
 
 .remirror-menu-dropdown-label {

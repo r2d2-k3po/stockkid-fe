@@ -149,9 +149,12 @@ const Reply: FC<ReplyProps> = ({
     [dispatch, panelId]
   );
 
+  const needSaveText = useRef(false);
+
   const enableReplyEditorToModify = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
+      needSaveText.current = true;
       const payload = {
         panelId: panelId,
         panelState: {
@@ -266,8 +269,6 @@ const Reply: FC<ReplyProps> = ({
   // <- boardPageState.showReplyEditor === false
 
   // boardPageState.showReplyEditor === true ->
-
-  const needSaveText = useRef(false);
 
   const handleChangeNickname = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {

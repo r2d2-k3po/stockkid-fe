@@ -21,7 +21,8 @@ const BoardPreview: FC<BoardPreviewProps> = ({memberId, panelId, boardDTO}) => {
       const payload = {
         panelId: panelId,
         panelState: {
-          boardId: boardDTO?.boardId
+          boardId: boardDTO?.boardId,
+          mountBoardDetail: true
         }
       };
       dispatch(updatePanelState(payload));
