@@ -828,7 +828,12 @@ const BoardDetail: FC<BoardDetailProps> = ({
                 </button>
                 <div
                   onClick={onClickToPreview}
-                  className="text-md text-info ml-16 hover:text-accent"
+                  className={
+                    boardPageState.showBoardEditor ||
+                    boardPageState.showReplyEditor
+                      ? 'text-md text-info ml-16 hover:text-accent pointer-events-none'
+                      : 'text-md text-info ml-16 hover:text-accent'
+                  }
                 >
                   {boardDTO?.title}
                 </div>
@@ -951,6 +956,10 @@ const BoardDetail: FC<BoardDetailProps> = ({
             </button>
             <div className="justify-center">
               <button
+                disabled={
+                  boardPageState.showBoardEditor ||
+                  boardPageState.showReplyEditor
+                }
                 onClick={onClickToPreview}
                 className="btn btn-xs btn-circle btn-outline btn-info hover:btn-accent m-1"
               >
