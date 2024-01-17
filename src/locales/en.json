@@ -75,9 +75,9 @@
   },
   "Common": {
     "Cancel": "Cancel",
+    "Delete": "Delete",
     "RefreshError": "Refresh error! Logging out!",
-    "Save": "Save",
-    "Delete": "Delete"
+    "Save": "Save"
   },
   "DeleteAccount": {
     "DeleteAccount": "Delete Account",
@@ -85,7 +85,7 @@
     "Success": "Account delete success!"
   },
   "Editor": {
-    "placeholder": "Enter text..."
+    "placeholder": "Enter text..., drag and drop an image file (up to total 1.5MB)"
   },
   "LoginForm": {
     "Login": "Login",
