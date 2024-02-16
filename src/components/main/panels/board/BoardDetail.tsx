@@ -499,7 +499,13 @@ const BoardDetail: FC<BoardDetailProps> = ({
       }
       resetBoardEditorState();
     },
-    [boardDTO?.content, boardPageState.boardId, resetBoardEditorState]
+    [
+      boardDTO?.content,
+      boardPageState.boardId,
+      resetBoardEditorState,
+      panelId,
+      dispatch
+    ]
   );
 
   const onClickSave = useCallback(
