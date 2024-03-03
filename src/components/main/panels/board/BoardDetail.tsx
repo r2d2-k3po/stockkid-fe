@@ -99,6 +99,8 @@ const BoardDetail: FC<BoardDetailProps> = ({
   const dispatch = useAppDispatch();
   const regexFinal = /^.{2,30}$/;
 
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
   ]?.panelState as BoardPageState;
@@ -848,7 +850,10 @@ const BoardDetail: FC<BoardDetailProps> = ({
                 <i className="ri-time-line ri-1x"></i>
                 <div className="text-sm text-info mx-1">
                   {DateTime.fromISO(
-                    boardDTO?.regDate.split('.')[0] as string
+                    (boardDTO?.regDate.split('.')[0] as string) + 'Z',
+                    {
+                      zone: userTimeZone
+                    }
                   ).toFormat('HH:mm yyyy-MM-dd')}
                 </div>
                 <div className="text-xs text-info text-center w-16 mx-2 border-[1px] border-secondary rounded-lg my-0.5">
