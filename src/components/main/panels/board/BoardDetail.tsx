@@ -417,7 +417,11 @@ const BoardDetail: FC<BoardDetailProps> = ({
   const handleChangeBoardForm = useCallback(
     (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
       const regex = /^.{0,30}$/;
-      if (regex.test(e.target.value)) {
+      const regexTitle = /^.{0,50}$/;
+      if (
+        (key !== 'title' && regex.test(e.target.value)) ||
+        (key === 'title' && regexTitle.test(e.target.value))
+      ) {
         setBoardText((boardText) => {
           return {
             ...boardText,
