@@ -98,6 +98,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const regexFinal = /^.{2,30}$/;
+  const regexTitleFinal = /^.{2,50}$/;
 
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -781,7 +782,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
                     disabled={
                       boardPageState.boardCategory === '0' ||
                       !regexFinal.test(boardText.nickname) ||
-                      !regexFinal.test(boardText.title) ||
+                      !regexTitleFinal.test(boardText.title) ||
                       !boardText.preview
                     }
                     onClick={onClickSave}
