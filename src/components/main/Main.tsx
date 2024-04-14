@@ -77,6 +77,13 @@ const Main: FC<MainProps> = ({mainClassName}) => {
   useEffect(() => {
     if (!localStorage.getItem('screens')) {
       dispatch(addScreen(nanoid()));
+      dispatch(
+        addScreenPanel({
+          currentIndex: 0,
+          panelId: nanoid(),
+          panelCode: 'boardPage'
+        })
+      );
       setCurrentScreen('1');
       navigate('screen/1');
     }

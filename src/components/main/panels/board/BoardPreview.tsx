@@ -15,6 +15,8 @@ const BoardPreview: FC<BoardPreviewProps> = ({memberId, panelId, boardDTO}) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
 
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const onClickToDetail = useCallback(
     async (e: MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
@@ -74,7 +76,10 @@ const BoardPreview: FC<BoardPreviewProps> = ({memberId, panelId, boardDTO}) => {
           <i className="ri-time-line ri-1x"></i>
           <div className="text-sm text-info mx-1">
             {DateTime.fromISO(
-              boardDTO?.regDate.split('.')[0] as string
+              (boardDTO?.regDate.split('.')[0] as string) + 'Z',
+              {
+                zone: userTimeZone
+              }
             ).toFormat('HH:mm yyyy-MM-dd')}
           </div>
           <div className="text-xs text-info text-center w-16 mx-2 border-[1px] border-secondary rounded-lg my-0.5">

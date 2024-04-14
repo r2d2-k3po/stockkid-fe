@@ -13,7 +13,7 @@ const GoogleSignin = () => {
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (codeResponse) => {
-      console.log('codeResponse.code : ' + codeResponse.code);
+      // console.log('codeResponse.code : ' + codeResponse.code);
       try {
         const googleSigninRequest = {
           authcode: codeResponse.code

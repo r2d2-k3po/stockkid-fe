@@ -75,9 +75,9 @@
   },
   "Common": {
     "Cancel": "취소",
+    "Delete": "삭제",
     "RefreshError": "리프레시 에러! 로그아웃!",
-    "Save": "저장",
-    "Delete": "삭제"
+    "Save": "저장"
   },
   "DeleteAccount": {
     "DeleteAccount": "계정 삭제",
@@ -85,7 +85,7 @@
     "Success": "계정 삭제 성공!"
   },
   "Editor": {
-    "placeholder": "텍스트 입력..."
+    "placeholder": "텍스트 입력..., 이미지 파일을 끌어 놓으세요 (총 1.5MB까지)"
   },
   "LoginForm": {
     "Login": "로그인",

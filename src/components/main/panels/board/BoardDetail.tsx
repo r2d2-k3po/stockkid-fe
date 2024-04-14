@@ -98,6 +98,9 @@ const BoardDetail: FC<BoardDetailProps> = ({
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const regexFinal = /^.{2,30}$/;
+  const regexTitleFinal = /^.{2,50}$/;
+
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const boardPageState = useAppSelector((state) => state.panels).entities[
     panelId
@@ -415,7 +418,11 @@ const BoardDetail: FC<BoardDetailProps> = ({
   const handleChangeBoardForm = useCallback(
     (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
       const regex = /^.{0,30}$/;
-      if (regex.test(e.target.value)) {
+      const regexTitle = /^.{0,50}$/;
+      if (
+        (key !== 'title' && regex.test(e.target.value)) ||
+        (key === 'title' && regexTitle.test(e.target.value))
+      ) {
         setBoardText((boardText) => {
           return {
             ...boardText,
@@ -499,7 +506,13 @@ const BoardDetail: FC<BoardDetailProps> = ({
       }
       resetBoardEditorState();
     },
-    [boardDTO?.content, boardPageState.boardId, resetBoardEditorState]
+    [
+      boardDTO?.content,
+      boardPageState.boardId,
+      resetBoardEditorState,
+      panelId,
+      dispatch
+    ]
   );
 
   const onClickSave = useCallback(
@@ -769,7 +782,7 @@ const BoardDetail: FC<BoardDetailProps> = ({
                     disabled={
                       boardPageState.boardCategory === '0' ||
                       !regexFinal.test(boardText.nickname) ||
-                      !regexFinal.test(boardText.title) ||
+                      !regexTitleFinal.test(boardText.title) ||
                       !boardText.preview
                     }
                     onClick={onClickSave}
@@ -828,7 +841,12 @@ const BoardDetail: FC<BoardDetailProps> = ({
                 </button>
                 <div
                   onClick={onClickToPreview}
-                  className="text-md text-info ml-16 hover:text-accent"
+                  className={
+                    boardPageState.showBoardEditor ||
+                    boardPageState.showReplyEditor
+                      ? 'text-md text-info ml-16 hover:text-accent pointer-events-none'
+                      : 'text-md text-info ml-16 hover:text-accent'
+                  }
                 >
                   {boardDTO?.title}
                 </div>
@@ -837,7 +855,10 @@ const BoardDetail: FC<BoardDetailProps> = ({
                 <i className="ri-time-line ri-1x"></i>
                 <div className="text-sm text-info mx-1">
                   {DateTime.fromISO(
-                    boardDTO?.regDate.split('.')[0] as string
+                    (boardDTO?.regDate.split('.')[0] as string) + 'Z',
+                    {
+                      zone: userTimeZone
+                    }
                   ).toFormat('HH:mm yyyy-MM-dd')}
                 </div>
                 <div className="text-xs text-info text-center w-16 mx-2 border-[1px] border-secondary rounded-lg my-0.5">
@@ -951,6 +972,10 @@ const BoardDetail: FC<BoardDetailProps> = ({
             </button>
             <div className="justify-center">
               <button
+                disabled={
+                  boardPageState.showBoardEditor ||
+                  boardPageState.showReplyEditor
+                }
                 onClick={onClickToPreview}
                 className="btn btn-xs btn-circle btn-outline btn-info hover:btn-accent m-1"
               >
